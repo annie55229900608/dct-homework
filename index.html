@@ -1087,7 +1087,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261126-1930';
+const APP_VER = '20261126-1940';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1561,11 +1561,12 @@ function perTabs(items, dateOf, key) {
   return { html, list: items.filter(x => perOf(dateOf(x)) === cur), cur };
 }
 /* ---------- 課程結業總結 ---------- */
+function lastSub(bd, uid) { return bd.subs.filter(s => s.userId === uid).reduce((a, s) => s.submittedAt > a ? s.submittedAt : a, ''); }
 function wrapRank(bd) {
   const st = {}; (bd.course.admins || '').split(',').filter(Boolean).forEach(id => st[id] = 1); if (bd.course.createdBy) st[bd.course.createdBy] = 1;
   const keep = S.p.g; S.p.g = ''; const ms = memberStats(bd); S.p.g = keep;
   const wb = id => (bd.bonus || []).filter(b => b.userId === id && String(b.reason || '').indexOf('🏆 課程總結') === 0).reduce((a, b) => a + (Number(b.points) || 0), 0);
-  return ms.filter(x => !st[x.m.id]).map(x => { const sc = scoreOf(x.m.id); return { x, total: sc.total - wb(x.m.id) }; }).sort((a, b) => b.total - a.total || b.x.pass - a.x.pass || b.x.submitted - a.x.submitted);
+  return ms.filter(x => !st[x.m.id]).map(x => { const sc = scoreOf(x.m.id); return { x, total: sc.total - wb(x.m.id), last: lastSub(bd, x.m.id) }; }).sort((a, b) => b.total - a.total || (a.last || '9').localeCompare(b.last || '9'));
 }
 function vWrap() {
   const bd = S.bd, c = bd.course, W = (() => { try { return JSON.parse(c.wrap || 'null'); } catch (e) { return null; } })();
@@ -1573,7 +1574,7 @@ function vWrap() {
   const D = S.wd, L = wrapRank(bd), medal = i => ['🥇', '🥈', '🥉'][i] || '🏅';
   const won = {}; (W ? W.ranks : []).forEach(r => won[r.userId] = r);
   return `${backBar('全班成績')}<h1 class="title" style="margin-bottom:4px">🏆 課程結束總結</h1><div class="cmeta" style="margin-bottom:12px">${esc(c.title)}${W ? `・已於 ${fmtT(W.at)} 發布` : ''}</div>
-  <div class="panel"><h3>設定得獎名額和獎勵</h3><div class="hint">依「總分（作業分＋額外加分）」排名，老師和管理員不列入排名</div>
+  <div class="panel"><h3>設定得獎名額和獎勵</h3><div class="hint">依「總分（作業分＋額外加分）」排名；同分時，作業比較早交完的排前面。老師和管理員不列入排名</div>
     ${D.ranks.map((r, i) => `<div class="grow-row"><b style="min-width:62px">${medal(i)} 第${i + 1}名</b><input type="number" inputmode="numeric" value="${r.points}" oninput="S.wd.ranks[${i}].points=this.value" placeholder="加分" style="width:74px;flex:0 0 74px"><span class="cmeta">分</span><input value="${esc(r.prize)}" oninput="S.wd.ranks[${i}].prize=this.value" placeholder="獎品（選填）" style="flex:1"><button class="btn sm ghost" onclick="S.wd.ranks.splice(${i},1);render()">✕</button></div>`).join('')}
     <button class="btn sm ghost" onclick="S.wd.ranks.push({points:50,prize:''});render()">＋ 增加名額</button>
     <div class="grow-row" style="margin-top:10px"><b style="min-width:62px">🎓 其他完成者</b><input type="number" inputmode="numeric" value="${D.others}" oninput="S.wd.others=this.value" style="width:74px;flex:0 0 74px"><span class="cmeta">分・填完回饋領獎狀時自動發</span></div>
@@ -1862,7 +1863,7 @@ function bClass() {
   const bd = S.bd, ms = memberStats(bd), t0 = today();
   if (!ms.length) return `<div class="empty">還沒有夥伴加入<br>到「設定」複製邀請連結發給大家</div>`;
   const icon = { pass: '✓', pending: '…', revise: '✎' };
-  const R0 = ms.map(x => Object.assign({ x }, scoreOf(x.m.id))).sort((a, b) => b.total - a.total || b.x.rate - a.x.rate);
+  const R0 = ms.map(x => Object.assign({ x, last: lastSub(bd, x.m.id) }, scoreOf(x.m.id))).sort((a, b) => b.total - a.total || (a.last || '9').localeCompare(b.last || '9'));
   const sum = k => R0.reduce((a, r) => a + r[k], 0), avg = Math.round(ms.reduce((a, x) => a + x.rate, 0) / ms.length * 100);
   return `<div class="nums">
     <div class="num"><b>${ms.length}</b><span>參加人數</span></div>
