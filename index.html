@@ -1099,7 +1099,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261127-0225';
+const APP_VER = '20261127-0240';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1249,6 +1249,7 @@ async function doAuth(e) {
       if (code) store.del('dct_code');
       if (r.joined && r.joined.error) toast(r.joined.error);
       else if (r.joined) toast(r.joined.status === 'pending' ? '已申請加入課程，等待審核' : `已加入「${r.joined.title}」🪙 金幣 +10`);
+      if (r.joined && r.joined.status === 'active' && !r.joined.admin) S.joinCid = r.joined.courseId;
     } else {
       r = await api('login', { phone: val('aPhone'), password: val('aPw') });
     }
@@ -1257,7 +1258,7 @@ async function doAuth(e) {
     if (r.me) { try { store.set('dct_cache_me', JSON.stringify(Object.assign({}, r.me, { __t: r.token }))); if (r.pet) store.set('dct_cache_pet', JSON.stringify(r.pet)); } catch (e) {} }
     return true;
   }, reg ? '註冊中…' : '登入中…');
-  if (ok) boot();
+  if (ok) { boot(); if (S.joinCid) { const cid = S.joinCid; S.joinCid = ''; const t0 = Date.now(), w = () => { if (S.me && S.me.courses) openCourse(cid); else if (Date.now() - t0 < 15000) setTimeout(w, 400); }; setTimeout(w, 800); } }
 }
 
 /* ---------- 首頁 ---------- */
@@ -1320,9 +1321,10 @@ async function joinByCode() {
   });
 }
 function groupAsk() {
-  const d = S.cd; if (S.v !== 'course' || !d || !d.course || document.querySelector('.sysmodal')) return;
+  const d = S.cd; if (S.v !== 'course' || !d || !d.course) return;
   const c = d.course; S.gAsk = S.gAsk || {};
   if (c.groupSelf !== '1' || !(d.groups || []).length || d.myGroup || c.archived === '1' || S.gAsk[c.id]) return;
+  if (document.querySelector('.sysmodal')) { setTimeout(groupAsk, 1200); return; }
   S.gAsk[c.id] = 1;
   const el = document.createElement('div'); el.className = 'sysmodal gaskm';
   el.innerHTML = `<div class="sysbox"><div class="ding">叮！【系統提示】</div><h3>👥 選擇你的組別</h3><p style="text-align:center">「${esc(c.title)}」有分組，請選擇你的組別</p><div class="gask">${d.groups.map(g => `<button data-g="${esc(g.id)}">${esc(g.name)}${g.leaderName ? '<small>組長 ' + esc(g.leaderName) + '</small>' : ''}</button>`).join('')}</div><button class="gask-later">等一下再選</button></div>`;
