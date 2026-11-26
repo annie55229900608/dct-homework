@@ -1092,7 +1092,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261127-0010';
+const APP_VER = '20261127-0040';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1487,7 +1487,7 @@ async function pickFiles(inp, kind) {
   const list = Array.prototype.slice.call(inp.files); inp.value = '';
   for (const f of list) {
     if (kind === 'video') {
-      if (f.size > 35 * 1024 * 1024) { toast('影片太大了，請剪短或改貼 IG 連結'); continue; }
+      if (f.size > 80 * 1024 * 1024) { toast('影片超過 80MB，請剪短或改貼 IG 連結'); continue; }
       const dur = await videoDuration(f);
       if (dur > 65) { toast('影片超過 1 分鐘，請剪短或改貼連結'); continue; }
     }
@@ -1518,6 +1518,21 @@ function readB64(file) {
     r.readAsDataURL(file);
   });
 }
+function blobB64(b) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = () => rej(new Error('檔案讀取失敗')); r.readAsDataURL(b); });
+}
+async function upVideo(file, onp) {
+  if (file.size <= 20 * 1024 * 1024) return api('uploadFile', await readB64(file));
+  const s0 = await api('uploadStart', { name: file.name || 'video.mp4', mime: file.type || 'video/mp4', size: file.size });
+  const CH = 8 * 1024 * 1024; let off = 0, r = null;
+  while (off < file.size) {
+    r = await api('uploadPart', { uploadId: s0.uploadId, offset: off, data: await blobB64(file.slice(off, off + CH)) });
+    if (r && r.id) return r;
+    off = Number(r && r.next) || off + CH; if (onp) onp(Math.min(1, off / file.size));
+  }
+  if (r && r.id) return r;
+  throw new Error('影片上傳失敗，請再試一次');
+}
 function bgBar(txt) {
   let b = $('bgbar'); if (!txt) { if (b) b.remove(); return; }
   if (!b) { b = document.createElement('div'); b.id = 'bgbar'; document.body.appendChild(b); }
@@ -1540,7 +1555,7 @@ async function sendWork() {
     const up = [];
     for (let i = 0; i < files.length; i++) {
       const f = files[i];
-      up.push(await api('uploadFile', f.kind === 'image' ? await compressImage(f.file) : await readB64(f.file)));
+      up.push(f.kind === 'image' ? await api('uploadFile', await compressImage(f.file)) : await upVideo(f.file, p => bgBar(`⏳ 影片上傳中 ${i + 1} / ${files.length}（${Math.round(p * 100)}%），先不要關掉 App`)));
       bgBar(`⏳ 照片／影片上傳中 ${i + 1} / ${files.length}，先不要關掉 App`);
     }
     const sub = await api('submit', { taskId: t.id, text: draft.text, links, files: draft.keep.concat(up), extra });
@@ -2063,7 +2078,7 @@ function vTaskEdit() {
   ${isQ ? '' : `<label class="f">參考模板（夥伴可以一鍵複製）</label><textarea id="tTpl" placeholder="貼上文案模板">${esc(t.template)}</textarea>`}
   <label class="f">示範照片、影片（所有學員都看得到）</label>
   <div class="uploads"><label>📷 加照片<input type="file" accept="image/*" multiple onchange="tPick(this,'image')"></label><label>🎬 加影片<input type="file" accept="video/*" multiple onchange="tPick(this,'video')"></label></div>
-  <div class="hint">影片 35MB 以內；比較長的影片請上傳到 YouTube 或 IG，再貼連結到下面</div>
+  <div class="hint">影片 80MB 以內；比較長的影片請上傳到 YouTube 或 IG，再貼連結到下面</div>
   <div id="tFiles">${tFileList()}</div>
   <label class="f">參考連結（一行一個，可不填）</label><textarea id="tLinks" style="min-height:70px" placeholder="https://www.youtube.com/...">${esc((t.links || []).join('\n'))}</textarea>
   ${isQ ? '' : `<label class="f">可以交哪些內容</label>
@@ -2851,7 +2866,7 @@ function tRm(k, i) { S.tdraft[k].splice(i, 1); $('tFiles').innerHTML = tFileList
 function tPick(inp, kind) {
   const list = Array.prototype.slice.call(inp.files); inp.value = '';
   list.forEach(f => {
-    if (kind === 'video' && f.size > 35 * 1024 * 1024) { toast('這支影片超過 35MB，請上傳到 YouTube 或 IG 後貼連結'); return; }
+    if (kind === 'video' && f.size > 80 * 1024 * 1024) { toast('這支影片超過 80MB，請上傳到 YouTube 或 IG 後貼連結'); return; }
     S.tdraft.files.push({ kind, file: f, url: URL.createObjectURL(f) });
   });
   $('tFiles').innerHTML = tFileList();
@@ -2877,7 +2892,7 @@ async function saveTask() {
     for (let i = 0; i < d.files.length; i++) {
       busyText(`上傳檔案 ${i + 1} / ${d.files.length}…`);
       const f = d.files[i];
-      up.push(await api('uploadFile', f.kind === 'image' ? await compressImage(f.file) : await readB64(f.file)));
+      up.push(f.kind === 'image' ? await api('uploadFile', await compressImage(f.file)) : await upVideo(f.file, p => busyText(`上傳影片 ${i + 1} / ${d.files.length}（${Math.round(p * 100)}%）…`)));
     }
     data.media = d.keep.concat(up);
     busyText('儲存中…');
