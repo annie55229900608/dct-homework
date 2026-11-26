@@ -6,10 +6,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#14204E">
-<title>DCT 學習護照</title>
-<meta name="apple-mobile-web-app-title" content="學習護照">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=1">
-<link rel="icon" type="image/png" href="icon-512.png?v=1">
+<title>DCTx大瑩家</title>
+<meta name="apple-mobile-web-app-title" content="DCTx大瑩家">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="icon" type="image/png" href="icon-512.png?v=3">
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -311,6 +311,8 @@ html,body{height:100%;overflow:hidden}
 .cfoot{font-size:12px;color:rgba(20,32,78,.65);line-height:1.6}
 .themes button.tbuy span:last-child{color:#B8862E !important}
 #fbPanel.flash{animation:fbflash 1.6s ease 2}@keyframes fbflash{0%,100%{box-shadow:0 0 0 0 rgba(232,196,106,0)}50%{box-shadow:0 0 0 6px rgba(232,196,106,.9)}}
+.selbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:rgba(255,255,255,.95);color:#22315E;border-radius:14px;padding:8px 12px;margin-bottom:10px;position:sticky;top:6px;z-index:5;box-shadow:0 4px 14px rgba(10,15,40,.15)}.selbar label{display:flex;gap:6px;align-items:center;font-weight:700}.selbar .cmeta{flex:1;color:#6B7899 !important;text-shadow:none !important}
+.selck{width:22px;height:22px;flex:0 0 22px;accent-color:#C8961E;margin:0 4px 0 0}.selcard{display:flex;gap:10px;align-items:flex-start;cursor:pointer}.selcard.on{outline:3px solid #E8C46A}
 </style>
 <style id="pinkTheme">
 :root{--bg:#FFE8F4;--bg2:#FFF6FA;--card:rgba(255,255,255,.72);--line:#F2C6D7;--gold:#C8748A;--gold2:#E2A2B6;--ink:#2C2226;--mute:#8A6B78;--pend:#5B84D6;--revise:#E0883A;--late:#D65A6A;--serif:"Cormorant Garamond","Noto Serif TC",Georgia,serif}
@@ -1088,7 +1090,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261126-2030';
+const APP_VER = '20261126-2200';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1200,7 +1202,7 @@ async function joinPendingCode() {
 
 /* ---------- 設定畫面 ---------- */
 function vSetup() {
-  return `<div class="auth"><div class="brand"><div class="seal">DCT</div><h1>DCT 學習護照</h1><p>還差一步就能開始使用</p></div>
+  return `<div class="auth"><div class="brand"><div class="seal">DCT</div><h1>DCTx大瑩家</h1><p>還差一步就能開始使用</p></div>
   <div class="panel"><h3>請先設定後台網址</h3><p class="cmeta">打開 index.html，找到最上面的 API_URL，把 Apps Script 部署後的網址貼進去，再上傳到 GitHub。</p></div></div>`;
 }
 
@@ -1208,7 +1210,7 @@ function vSetup() {
 function vAuth() {
   const reg = S.authMode === 'reg', code = store.get('dct_code') || '';
   return `<div class="auth">
-  <div class="brand"><div class="seal">DCT</div><h1>DCT 學習護照</h1><p>每一次作業，都是一枚印章</p></div>
+  <div class="brand"><div class="seal">DCT</div><h1>DCTx大瑩家</h1><p>每一次作業，都是一枚印章</p></div>
   <div class="seg"><button class="${reg ? '' : 'on'}" onclick="S.authMode='login';render()">登入</button><button class="${reg ? 'on' : ''}" onclick="S.authMode='reg';render()">註冊</button></div>
   <form onsubmit="doAuth(event)">
     <label class="f">手機號碼</label><input id="aPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="0912345678">
@@ -1252,7 +1254,7 @@ async function doAuth(e) {
 /* ---------- 首頁 ---------- */
 function vHome() {
   const m = S.me, act = m.courses.filter(c => !ended(c)), past = m.courses.filter(ended);
-  return `<header class="top"><div><div class="hi">嗨，${esc(FN(m.user))}</div><h1 class="title">我的學習護照</h1></div><div class="row" style="gap:8px;flex-wrap:nowrap"><button class="bell" onclick="openNotifs()" aria-label="系統通知">🔔${nfNew() ? `<i>${nfNew() > 99 ? '99+' : nfNew()}</i>` : ''}</button><button class="btn sm" onclick="openNotices()">📢 公告</button></div></header>
+  return `<header class="top"><div><div class="hi">嗨，${esc(FN(m.user))}</div><h1 class="title">DCTx大瑩家</h1></div><div class="row" style="gap:8px;flex-wrap:nowrap"><button class="bell" onclick="openNotifs()" aria-label="系統通知">🔔${nfNew() ? `<i>${nfNew() > 99 ? '99+' : nfNew()}</i>` : ''}</button><button class="btn sm" onclick="openNotices()">📢 公告</button></div></header>
   ${m.unreadNotices ? `<button class="notice-bar" onclick="openNotices()">📢 你有 ${m.unreadNotices} 則新公告，點我查看</button>` : ''}
   ${(m.leads || []).length ? `<h2 class="sec">👑 我帶的小組</h2>${m.leads.map(l => `<button class="qcard" onclick="openBoard('${l.courseId}')"><div class="q1"><b>${esc(l.title)}</b>${l.pending ? `<span class="st pending">待批改 ${l.pending}</span>` : ''}</div><div class="cmeta">${esc(l.groups.join('、'))}・組員 ${l.members} 人</div></button>`).join('')}` : ''}
   ${todoHTML()}
@@ -1542,7 +1544,7 @@ async function sendWork() {
 }
 function copyInvite() {
   const c = S.bd.course, L = EMBED ? window.parent.location : location, link = L.origin + L.pathname + '?code=' + c.code;
-  copyText(`邀請你加入「${c.title}」📖\n\n✅ 已經有 DCT 學習護照 App：\n打開 App →「我的課程」→ 輸入邀請碼 ${c.code}\n\n🆕 還沒有：點連結註冊，會自動加入課程\n${link}`);
+  copyText(`邀請你加入「${c.title}」📖\n\n✅ 已經有 DCTx大瑩家 App：\n打開 App →「我的課程」→ 輸入邀請碼 ${c.code}\n\n🆕 還沒有：點連結註冊，會自動加入課程\n${link}`);
 }
 function copyText(txt) {
   if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(() => toast('已複製'), () => fallbackCopy(txt));
@@ -1611,7 +1613,7 @@ function vCert() {
   const P = C.pet;
   return `<div class="certtop"><button class="btn sm ghost" onclick="back()">‹ 返回</button><span class="cmeta">📸 截圖分享到限動吧</span></div>
   <div class="cert ${tier}">
-    <div class="cbrand">DCT 學習護照・CERTIFICATE</div>
+    <div class="cbrand">DCTx大瑩家・CERTIFICATE</div>
     <div class="ckind">${title}</div>
     <div class="cava">${u.avatar ? avatarHtml(u, 84) : `<span>${esc(nm.slice(0, 1))}</span>`}</div>
     <div class="cname">${esc(nm)}</div>
@@ -1659,7 +1661,7 @@ function openTaskAdmin(cid, tid) { run(async () => { await loadBoard(cid); go('b
 function backupPanel() {
   const L = S.bk || null;
   return `<div class="panel ownerp"><h3 style="margin-top:0">💾 備份</h3>
-    <div class="hint">把整個後台（所有夥伴、課程、作業、金幣、星寵）複製一份到你的 Google 雲端硬碟「DCT學習護照_後台備份」資料夾。每週一也會自動備份一次（保留 12 週）。</div>
+    <div class="hint">把整個後台（所有夥伴、課程、作業、金幣、星寵）複製一份到你的 Google 雲端硬碟「DCTx大瑩家_後台備份」資料夾。每週一也會自動備份一次（保留 12 週）。</div>
     <button class="btn gold block" style="margin-top:10px" onclick="backupNow()">立即備份整個後台</button>
     ${L ? (L.length ? `<h4 style="margin:14px 0 6px">最近的備份</h4>${L.slice(0, 8).map(b => `<a class="bkrow" href="${esc(b.url)}" target="_blank" rel="noopener"><span>📄</span><div class="grow"><b>${esc(b.name.replace('DCT後台備份_', ''))}</b><div class="cmeta">${fmtT(b.at)}</div></div><span class="cmeta">開啟 ›</span></a>`).join('')}` : '<div class="cmeta" style="margin-top:8px">還沒有備份</div>') : `<button class="btn sm ghost" style="margin-top:8px" onclick="loadBackups()">看備份紀錄</button>`}
   </div>`;
@@ -1809,14 +1811,25 @@ function vPinfo() {
 }
 function nameOf(id) { const m = S.bd.members.find(x => x.id === id); return m ? m.name : '已離開的夥伴'; }
 function taskOf(id) { return S.bd.tasks.find(t => t.id === id); }
+async function reviewMany() {
+  const bd = S.bd, ids = bd.subs.filter(s => (S.selSub || {})[s.id]).map(s => s.id); if (!ids.length) return;
+  const cmt = prompt(`一次通過 ${ids.length} 份作業。\n要一起留一句評語嗎？（可以空白）`, '做得很好，繼續加油！'); if (cmt == null) return;
+  const old = {}; bd.subs.forEach((s, i) => { if (ids.indexOf(s.id) >= 0) { old[s.id] = s; bd.subs[i] = Object.assign({}, s, { status: 'pass' }); } });
+  if (S.ad && S.ad.pendingList) S.ad.pendingList = S.ad.pendingList.filter(x => ids.indexOf(x.id) < 0);
+  S.selMode = 0; S.selSub = {}; render(); toast(`已通過 ${ids.length} 份 ✓`);
+  try { const r = await api('reviewBatch', { subIds: ids, status: 'pass', comment: cmt.trim() }); if (r.coin) { toast(`✅ 已通過 ${r.ok} 份・🪙 批改獎勵 +${r.coin}`); if (S.pet) S.pet.coins = (Number(S.pet.coins) || 0) + r.coin; } if (r.fail && r.fail.length) toast('有 ' + r.fail.length + ' 份沒成功：' + r.fail[0]); delete MEM.notifs; await loadBoard(bd.course.id); if (S.v === 'board') render(); }
+  catch (e) { bd.subs = bd.subs.map(s => old[s.id] || s); render(); sysPop({ warn: true, title: '批次批改沒有成功', body: e.message || '網路不穩，請再試一次', btn: '知道了' }); }
+}
 function bReview() {
   const f = S.p.f;
   let list = S.bd.subs.filter(s => taskOf(s.taskId) && gOK(s.userId));
   if (f !== 'all') list = list.filter(s => s.status === f);
   list.sort((a, b) => (a.updatedAt < b.updatedAt ? (f === 'pending' ? -1 : 1) : (f === 'pending' ? 1 : -1)));
   const fs = [['pending', '待批改'], ['revise', '需修改'], ['pass', '已通過'], ['all', '全部']];
+  const SEL = S.selSub = S.selSub || {}, selOn = !!S.selMode && f !== 'pass', nSel = list.filter(s => SEL[s.id]).length;
   return `${missingBox()}<div class="pick" style="margin-bottom:14px">${fs.map(([k, l]) => `<button class="${f === k ? 'on pass' : ''}" style="padding:9px 4px;font-size:15px" onclick="S.p.f='${k}';render()">${l}</button>`).join('')}</div>
-  ${list.length ? list.map(s => `<button class="qcard" onclick="openReview('${s.id}')">
+  ${list.length && f !== 'pass' ? (selOn ? `<div class="selbar"><label><input type="checkbox" ${nSel === list.length ? 'checked' : ''} onchange="S.selSub={};if(this.checked)(${JSON.stringify(list.map(s => s.id)).replace(/"/g, "'")}).forEach(i=>S.selSub[i]=1);render()"> 全選</label><span class="cmeta">已選 ${nSel} 份</span><button class="btn sm gold" ${nSel ? '' : 'disabled'} onclick="reviewMany()">✅ 一鍵通過</button><button class="btn sm ghost" onclick="S.selMode=0;S.selSub={};render()">取消</button></div>` : `<button class="btn sm" style="margin-bottom:10px" onclick="S.selMode=1;S.selSub={};render()">☑️ 多選批改（一次通過多份）</button>`) : ''}
+  ${list.length ? list.map(s => selOn ? `<label class="qcard selcard ${SEL[s.id] ? 'on' : ''}"><input type="checkbox" class="selck" ${SEL[s.id] ? 'checked' : ''} onchange="S.selSub['${s.id}']=this.checked?1:0;render()"><div class="grow"><div class="q1"><b>${esc(nameOf(s.userId))}</b><span class="st ${s.status}">${STW[s.status]}</span></div><div class="cmeta">${esc(taskOf(s.taskId).title)}，${fmtT(s.updatedAt)}${s.files.length ? `，${s.files.length} 個檔案` : ''}</div>${s.text ? `<div class="q2">${esc(s.text)}</div>` : ''}</div></label>` : `<button class="qcard" onclick="openReview('${s.id}')">
     <div class="q1"><b>${esc(nameOf(s.userId))}</b><span class="st ${s.status}">${STW[s.status]}</span></div>
     ${(() => { const m = S.bd.members.find(x => x.id === s.userId) || {}; return `<div class="cmeta">${[m.level, (m.uplineName || m.upName) ? '上家 ' + (m.uplineName || m.upName) : '', m.royal ? '皇家 ' + m.royal : '', m.lineName ? 'LINE ' + m.lineName : '', m.ig ? '@' + m.ig : ''].filter(Boolean).map(esc).join('・')}</div>`; })()}
     <div class="cmeta">${esc(taskOf(s.taskId).title)}，${fmtT(s.updatedAt)}${s.files.length ? `，${s.files.length} 個檔案` : ''}</div>
@@ -1975,7 +1988,7 @@ function bSetting() {
   const adms = (c.admins || '').split(',').filter(Boolean).map(id => (bd.admins.find(u => u.id === id) || {}).name).filter(Boolean);
   return `${groupPanel()}<div class="panel"><h3>邀請夥伴加入</h3><div class="code">${esc(c.code)}</div>
     <div class="row wrap" style="margin-top:12px"><button class="btn sm" onclick="copyText('${esc(c.code)}')">複製邀請碼</button><button class="btn sm gold" onclick="copyInvite()">複製邀請訊息</button></div>
-    <div class="hint">複製的訊息裡有邀請碼和連結：已經有學習護照 App 的夥伴，打開 App 輸入邀請碼就能加入，不用點連結</div></div>
+    <div class="hint">複製的訊息裡有邀請碼和連結：已經有 DCTx大瑩家 App 的夥伴，打開 App 輸入邀請碼就能加入，不用點連結</div></div>
   <div class="panel"><h3>這堂課的獨立管理員</h3>
     ${(bd.courseAdmins || []).length ? bd.courseAdmins.map(a => `<div class="urow"><div class="grow"><b>${esc(a.realName || a.name)}</b>${a.realName && a.realName !== a.name ? `<span class="cmeta">（${esc(a.name)}）</span>` : ''}</div>${bd.canEditAdmins ? `<button class="btn sm ghost" onclick="rmCourseAdmin('${a.id}')">移除</button>` : ''}</div>`).join('') : '<div class="cmeta">還沒有其他管理員</div>'}
     ${bd.canEditAdmins ? (c.adminCode ? `<div class="cmeta" style="margin-top:12px">管理員邀請碼</div><div class="code">${esc(c.adminCode)}</div>
@@ -2796,7 +2809,7 @@ function vPet() {
   ${tab === 'adopt' ? adoptBox(P, false) : ''}
 
   ${tab === 'earn' ? `<div class="panel"><h3>怎麼賺金幣</h3>
-    <div class="extra">🎉 註冊完成 <b class="coin">+10</b></div><div class="extra">📖 每加入一堂課程 <b class="coin">+10</b></div><div class="extra">交一份作業 <b class="coin">+5～30</b></div><div class="hint" style="margin:-2px 0 6px">每個作業由老師設定 +5 到 +30，任務頁面會寫交了拿多少</div><div class="extra">作業被批改通過 <b class="coin">+10</b></div><div class="extra">🎮 抉擇關卡 100 分過關 <b class="coin">+5</b></div><h3 style="margin-top:14px">管理員／老師</h3><div class="extra">發布一個任務 <b class="coin">+8</b></div><div class="extra">批改一份作業 <b class="coin">+10</b></div>
+    <div class="extra">🎉 註冊完成 <b class="coin">+10</b></div><div class="extra">📖 每加入一堂課程 <b class="coin">+10</b></div><div class="extra">交一份作業 <b class="coin">+5～30</b></div><div class="hint" style="margin:-2px 0 6px">每個作業由老師設定 +5 到 +30，任務頁面會寫交了拿多少</div><div class="extra">作業被批改通過 <b class="coin">+10</b></div><div class="extra">🎮 抉擇關卡 100 分過關 <b class="coin">+5</b></div><h3 style="margin-top:14px">管理員／老師</h3><div class="extra">發布一個任務 <b class="coin">+8</b></div><div class="extra">批改一份作業（每份第一次批改） <b class="coin">+10</b></div><div class="extra">🎓 管理員完成課程總結 <b class="coin">+200</b></div><div class="extra">🎓 領取結業獎狀 <b class="coin">+50</b></div>
     <div class="hint">總共賺到 ${P.earned} 金幣，已經花了 ${P.earned + (P.bonus || 0) - P.coins}，另外升級獎勵拿到 ${P.bonus || 0}</div></div>
     <div class="panel" id="lvlist"><h3>等級獎勵</h3><div class="hint" style="margin-top:0">成長值只能靠餵食累積：吃下的食物飽足度多少，就加多少成長值。每隻每天只能餵一種，所以挑貴一點的食物升級比較快！</div>
     ${(P.levels || []).map(L => { const un = Object.keys(shop).filter(k => shop[k].minLv === L.lv && L.lv > 1).map(k => k === 'fish' ? PET_FOOD_NAME[p.kind] : shop[k].name).concat(Object.keys(P.themeLv || {}).filter(t => P.themeLv[t] === L.lv && L.lv > 1).map(t => ROOM_TH[t][0] + '房間')); return `<div class="lvrow ${p.level >= L.lv ? 'got' : ''}"><span class="lvb lv${L.lv}">Lv.${L.lv} ${esc(L.name)}</span><div class="lvd"><div class="cmeta">成長值 ${L.need}${p.level >= L.lv ? '・已達成 ✓' : ''}</div><div>${L.reward ? `${coinIco()} 送 ${L.reward} 金幣` : '起點'}・每天餓 ${L.decay}%${L.lv === 5 ? '・身邊出現紫色光暈✨' : L.lv === 7 ? '・升級成金色光圈🌟' : ''}${un.length ? `・解鎖「${un.join('、')}」` : ''}</div></div></div>`; }).join('')}</div>` : ''}`;
@@ -2890,6 +2903,7 @@ async function sendReview() {
   try {
     const sub = await api('review', { subId: id, status: rv.status || undefined, stars: rv.stars, comment: text });
     const k = bd.subs.findIndex(x => x.id === id); if (k >= 0) bd.subs[k] = sub;
+    if (sub.graderCoin) { toast('✅ 已批改・🪙 批改獎勵 +' + sub.graderCoin); if (S.pet) S.pet.coins = (Number(S.pet.coins) || 0) + sub.graderCoin; delete MEM.notifs; api('petGet').then(x => { S.pet = x; saveBootCache(); }).catch(() => {}); }
   } catch (e) {
     const k = bd.subs.findIndex(x => x.id === id); if (k >= 0) bd.subs[k] = old;
     sysPop({ warn: true, title: '批改沒有送出成功', body: (e.message || '網路不穩') + '\n請再批改一次', btn: '知道了' });
@@ -3099,7 +3113,7 @@ function vTeam() {
   const row = x => x.dup ? '' : `<button class="ccard" style="margin-left:${Math.min(x.depth - 1, 4) * 14}px;width:calc(100% - ${Math.min(x.depth - 1, 4) * 14}px)" onclick="openMember('${x.id}')">
     <div class="ctop"><div class="row" style="gap:8px"><b style="font-size:18px">${esc(x.realName || x.name)}</b>${x.realName && x.realName !== x.name ? `<span class="cmeta">${esc(x.name)}</span>` : ''}${lvTag(x.level)}${x.exited ? '<span class="chip">已退出</span>' : ''}${x.second ? '<span class="chip">共同上家</span>' : ''}</div><span class="cmeta">${x.depth > 1 ? '第 ' + x.depth + ' 代' : '直屬'}</span></div>
     <div class="row" style="gap:6px;margin:10px 0 4px">${x.last3.map(m => `<div class="num" style="flex:1;padding:8px 10px"><span style="font-size:12px">${Number(m.m.slice(5))}月淨利</span><b style="font-size:17px">${money(m.profit)}</b></div>`).join('')}</div>
-    <div class="cmeta">${careLine(careOf(x.id))}｜學習護照 ${x.courses} 課、通過 ${x.passed} 份${x.depth > 1 ? '｜上家 ' + esc(x.parentName) : ''}</div>
+    <div class="cmeta">${careLine(careOf(x.id))}｜上課 ${x.courses} 堂、通過 ${x.passed} 份${x.depth > 1 ? '｜上家 ' + esc(x.parentName) : ''}</div>
   </button>`;
   const flt = S.careFilter || 'ALL';
   const pass = x => { if (flt === 'ALL') return true; const c = careOf(x.id); if (flt === 'LATE') return c && careLate(c); return c && c.status === flt; };
@@ -3214,7 +3228,10 @@ function vTeamLite() {
     <div class="cmeta" style="margin-top:6px">📖 ${x.courses} 堂課・交 ${x.submitted} 份・通過 ${x.passed} 份</div></div><span class="cmeta">›</span></div></button>`;
   return `<header class="top"><div><div class="hi">上家看下家</div><h1 class="title">我的團隊</h1></div></header>
   ${(t.delReqs || []).length ? `<h2 class="sec" style="margin-top:0">申請刪除帳號（${t.delReqs.length}）</h2>${t.delReqs.map(r => `<div class="urow"><div class="grow"><b>${esc(r.realName || r.name)}</b>${r.realName && r.realName !== r.name ? ` <span class="cmeta">（${esc(r.name)}）</span>` : ''}<div class="cmeta">${esc(r.phone)}，${fmtT(r.deleteReq)} 申請</div></div><button class="btn sm red" onclick="answerDelete('${r.id}',true)">同意刪除</button><button class="btn sm" onclick="answerDelete('${r.id}',false)">不同意</button></div>`).join('')}` : ''}
-  ${t.requests.length ? `<h2 class="sec" style="margin-top:0">想加入你團隊的夥伴（${t.requests.length}）</h2>${t.requests.map(r => `<div class="urow">${avatarHtml(r, 40)}<div class="grow"><b>${esc(r.name)}</b><div class="cmeta">${esc(r.phone)}${r.ig ? '，IG ' + esc(r.ig) : ''}</div></div><button class="btn sm gold" onclick="answerDown('${r.id}',true)">確認</button><button class="btn sm ghost" onclick="answerDown('${r.id}',false)">不是</button></div>`).join('')}` : ''}
+  ${t.requests.length ? (() => { const SEL = S.selReq = S.selReq || {}, n = t.requests.filter(r => SEL[r.id]).length, allOn = n === t.requests.length;
+    return `<h2 class="sec" style="margin-top:0">想加入你團隊的夥伴（${t.requests.length}）</h2>
+    ${t.requests.length > 1 ? `<div class="selbar"><label><input type="checkbox" ${allOn ? 'checked' : ''} onchange="S.selReq={};if(this.checked)S.team.requests.forEach(r=>S.selReq[r.id]=1);render()"> 全選</label><span class="cmeta">已選 ${n} 位</span><button class="btn sm gold" ${n ? '' : 'disabled'} onclick="answerDownMany(true)">✅ 全部確認</button><button class="btn sm ghost" ${n ? '' : 'disabled'} onclick="answerDownMany(false)">不是</button></div>` : ''}
+    ${t.requests.map(r => `<div class="urow">${t.requests.length > 1 ? `<input type="checkbox" class="selck" ${SEL[r.id] ? 'checked' : ''} onchange="S.selReq['${r.id}']=this.checked?1:0;render()">` : ''}${avatarHtml(r, 40)}<div class="grow"><b>${esc(r.name)}</b><div class="cmeta">${esc(r.phone)}${r.ig ? '，IG ' + esc(r.ig) : ''}</div></div><button class="btn sm gold" onclick="answerDown('${r.id}',true)">確認</button><button class="btn sm ghost" onclick="answerDown('${r.id}',false)">不是</button></div>`).join('')}`; })() : ''}
   ${uniq.length ? `<div class="nums" style="grid-template-columns:repeat(3,1fr)"><div class="num"><b>${uniq.length}</b><span>直屬下家</span></div><button class="num numbtn" onclick="openTsubs('')"><b>${sub}</b><span>交過的作業 ›</span></button><button class="num numbtn" onclick="openTsubs('pass')"><b>${pas}</b><span>通過的作業 ›</span></button></div>
     ${teamActHTML()}
     <div class="row" style="margin-bottom:12px"><input id="teamQ" placeholder="🔍 搜尋本名、LINE 名字、手機" value="${esc(S.teamQ || '')}" oninput="qIn(this,v=>{S.teamQ=v;S.teamLimit=60;tlRefresh()})"></div>
@@ -3244,6 +3261,15 @@ async function answerDelete(id, ok) {
   if (ok && !confirm('同意後會刪除她的帳號和所有資料，無法復原。確定？')) return;
   await run(async () => { await api('approveDelete', { userId: id, ok }); S.team = MEM.team = await api('myTeam', EMBED ? {} : { direct: 1 }); render(); toast(ok ? '已刪除' : '已退回申請'); crmResync(); });
 }
+async function answerDownMany(ok) {
+  const ids = (S.team.requests || []).filter(r => (S.selReq || {})[r.id]).map(r => r.id); if (!ids.length) return;
+  if (!confirm(`${ok ? '確認' : '婉拒'}這 ${ids.length} 位夥伴？`)) return;
+  S.ansDone = S.ansDone || {}; ids.forEach(id => S.ansDone[id] = Date.now());
+  S.team.requests = S.team.requests.filter(r => ids.indexOf(r.id) < 0); S.selReq = {}; MEM.team = S.team; if (S.me) S.me.downReq = S.team.requests.length; saveBootCache(); render();
+  toast(ok ? `已確認 ${ids.length} 位夥伴加入團隊` : `已婉拒 ${ids.length} 位`);
+  try { const r = await api('answerDownlineBatch', { userIds: ids, ok }); if (r.fail && r.fail.length) toast('有 ' + r.fail.length + ' 位沒處理成功：' + r.fail[0]); S.ts = null; S.team = MEM.team = await api('myTeam', EMBED ? {} : { direct: 1 }); if (S.v === 'team') render(); }
+  catch (e) { ids.forEach(id => delete S.ansDone[id]); delete MEM.team; toast('處理失敗：' + (e.message || '請再試一次')); }
+}
 async function answerDown(id, ok) {
   S.ansDone = S.ansDone || {}; if (S.ansDone[id]) return; S.ansDone[id] = Date.now();
   if (S.team && S.team.requests) S.team.requests = S.team.requests.filter(r => r.id !== id);
@@ -3264,7 +3290,7 @@ function openGrowth(name, ig, id) {
     const n = String(name || '').trim(), g = String(ig || '').trim().replace(/^@/, '').toLowerCase();
     const hit = all.find(x => x.realName === n || x.name === n) || (g && all.find(x => (x.ig || '').toLowerCase() === g)) || all.find(x => n && (x.name.indexOf(n) >= 0 || n.indexOf(x.name) >= 0));
     if (hit) { S.md = await api('memberDetail', { userId: hit.id }); go('member', { id: hit.id }, true); }
-    else { go('team', {}, true); toast(`找不到「${n}」：請她用這個名字註冊學習護照，並把你的手機設為上家`); }
+    else { go('team', {}, true); toast(`找不到「${n}」：請她用這個名字註冊 DCTx大瑩家，並把你的手機設為上家`); }
   }, '載入資料…');
 }
 async function removeDown(id) {
@@ -3343,7 +3369,7 @@ function vMember() {
   <div class="row" style="gap:8px">${ag.map(a => `<div class="num" style="flex:1"><span>${Number(a.k.slice(5))}月</span><b>${money(a.r + a.t)}</b><span style="font-size:12px">零售 ${money(a.r)}<br>團隊 ${money(a.t)}</span></div>`).join('')}</div>
   <h2 class="sec">📈 淨利曲線圖</h2><div class="panel" style="padding:12px">${profitSVG(d.months)}</div>
   <h2 class="sec">✨ 魔術曲線圖</h2><div class="panel" style="padding:12px">${fansSVG(d.curve)}</div>
-  <h2 class="sec">📖 學習護照（加入至今）</h2>
+  <h2 class="sec">📖 學習紀錄（加入至今）</h2>
   ${d.courses.length ? d.courses.map(c => { const pct = c.tasks ? Math.round(c.submitted / c.tasks * 100) : 0; return `<div class="sub" style="padding:14px 16px"><div class="row" style="justify-content:space-between"><b>${esc(c.title)}</b><span class="chip">${typ[c.type] || ''}</span></div>
     <div class="cmeta">${dateRange(c)}${c.status === 'pending' ? '，等待審核' : ''}${c.archived === '1' || (c.endDate && c.endDate < today()) ? '，已結束' : '，進行中'}</div>
     <div class="bar"><i style="width:${pct}%"></i></div><div class="cmeta">交 ${c.submitted} / ${c.tasks} 份，通過 ${c.passed}${c.missing ? `，<span style="color:var(--late)">漏交 ${c.missing}</span>` : ''}${c.last ? '，最近交 ' + fmtT(c.last) : ''}</div></div>`; }).join('') : '<div class="empty">還沒參加過課程</div>'}
@@ -3406,7 +3432,7 @@ function pushAsk() {
     const el = document.createElement('div'); el.className = 'sysmodal pushask';
     el.innerHTML = st === 'ask'
       ? `<div class="sysbox"><div class="ding">叮！【系統提示】</div><h3>🔔 開啟手機通知</h3><p>有新公告、老師批改了你的作業、星寵肚子餓時，會第一時間通知你</p><button class="pa-ok">開啟通知</button><button class="pa-no" style="background:none;color:#fff;box-shadow:none;margin-top:4px;font-weight:600;opacity:.8">稍後再說</button></div>`
-      : `<div class="sysbox"><div class="ding">叮！【系統提示】</div><h3>📲 把學習護照放到桌面</h3><p>放到主畫面後，打開更快，也能收到公告和星寵的通知：\n① 按 Safari 下方的「分享」\n② 選「加入主畫面」→「新增」\n③ 之後從桌面的圖示打開</p><button class="pa-no">知道了</button></div>`;
+      : `<div class="sysbox"><div class="ding">叮！【系統提示】</div><h3>📲 把 DCTx大瑩家 放到桌面</h3><p>放到主畫面後，打開更快，也能收到公告和星寵的通知：\n① 按 Safari 下方的「分享」\n② 選「加入主畫面」→「新增」\n③ 之後從桌面的圖示打開</p><button class="pa-no">知道了</button></div>`;
     const ok = el.querySelector('.pa-ok'); if (ok) ok.onclick = () => { el.remove(); pushEnable(); };
     el.querySelector('.pa-no').onclick = () => el.remove();
     document.body.appendChild(el);
@@ -3419,8 +3445,8 @@ function pushPanel() {
   const T = {
     on: '<div class="cmeta">✅ 已開啟。發公告、星寵肚子餓、每天早安都會跳通知</div>',
     ask: '<div class="cmeta">開啟後，發公告、星寵肚子餓、每天早安都會跳到手機上</div><button class="btn gold block" style="margin-top:10px" onclick="pushEnable()">🔔 開啟手機通知</button>',
-    needHome: '<div class="cmeta">iPhone 要先把學習護照放到主畫面才能收通知：<br>① 用 Safari 打開這個網站<br>② 按下方「分享」→「加入主畫面」<br>③ 從主畫面的圖示打開，再回來這裡按「開啟手機通知」</div>',
-    denied: '<div class="cmeta">你之前按了「不允許」。請到手機「設定 → 通知 → 學習護照」打開，再回來重新整理</div>',
+    needHome: '<div class="cmeta">iPhone 要先把 DCTx大瑩家 放到主畫面才能收通知：<br>① 用 Safari 打開這個網站<br>② 按下方「分享」→「加入主畫面」<br>③ 從主畫面的圖示打開，再回來這裡按「開啟手機通知」</div>',
+    denied: '<div class="cmeta">你之前按了「不允許」。請到手機「設定 → 通知 → DCTx大瑩家」打開，再回來重新整理</div>',
     unsupported: '<div class="cmeta">這個瀏覽器不支援通知，請用手機的 Safari 或 Chrome 打開</div>'
   };
   return `<div class="panel"><h3>🔔 手機通知</h3>${T[st]}</div>`;
