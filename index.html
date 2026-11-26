@@ -101,6 +101,7 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;margin:0;line-height:1.35}
 .tlist{margin-top:18px;border-top:1px solid var(--line)}
 .trow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:14px 2px}
 .trow .tt{flex:1;min-width:0}
+.tact{display:flex;flex-direction:column;gap:6px;flex:none}.tact b{font-size:12px;font-weight:700;padding:5px 10px;border-radius:99px;background:#EEF1F8;color:#22315E;text-align:center}.tact b.del{background:#FCE8EC;color:#C2334D}
 .trow .tt div:first-child{font-weight:600}
 .st{font-size:13px;padding:2px 10px;border-radius:99px;white-space:nowrap;border:1px solid}
 .st.pass{color:var(--gold);border-color:var(--gold2)}
@@ -172,6 +173,12 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;margin:0;line-height:1.35}
 .nav button.on{color:var(--gold)}
 #busy{position:fixed;inset:0;background:rgba(10,18,32,.6);display:none;align-items:center;justify-content:center;z-index:50}
 #busy.on{display:flex}
+#busyText{display:flex;flex-direction:column;align-items:center}#busyBar{display:none;width:210px;height:8px;border-radius:9px;background:#E3E8F5;margin-top:12px;overflow:hidden}#busyBar i{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,#E8C46A,#F2A7C3);transition:width .35s}
+#bgbar .bgp{display:block;height:6px;border-radius:6px;background:rgba(255,255,255,.25);margin-top:6px;overflow:hidden}#bgbar .bgp i{display:block;height:100%;border-radius:6px;background:#E8C46A;transition:width .35s}#bgbar.wp{border-radius:14px}
+.pv .pok{position:absolute;left:6px;bottom:6px;font-size:11px;font-weight:700;background:#2FA36B;color:#fff;border-radius:99px;padding:2px 8px}.pv .perr{position:absolute;left:6px;right:6px;bottom:6px;font-size:11px;font-weight:700;background:#D9485F;color:#fff;border-radius:99px;padding:3px 6px;text-align:center}.pv .pup{position:absolute;left:6px;right:6px;bottom:6px;height:18px;border-radius:99px;background:rgba(20,32,78,.75);overflow:hidden}.pv .pup i{position:absolute;left:0;top:0;bottom:0;background:#E8C46A;transition:width .35s}.pv .pup b{position:relative;display:block;text-align:center;font-size:10px;line-height:18px;color:#fff}
+.pv .pend{position:absolute;left:6px;bottom:6px;font-size:11px;font-weight:700;background:#E8C46A;color:#14204E;border-radius:99px;padding:2px 8px}
+.lvw .lvbox{width:100%;max-width:420px;text-align:center}.lvw video,.lvw img{width:100%;max-height:70vh;border-radius:14px;background:#000;object-fit:contain}
+.pv .vph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:30px;background:#E9EDF7}
 #busy div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 26px;font-size:16px}
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:12px;font-size:16px;opacity:0;transition:.25s;z-index:60;max-width:88vw;text-align:center;pointer-events:none}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -956,7 +963,7 @@ html.petmode .kindpick button.on::before{content:"✓ "}
 <script>if (window.parent !== window) document.documentElement.className = 'embed';</script>
 <div id="scr"><div id="app"></div></div>
 <nav class="nav" id="nav" style="display:none"></nav>
-<div id="busy"><div id="busyText">處理中…</div></div>
+<div id="busy"><div id="busyText"><span id="busyMsg">處理中…</span><span id="busyBar"><i></i></span></div></div>
 <div id="toast"></div>
 
 <script>
@@ -1008,11 +1015,11 @@ function stampLabel(t, i) {
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2600); }
 let BUSY_T = null;
 function busy(on, text) {
-  const b = $('busy'); $('busyText').textContent = text || '處理中…'; clearTimeout(BUSY_T);
+  const b = $('busy'); $('busyMsg').textContent = text || '處理中…'; $('busyBar').style.display = 'none'; clearTimeout(BUSY_T);
   if (on) { b.classList.add('on', 'quiet'); BUSY_T = setTimeout(() => b.classList.remove('quiet'), 700); }
   else b.classList.remove('on', 'quiet');
 }
-function busyText(t) { $('busyText').textContent = t; }
+function busyText(t, p) { $('busyMsg').textContent = t; const bb = $('busyBar'); if (p == null) { bb.style.display = 'none'; return; } bb.style.display = 'block'; bb.firstChild.style.width = Math.round(Math.max(0.03, Math.min(1, p)) * 100) + '%'; $('busy').classList.remove('quiet'); }
 
 async function api(action, data, tries) {
   tries = tries || 0;
@@ -1092,7 +1099,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261127-0110';
+const APP_VER = '20261127-0225';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1442,7 +1449,18 @@ function subBody(s) {
   ${mediaHtml(s.files)}
   ${s.comments && s.comments.length ? s.comments.map(c => `<div class="cm"><div class="who">${esc(c.authorName)}<span class="when">${fmtT(c.createdAt)}</span></div><p>${esc(c.text)}</p></div>`).join('') : ''}`;
 }
+async function delTaskQuick(id) {
+  const t = S.bd.tasks.find(x => x.id === id); if (!t) return;
+  if (!confirm('確定刪除「' + t.title + '」？\n夥伴已經拿到的金幣會保留，不會發通知。')) return;
+  const ok = await run(async () => { await api('deleteTask', { taskId: id }); await loadBoard(S.bd.course.id); return true; }, '刪除中…');
+  if (ok) { toast('已刪除'); render(); }
+}
 function vTask() {
+  const h = vTask0(); if (!S.cd || S.cd.canManage !== '1') return h;
+  const t = curTask(), bb = backBar(S.cd.course.title);
+  return h.replace(bb, bb + `<button class="btn sm" style="margin:-4px 0 10px" onclick="openTaskAdmin('${S.cd.course.id}','${t.id}')">✏️ 編輯／刪除這個任務</button>`);
+}
+function vTask0() {
   const t0 = curTask();
   if (t0.kind === 'choice') {
     const s0 = S.cd.subs.find(x => x.taskId === t0.id);
@@ -1474,9 +1492,45 @@ function fileListHtml() {
   const d = S.draft;
   if (!d.keep.length && !d.files.length) return '';
   return `<div class="media">${(() => { const k = MV.push(d.keep) - 1; return d.keep.map((f, i) => `<div class="pv" onclick="if(!event.target.closest('.x'))mvOpen(${k},${i})" style="cursor:pointer"><img src="${driveImg(f.id, 300)}" alt="">${f.type === 'video' ? '<span class="play">▶</span>' : ''}<button class="x" onclick="rmFile('keep',${i})" aria-label="移除">✕</button></div>`).join(''); })()}
-  ${d.files.map((f, i) => `<div class="pv">${f.kind === 'video' ? `<video src="${f.url}#t=0.1" muted playsinline preload="metadata"></video><span class="play">▶</span>` : `<img src="${f.url}" alt="">`}<button class="x" onclick="rmFile('files',${i})" aria-label="移除">✕</button></div>`).join('')}</div>`;
+  ${d.files.map((f, i) => pvTile(f, 's', i)).join('')}</div>${d.files.length ? '<div class="hint">👆 選好就會自動上傳，看到「✓ 已上傳」就完成了；按 ✕ 會一起刪掉。點縮圖可以預覽</div>' : ''}`;
 }
-function rmFile(k, i) { S.draft[k].splice(i, 1); $('fileList').innerHTML = fileListHtml(); }
+function rmFile(k, i) { if (k === 'files') upDrop(S.draft.files[i]); S.draft[k].splice(i, 1); $('fileList').innerHTML = fileListHtml(); }
+let PV_N = 0;
+function upStart(it, rer) {
+  it.k = it.k || 'pv' + (++PV_N); it.st = 'up'; it.p = 0; if (rer) it.rer = rer;
+  const tick = () => { if (it.rer) it.rer(); };
+  it.promise = (async () => {
+    try {
+      const r = it.kind === 'image' ? await api('uploadFile', await compressImage(it.file)) : await upVideo(it.file, p => { it.p = p; tick(); });
+      if (it.removed) { api('deleteUpload', { id: r.id }).catch(() => {}); return null; }
+      it.res = r; it.st = 'done'; it.p = 1; tick(); return r;
+    } catch (e) { it.st = 'err'; tick(); throw e; }
+  })();
+  it.promise.catch(() => {});
+  tick();
+}
+function upDrop(it) { if (!it) return; it.removed = true; if (it.res && it.res.id) api('deleteUpload', { id: it.res.id }).catch(() => {}); }
+function upRetry(w, i) { const it = (w === 't' ? S.tdraft : S.draft).files[i]; if (it) upStart(it); }
+async function upWait(files, show) {
+  const tk = setInterval(() => { const n = files.filter(f => !f.removed).length || 1; show(files.reduce((a, f) => a + (f.removed ? 0 : f.st === 'done' ? 1 : (f.p || 0)), 0) / n); }, 400);
+  try {
+    const out = [];
+    for (const f of files) {
+      if (f.removed) continue;
+      let r = f.res;
+      if (!r) { try { r = await f.promise; } catch (e) { r = null; } }
+      if (!r && !f.removed) { upStart(f); r = await f.promise; }
+      if (r) out.push(r);
+    }
+    return out;
+  } finally { clearInterval(tk); }
+}
+function pvTile(f, w, i) {
+  const rm = w === 't' ? `tRm('files',${i})` : `rmFile('files',${i})`;
+  const pic = f.kind === 'video' ? (f.thumb ? `<img src="${f.thumb}" alt="">` : '<div class="vph">🎬</div>') + '<span class="play">▶</span>' : `<img src="${f.url}" alt="">`;
+  const badge = f.st === 'done' ? '<span class="pok">✓ 已上傳</span>' : f.st === 'err' ? `<span class="perr" onclick="event.stopPropagation();upRetry('${w}',${i})">❗ 點我重傳</span>` : `<span class="pup"><i style="width:${Math.round(Math.max(0.06, f.p || 0) * 100)}%"></i><b>${f.p ? '上傳中 ' + Math.round(f.p * 100) + '%' : '上傳中…'}</b></span>`;
+  return `<div class="pv" onclick="if(!event.target.closest('.x,.perr'))localView('${w}',${i})" style="cursor:pointer">${pic}${badge}<button class="x" onclick="${rm}" aria-label="移除">✕</button></div>`;
+}
 function videoDuration(file) {
   return new Promise(res => {
     const v = document.createElement('video'); v.preload = 'metadata'; v.muted = true; v.playsInline = true;
@@ -1494,7 +1548,8 @@ async function pickFiles(inp, kind) {
       const dur = await videoDuration(f);
       if (dur > 65) { toast('影片超過 1 分鐘，請剪短或改貼連結'); continue; }
     }
-    S.draft.files.push({ kind, file: f, url: URL.createObjectURL(f) });
+    const it = { kind, file: f, url: URL.createObjectURL(f) }, rer = () => { if ($('fileList') && S.draft && S.draft.files.indexOf(it) >= 0) $('fileList').innerHTML = fileListHtml(); }; S.draft.files.push(it);
+    upStart(it, rer); if (kind === 'video') vidThumb(it, rer);
   }
   $('fileList').innerHTML = fileListHtml();
 }
@@ -1536,10 +1591,21 @@ async function upVideo(file, onp) {
   if (r && r.id) return r;
   throw new Error('影片上傳失敗，請再試一次');
 }
-function bgBar(txt) {
+function bgBar(txt, p) {
   let b = $('bgbar'); if (!txt) { if (b) b.remove(); return; }
   if (!b) { b = document.createElement('div'); b.id = 'bgbar'; document.body.appendChild(b); }
-  b.textContent = txt;
+  b.classList.toggle('wp', p != null);
+  b.innerHTML = esc(txt) + (p != null ? `<b class="bgp"><i style="width:${Math.round(Math.max(0.03, Math.min(1, p)) * 100)}%"></i></b>` : '');
+}
+function vidThumb(f, after) {
+  try {
+    const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.preload = 'auto'; let done = false;
+    const fin = () => { if (done) return; done = true; try { v.removeAttribute('src'); v.load(); } catch (e) {} if (after) after(); };
+    v.onloadeddata = () => { try { v.currentTime = 0.1; } catch (e) { fin(); } };
+    v.onseeked = () => { try { const k = 240 / Math.max(v.videoWidth || 240, v.videoHeight || 240), c = document.createElement('canvas'); c.width = Math.round((v.videoWidth || 240) * k); c.height = Math.round((v.videoHeight || 240) * k); c.getContext('2d').drawImage(v, 0, 0, c.width, c.height); f.thumb = c.toDataURL('image/jpeg', 0.7); } catch (e) {} fin(); };
+    v.onerror = fin; setTimeout(fin, 5000);
+    v.src = f.url;
+  } catch (e) { if (after) after(); }
 }
 let BG_JOBS = 0;
 async function sendWork() {
@@ -1553,18 +1619,13 @@ async function sendWork() {
   if (i0 >= 0) cd.subs[i0] = local; else cd.subs.push(local);
   openTask(t.id); S.hist.pop();
   sysPop({ title: '任務已提交！', xp: 10, body: `🪙 金幣 +${Math.max(5, Math.min(30, Math.round(Number(t.coin) || 5)))}\n導師批改通過後，再拿經驗值 +30、金幣 +10 🌟`, btn: '繼續加油' });
-  BG_JOBS++; bgBar(files.length ? `⏳ 照片／影片上傳中 0 / ${files.length}，先不要關掉 App` : '⏳ 作業送出中…');
+  BG_JOBS++; bgBar(files.length ? `⏳ 上傳中 0 / ${files.length}，先不要關掉 App` : '⏳ 作業送出中…', files.length ? 0 : null);
   try {
-    const up = [];
-    for (let i = 0; i < files.length; i++) {
-      const f = files[i];
-      up.push(f.kind === 'image' ? await api('uploadFile', await compressImage(f.file)) : await upVideo(f.file, p => bgBar(`⏳ 影片上傳中 ${i + 1} / ${files.length}（${Math.round(p * 100)}%），先不要關掉 App`)));
-      bgBar(`⏳ 照片／影片上傳中 ${i + 1} / ${files.length}，先不要關掉 App`);
-    }
+    const up = files.length ? await upWait(files, p => bgBar('⏳ 上傳中，先不要關掉 App', p)) : [];
     const sub = await api('submit', { taskId: t.id, text: draft.text, links, files: draft.keep.concat(up), extra });
     const k = cd.subs.findIndex(x => x.taskId === t.id); if (k >= 0) cd.subs[k] = sub; else cd.subs.push(sub);
     if (--BG_JOBS <= 0) bgBar('');
-    toast('作業已送出 ✓'); loadPet();
+    toast(files.length ? '上傳完成，作業已送出 ✓' : '作業已送出 ✓'); loadPet();
     if (S.cd === cd && (S.v === 'task' || S.v === 'course') && !typing() && !document.querySelector('.sysmodal')) { const y = SCR().scrollTop; render(); SCR().scrollTop = y; }
   } catch (e) {
     if (--BG_JOBS <= 0) bgBar('');
@@ -1976,7 +2037,7 @@ function bTasks() {
   return `<button class="btn gold block" style="margin:0 0 14px" onclick="go('taskEdit',{})">＋ 新增任務</button>
   ${ts.length ? ts.map(t => {
     const n = S.bd.subs.filter(s => s.taskId === t.id).length;
-    return `<button class="trow" onclick="go('taskEdit',{taskId:'${t.id}'})"><div class="tt"><div>${t.kind === 'choice' ? '🎮 ' : ''}${esc(t.title)}${t.groupIds ? ` <span class="chip">${esc(String(t.groupIds).split(',').map(id => gName(id)).filter(Boolean).join('、'))}</span>` : ''}</div><div class="cmeta">${t.dueDate ? fmtD(t.dueDate) + ' 截止' : '不限時間'}，已交 ${n} 份${t.template ? '，有模板' : ''}${(t.media || []).length ? '，📎 ' + t.media.length + ' 個檔案' : ''}</div></div><span class="cmeta">編輯 ›</span></button>`;
+    return `<button class="trow" onclick="go('taskEdit',{taskId:'${t.id}'})"><div class="tt"><div>${t.kind === 'choice' ? '🎮 ' : ''}${esc(t.title)}${t.groupIds ? ` <span class="chip">${esc(String(t.groupIds).split(',').map(id => gName(id)).filter(Boolean).join('、'))}</span>` : ''}</div><div class="cmeta">${t.dueDate ? fmtD(t.dueDate) + ' 截止' : '不限時間'}，已交 ${n} 份${t.template ? '，有模板' : ''}${(t.media || []).length ? '，📎 ' + t.media.length + ' 個檔案' : ''}</div></div><span class="tact"><b onclick="event.stopPropagation();go('taskEdit',{taskId:'${t.id}'})">✏️ 編輯</b><b class="del" onclick="event.stopPropagation();delTaskQuick('${t.id}')">🗑 刪除</b></span></button>`;
   }).join('') : `<div class="empty">還沒有任務</div>`}`;
 }
 function groupPanel() {
@@ -2863,14 +2924,22 @@ function taskMediaHtml(t) {
 function tFileList() {
   const d = S.tdraft; if (!d || (!d.keep.length && !d.files.length)) return '';
   return `<div class="media">${(() => { const k = MV.push(d.keep) - 1; return d.keep.map((f, i) => `<div class="pv" onclick="if(!event.target.closest('.x'))mvOpen(${k},${i})" style="cursor:pointer"><img src="${driveImg(f.id, 300)}" alt="">${f.type === 'video' ? '<span class="play">▶</span>' : ''}<button class="x" onclick="tRm('keep',${i})" aria-label="移除">✕</button></div>`).join(''); })()}
-  ${d.files.map((f, i) => `<div class="pv">${f.kind === 'video' ? `<video src="${f.url}#t=0.1" muted playsinline preload="metadata"></video><span class="play">▶</span>` : `<img src="${f.url}" alt="">`}<button class="x" onclick="tRm('files',${i})" aria-label="移除">✕</button></div>`).join('')}</div>`;
+  ${d.files.map((f, i) => pvTile(f, 't', i)).join('')}</div>${d.files.length ? '<div class="hint">👆 選好就會自動上傳，看到「✓ 已上傳」就完成了；按 ✕ 會一起刪掉。點縮圖可以預覽</div>' : ''}`;
 }
-function tRm(k, i) { S.tdraft[k].splice(i, 1); $('tFiles').innerHTML = tFileList(); }
+function localView(w, i) {
+  const f = (w === 't' ? S.tdraft : S.draft).files[i]; if (!f) return;
+  const el = document.createElement('div'); el.className = 'sysmodal lvw';
+  el.innerHTML = `<div class="lvbox">${f.kind === 'video' ? `<video src="${f.url}" controls playsinline autoplay></video>` : `<img src="${f.url}" alt="">`}<div class="cmeta" style="color:#E9DBF7;margin-top:8px">預覽・還沒上傳</div><button class="btn block" style="margin-top:10px">關閉</button></div>`;
+  el.onclick = e => { if (e.target === el || e.target.closest('button')) { const v = el.querySelector('video'); if (v) { v.pause(); v.removeAttribute('src'); v.load(); } el.remove(); } };
+  document.body.appendChild(el);
+}
+function tRm(k, i) { if (k === 'files') upDrop(S.tdraft.files[i]); S.tdraft[k].splice(i, 1); $('tFiles').innerHTML = tFileList(); }
 function tPick(inp, kind) {
   const list = Array.prototype.slice.call(inp.files); inp.value = '';
   list.forEach(f => {
     if (kind === 'video' && f.size > 80 * 1024 * 1024) { toast('這支影片超過 80MB，請上傳到 YouTube 或 IG 後貼連結'); return; }
-    S.tdraft.files.push({ kind, file: f, url: URL.createObjectURL(f) });
+    const it = { kind, file: f, url: URL.createObjectURL(f) }, rer = () => { if ($('tFiles') && S.tdraft && S.tdraft.files.indexOf(it) >= 0) $('tFiles').innerHTML = tFileList(); }; S.tdraft.files.push(it);
+    upStart(it, rer); if (kind === 'video') vidThumb(it, rer);
   });
   $('tFiles').innerHTML = tFileList();
 }
@@ -2891,17 +2960,12 @@ async function saveTask() {
     links: val('tLinks').split(/\s+/).map(x => x.trim()).filter(Boolean) };
   if (!data.title.trim()) return toast('請輸入任務名稱');
   const ok = await run(async () => {
-    const d = S.tdraft, up = [];
-    for (let i = 0; i < d.files.length; i++) {
-      busyText(`上傳檔案 ${i + 1} / ${d.files.length}…`);
-      const f = d.files[i];
-      up.push(f.kind === 'image' ? await api('uploadFile', await compressImage(f.file)) : await upVideo(f.file, p => busyText(`上傳影片 ${i + 1} / ${d.files.length}（${Math.round(p * 100)}%）…`)));
-    }
-    data.media = d.keep.concat(up);
-    busyText('儲存中…');
+    const d = S.tdraft, up = d.files.length ? await upWait(d.files, p => busyText('等檔案上傳完成…', p)) : [];
+    data.media = d.keep.concat(up); S.tdone = up.length;
+    busyText(up.length ? '上傳完成 ✓ 儲存中…' : '儲存中…', up.length ? 1 : null);
     await api('saveTask', data); await loadBoard(S.bd.course.id); S.tdraft = null; S.qd = null; return true;
   }, '準備中…');
-  if (ok) { toast('已儲存'); S.hist.pop(); S.v = 'board'; S.p = { id: S.bd.course.id, tab: 'tasks', f: 'pending' }; render(); SCR().scrollTop = 0; }
+  if (ok) { toast(S.tdone ? '上傳完成 ✓ 已儲存' : '已儲存'); S.tdone = 0; S.hist.pop(); S.v = 'board'; S.p = { id: S.bd.course.id, tab: 'tasks', f: 'pending' }; render(); SCR().scrollTop = 0; }
 }
 async function deleteTask() {
   if (!confirm('刪除後，這個任務的作業也不會再顯示。確定刪除？')) return;
