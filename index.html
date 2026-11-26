@@ -285,6 +285,31 @@ html,body{height:100%;overflow:hidden}
 .gmem b{color:#22315E}.gmem .cmeta{color:#6B7899 !important;text-shadow:none !important}.gpct{font-size:20px;color:#B8862E !important}
 .gbar{height:6px;background:#EEF1FA;border-radius:3px;margin-top:8px;overflow:hidden}.gbar i{display:block;height:100%;background:linear-gradient(90deg,#5B6FC4,#D9A73C)}
 .gsub{border-top:1px solid #EEF1FA;padding:10px 0}.gsub .nb,.gsub p{color:#333}
+.dangerp{border:2px solid #F2B8C6 !important}
+.bkrow{display:flex;gap:10px;align-items:center;padding:9px 4px;border-top:1px solid rgba(0,0,0,.06);text-decoration:none;color:inherit}.bkrow b{font-size:15px}
+.wrapbar{display:flex;gap:12px;align-items:center;background:linear-gradient(135deg,#FFF4D6,#FFE3EE);color:#5A1530;border:2px solid #E8C46A;border-radius:16px;padding:12px 14px;margin:0 0 12px}.wrapbar b{color:#5A1530}.wrapbar .cmeta{color:#7A5A66 !important;text-shadow:none !important}
+.wrow .cmeta{text-shadow:none !important}
+.certtop{display:flex;justify-content:space-between;align-items:center;margin:0 0 10px}.certtop .cmeta{text-shadow:none}
+.cert{position:relative;border-radius:26px;padding:26px 22px 22px;text-align:center;color:#3A2400;overflow:hidden;box-shadow:0 10px 30px rgba(10,15,40,.35)}
+.cert::before{content:"";position:absolute;inset:8px;border:2px solid rgba(255,255,255,.7);border-radius:20px;pointer-events:none}
+.cert.r1{background:linear-gradient(160deg,#FFF6D8,#F3D27A 55%,#D9A73C)}
+.cert.r2{background:linear-gradient(160deg,#FFF3F7,#FBC4D6 55%,#E88AAE)}
+.cert.r3{background:linear-gradient(160deg,#F7F1FF,#D9C6FA 55%,#A98BE6)}
+.cert.r4{background:linear-gradient(160deg,#F0FFF8,#BFEBD6 55%,#7CCBA8)}
+.cert.base{background:linear-gradient(160deg,#F2F8FF,#CFE3FA 55%,#94BDEB)}
+.cert .cpz{font-size:17px;margin-bottom:4px}.cert .ccoin{font-size:14px;color:#6B4A10;font-weight:700;margin-top:4px}
+.cbrand{font:700 11px/1 -apple-system,sans-serif;letter-spacing:3px;color:rgba(58,36,0,.6)}
+.ckind{font-size:30px;font-weight:900;margin:10px 0 12px;color:#14204E}
+.cava{width:92px;height:92px;margin:0 auto 8px;border-radius:50%;border:4px solid #fff;overflow:hidden;background:#14204E;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.cava span{color:#FFE7A8;font-size:40px;font-weight:800}.cava .ava{width:100% !important;height:100% !important;border:0 !important}
+.cname{font-size:30px;font-weight:900;color:#14204E;letter-spacing:2px}
+.cmsg{font-size:14px;line-height:1.7;color:#3A3550;margin:8px 6px 12px}
+.cprize{background:rgba(255,255,255,.75);border-radius:14px;padding:9px 12px;font-weight:800;color:#8A4A00;margin:0 10px 12px;font-size:15px}
+.cstats{display:flex;gap:8px;margin:0 4px 12px}.cstats div{flex:1;background:rgba(255,255,255,.7);border-radius:12px;padding:8px 4px}.cstats b{display:block;font-size:22px;color:#14204E}.cstats b small{font-size:13px;color:#6B7899}.cstats span{font-size:12px;color:#5B6585}
+.cpet{display:flex;align-items:center;gap:6px;justify-content:center;background:rgba(255,255,255,.55);border-radius:18px;padding:6px 10px;margin:0 4px 12px}.cpet>div:last-child{display:flex;flex-direction:column;text-align:left;font-size:13px;color:#5B6585}.cpet b{font-size:17px;color:#14204E}
+.cnote{font-size:14px;color:#5A1530;margin:0 8px 10px;font-style:italic}
+.cfoot{font-size:12px;color:rgba(20,32,78,.65);line-height:1.6}
+.themes button.tbuy span:last-child{color:#B8862E !important}
 </style>
 <style id="pinkTheme">
 :root{--bg:#FFE8F4;--bg2:#FFF6FA;--card:rgba(255,255,255,.72);--line:#F2C6D7;--gold:#C8748A;--gold2:#E2A2B6;--ink:#2C2226;--mute:#8A6B78;--pend:#5B84D6;--revise:#E0883A;--late:#D65A6A;--serif:"Cormorant Garamond","Noto Serif TC",Georgia,serif}
@@ -1045,11 +1070,11 @@ function tab(v) {
 const backBar = (txt) => `<button class="back" onclick="back()">‹ ${esc(txt || '返回')}</button>`;
 
 function render() {
-  const views = { pet: vPet, care: vCare, team: vTeam, member: vMember, notices: vNotices, notifs: vNotifs, noticeEdit: vNoticeEdit, auth: vAuth, home: vHome, course: vCourse, task: vTask, admin: vAdmin, courseEdit: vCourseEdit, board: vBoard, review: vReview, taskEdit: vTaskEdit, me: vMe, users: vUsers, pinfo: vPinfo, tsubs: vTsubs, mysubs: vMySubs };
+  const views = { pet: vPet, care: vCare, team: vTeam, member: vMember, notices: vNotices, notifs: vNotifs, cert: vCert, wrap: vWrap, noticeEdit: vNoticeEdit, auth: vAuth, home: vHome, course: vCourse, task: vTask, admin: vAdmin, courseEdit: vCourseEdit, board: vBoard, review: vReview, taskEdit: vTaskEdit, me: vMe, users: vUsers, pinfo: vPinfo, tsubs: vTsubs, mysubs: vMySubs };
   document.documentElement.classList.add('petmode');
   $('app').innerHTML = (views[S.v] || vHome)();
   const nav = $('nav');
-  if (S.v === 'auth' || !S.me) { nav.style.display = 'none'; return; }
+  if (S.v === 'auth' || !S.me || S.v === 'cert') { nav.style.display = 'none'; return; }
   const sect = S.v === 'pet' ? 'pet' : ['admin', 'courseEdit', 'board', 'review', 'taskEdit', 'noticeEdit'].indexOf(S.v) >= 0 ? 'admin' : (['me', 'users'].indexOf(S.v) >= 0 ? 'me' : (['team', 'member', 'care', 'tsubs'].indexOf(S.v) >= 0 ? 'team' : 'home'));
   nav.style.display = 'flex';
   const navH = `<button class="${sect === 'home' ? 'on' : ''}" onclick="tab('home')" style="position:relative"><span>📖</span>我的課程${todoCount() ? `<i class="navdot">${todoCount()}</i>` : ''}</button><button class="${sect === 'pet' ? 'on' : ''}" onclick="tab('pet')"><span>⭐</span>星寵</button>`
@@ -1062,7 +1087,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261126-1610';
+const APP_VER = '20261126-1930';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1233,7 +1258,7 @@ function vHome() {
   ${petCard()}
   <div class="join"><input id="joinCode" placeholder="輸入邀請碼加入課程" autocapitalize="characters" autocomplete="off"><button class="btn gold" onclick="joinByCode()">加入</button></div>
   ${act.length ? act.map(courseCard).join('') : `<div class="empty">還沒有進行中的課程<br>跟帶你的老師拿邀請碼，輸入後就能開始交作業</div>`}
-  ${past.length ? `<h2 class="sec">學習履歷</h2>${past.map(courseCard).join('')}` : ''}`;
+  ${past.length ? (() => { const PT = perTabs(past, c => c.endDate || c.startDate, 'hpPer'); return `<h2 class="sec">學習履歷（${past.length}）</h2>${PT.html}${PT.list.length ? PT.list.map(courseCard).join('') : '<div class="empty">這段期間沒有結束的課程，點上方看更早的</div>'}`; })() : ''}`;
 }
 const TODO_T = { revise: ['🔴', '老師請你修改', '#E0607A'], overdue: ['⏰', '過期了，還可以補交', '#E8913A'], today: ['📅', '今天要交', '#C9A227'], open: ['📝', '還沒完成的任務', '#4A6FD1'], reply: ['💬', '老師回覆了', '#3FA37A'] };
 function todoCount() { return ((S.me && S.me.todo) || []).filter(x => x.type !== 'reply').length; }
@@ -1292,6 +1317,9 @@ function vCourse() {
   const subOf = id => d.subs.find(s => s.taskId === id);
   return `${backBar('我的課程')}
   <div class="chead"><span class="chip">${TYPE[c.type] || ''}</span><h1 class="title">${esc(c.title)}</h1><div class="cmeta">${dateRange(c)}</div>${c.desc ? `<p class="desc">${nl(c.desc)}</p>` : ''}</div>
+  ${c.archived === '1' ? `<div class="wrapbar" style="border-color:#B9C2D6;background:#EEF1F8"><div style="font-size:26px">🔒</div><div class="grow"><b>這堂課已經封存</b><div class="cmeta">不能再交作業了${c.wrap ? (c.feedbackOn === '1' && !d.feedback ? '，封存前沒有填回饋，所以領不到獎狀' : '') : ''}</div></div>${c.wrap && !(c.feedbackOn === '1' && !d.feedback) ? `<button class="btn sm gold" onclick="openCert('${c.id}')">🏅 看獎狀</button>` : ''}</div>` : ''}
+  ${c.archiveAt && c.archived !== '1' ? (() => { const left = Math.round((new Date(c.archiveAt) - new Date(today())) / 86400000); return `<div class="wrapbar" style="border-color:#F2B8C6"><div style="font-size:26px">⏰</div><div class="grow"><b>${left <= 0 ? '今天' : left + ' 天後'}封存（${c.archiveAt.slice(5).replace('-', '/')}）</b><div class="cmeta">封存後就不能交作業、領獎狀，把握時間喔！不用全部做完也能結業</div></div></div>`; })() : ''}
+  ${c.wrap && c.archived !== '1' ? (() => { const fbNeed = c.feedbackOn === '1' && !d.feedback; return `<div class="wrapbar"><div style="font-size:30px">🎓</div><div class="grow"><b>課程結業了！</b><div class="cmeta">${fbNeed ? '填完最下面的「課程回饋」，就能領取你的獎狀 👇' : '你的獎狀已經準備好了'}</div></div>${fbNeed ? `<button class="btn sm gold" onclick="const e=document.querySelector('.fbform,#fbBest');e&&e.scrollIntoView({behavior:'smooth',block:'center'})">去填回饋</button>` : `<button class="btn sm gold" onclick="openCert('${c.id}')">🏅 看獎狀</button>`}</div>`; })() : ''}
   ${(d.groups || []).length ? (() => { const my = d.groups.find(g => g.id === d.myGroup);
     if (my) return `<div class="mygroup">👥 你的組別：<b>${esc(my.name)}</b>${my.leaderName ? `・組長 ${esc(my.leaderName)}` : ''}${(d.myLeads || []).indexOf(my.id) >= 0 ? ' 👑' : ''}${c.groupSelf === '1' ? `<div class="adchips">${d.groups.map(g => `<button class="${g.id === d.myGroup ? 'on' : ''}" onclick="setMemberGroup(S.me.user.id,'${g.id}',1)">${esc(g.name)}</button>`).join('')}</div>` : ''}</div>`;
     return c.groupSelf === '1' ? `<div class="mygroup">👥 <b>請選擇你的組別</b><div class="adchips">${d.groups.map(g => `<button onclick="setMemberGroup(S.me.user.id,'${g.id}',1)">${esc(g.name)}${g.leaderName ? '・' + esc(g.leaderName) : ''}</button>`).join('')}</div></div>` : `<div class="mygroup cmeta">👥 老師還沒幫你分組</div>`; })() : ''}
@@ -1323,6 +1351,7 @@ async function sendFeedback() {
   await run(async () => {
     S.cd.feedback = await api('submitFeedback', { courseId: S.cd.course.id, rating, best: val('fbBest'), improve: val('fbImprove'), wish: val('fbWish') });
     S.fbRating = null; toast('已送出回饋，謝謝你'); render();
+    if (S.cd.course.wrap) setTimeout(() => openCert(S.cd.course.id), 500);
   });
 }
 
@@ -1520,24 +1549,91 @@ function fallbackCopy(t) {
 }
 
 /* ---------- 管理：課程列表 ---------- */
+/* 近半年／更早分頁 */
+function perOf(d) { if (!d) return 'recent'; const t = new Date(d); if (isNaN(t)) return 'recent'; if (Date.now() - t.getTime() < 183 * 86400000) return 'recent'; return t.getFullYear() + '-' + (t.getMonth() < 6 ? 'H1' : 'H2'); }
+function perLabel(p) { return p === 'recent' ? '近半年' : p.slice(0, 4) + (p.slice(5) === 'H1' ? ' 上半年' : ' 下半年'); }
+function perTabs(items, dateOf, key) {
+  const ps = []; items.forEach(x => { const p = perOf(dateOf(x)); if (ps.indexOf(p) < 0) ps.push(p); });
+  ps.sort((a, b) => a === 'recent' ? -1 : b === 'recent' ? 1 : (a < b ? 1 : -1));
+  if (ps.indexOf('recent') < 0) ps.unshift('recent');
+  let cur = S[key] || 'recent'; if (ps.indexOf(cur) < 0) cur = 'recent';
+  const html = ps.length > 1 ? `<div class="adchips">${ps.map(p => `<button class="${p === cur ? 'on' : ''}" onclick="S['${key}']='${p}';render()">${perLabel(p)}（${items.filter(x => perOf(dateOf(x)) === p).length}）</button>`).join('')}</div>` : '';
+  return { html, list: items.filter(x => perOf(dateOf(x)) === cur), cur };
+}
+/* ---------- 課程結業總結 ---------- */
+function wrapRank(bd) {
+  const st = {}; (bd.course.admins || '').split(',').filter(Boolean).forEach(id => st[id] = 1); if (bd.course.createdBy) st[bd.course.createdBy] = 1;
+  const keep = S.p.g; S.p.g = ''; const ms = memberStats(bd); S.p.g = keep;
+  const wb = id => (bd.bonus || []).filter(b => b.userId === id && String(b.reason || '').indexOf('🏆 課程總結') === 0).reduce((a, b) => a + (Number(b.points) || 0), 0);
+  return ms.filter(x => !st[x.m.id]).map(x => { const sc = scoreOf(x.m.id); return { x, total: sc.total - wb(x.m.id) }; }).sort((a, b) => b.total - a.total || b.x.pass - a.x.pass || b.x.submitted - a.x.submitted);
+}
+function vWrap() {
+  const bd = S.bd, c = bd.course, W = (() => { try { return JSON.parse(c.wrap || 'null'); } catch (e) { return null; } })();
+  if (!S.wd || S.wd.cid !== c.id) S.wd = { cid: c.id, ranks: W && W.cfg && W.cfg.length ? W.cfg.map(r => Object.assign({}, r)) : [{ points: 100, prize: '' }, { points: 80, prize: '' }, { points: 50, prize: '' }], others: W && W.others != null ? W.others : 50, note: W ? W.note || '' : '' };
+  const D = S.wd, L = wrapRank(bd), medal = i => ['🥇', '🥈', '🥉'][i] || '🏅';
+  const won = {}; (W ? W.ranks : []).forEach(r => won[r.userId] = r);
+  return `${backBar('全班成績')}<h1 class="title" style="margin-bottom:4px">🏆 課程結束總結</h1><div class="cmeta" style="margin-bottom:12px">${esc(c.title)}${W ? `・已於 ${fmtT(W.at)} 發布` : ''}</div>
+  <div class="panel"><h3>設定得獎名額和獎勵</h3><div class="hint">依「總分（作業分＋額外加分）」排名，老師和管理員不列入排名</div>
+    ${D.ranks.map((r, i) => `<div class="grow-row"><b style="min-width:62px">${medal(i)} 第${i + 1}名</b><input type="number" inputmode="numeric" value="${r.points}" oninput="S.wd.ranks[${i}].points=this.value" placeholder="加分" style="width:74px;flex:0 0 74px"><span class="cmeta">分</span><input value="${esc(r.prize)}" oninput="S.wd.ranks[${i}].prize=this.value" placeholder="獎品（選填）" style="flex:1"><button class="btn sm ghost" onclick="S.wd.ranks.splice(${i},1);render()">✕</button></div>`).join('')}
+    <button class="btn sm ghost" onclick="S.wd.ranks.push({points:50,prize:''});render()">＋ 增加名額</button>
+    <div class="grow-row" style="margin-top:10px"><b style="min-width:62px">🎓 其他完成者</b><input type="number" inputmode="numeric" value="${D.others}" oninput="S.wd.others=this.value" style="width:74px;flex:0 0 74px"><span class="cmeta">分・填完回饋領獎狀時自動發</span></div>
+    <div class="hint">💡 建議：第 1 名 +100、第 2 名 +80、第 3 名 +50、其他完成者 +50。你第一次完成這堂課的總結，也會拿到 🪙 +200 管理員獎勵</div>
+    <label class="f">給大家的話（會印在獎狀上，選填）</label><textarea rows="2" oninput="S.wd.note=this.value" placeholder="例如：謝謝大家這 20 天的努力！">${esc(D.note)}</textarea>
+    <div class="hint">加分會同步變成金幣。重新發布會依最新成績重算名次，上一次頒的加分會先收回再重發，不會重複。</div>
+    <button class="btn gold block" style="margin-top:10px" onclick="publishWrap()">${W ? '重新發布總結' : '發布總結・頒獎'}</button></div>
+  <h2 class="sec">${W ? '頒獎結果・每位夥伴的獎狀' : '目前排名預覽'}</h2>
+  ${L.map((r, i) => { const w = W ? won[r.x.m.id] : (i < D.ranks.length ? { rank: i + 1, points: D.ranks[i].points, prize: D.ranks[i].prize } : null);
+    return `<div class="urow wrow">${avatarHtml(r.x.m, 38)}<div class="grow"><b>${w ? medal(w.rank - 1) + ' 第' + w.rank + '名・' : ''}${esc(FN(r.x.m))}</b><div class="cmeta">總分 ${r.total}・交 ${r.x.submitted} 份${w && Number(w.points) ? `・🪙 +${w.points}` : ''}${w && w.prize ? `・🎁 ${esc(w.prize)}` : ''}${!w ? `・結業獎狀${Number(D.others) ? '・🪙 +' + D.others : ''}` : ''}</div></div>${W ? `<button class="btn sm" onclick="openCert('${c.id}','${r.x.m.id}')">看獎狀</button>` : ''}</div>`; }).join('') || '<div class="empty">還沒有成員</div>'}`;
+}
+function publishWrap() {
+  const D = S.wd, c = S.bd.course;
+  if (!confirm(`確定發布「${c.title}」的課程總結？\n前 ${D.ranks.length} 名會拿到加分和獎品，所有夥伴都會收到通知和獎狀。`)) return;
+  run(async () => { const r = await api('finishCourse', { courseId: c.id, ranks: D.ranks, others: D.others, note: D.note }); delete MEM['bd_' + c.id]; await loadBoard(c.id); S.wd = null; render(); toast(r.adminBonus ? '🎉 已發布！你獲得 🪙 +200 管理員獎勵' : '🎉 已發布！大家都收到通知了'); }, '發布中…');
+}
+function openCert(cid, uid) { run(async () => { S.cert = await api('certData', { courseId: cid, userId: uid || '' }); go('cert', {}); }, '準備獎狀…'); }
+function vCert() {
+  const C = S.cert, c = C.course, u = C.user, r = C.rank, st = C.stats, nm = FN(u);
+  if (!C.wrap) return `${backBar()}<div class="empty">老師還沒發布這堂課的總結</div>`;
+  if (!C.unlocked && C.archived) return `${backBar()}<div class="wrapbar" style="margin-top:20px"><div style="font-size:30px">🔒</div><div class="grow"><b>課程已經封存</b><div class="cmeta">封存前沒有填完課程回饋，所以領不到這堂課的獎狀，下次要記得喔！</div></div></div>`;
+  if (!C.unlocked) return `${backBar()}<div class="wrapbar" style="margin-top:20px"><div style="font-size:30px">📝</div><div class="grow"><b>還差一步！</b><div class="cmeta">填完課程回饋，就能領取你的獎狀</div></div><button class="btn sm gold" onclick="back()">去填回饋</button></div>`;
+  const tier = r ? ['r1', 'r2', 'r3'][r.rank - 1] || 'r4' : 'base';
+  const title = r ? (['🥇', '🥈', '🥉'][r.rank - 1] || '🏅') + ' 第 ' + r.rank + ' 名' : '🎓 結業獎狀';
+  const cheer = ['每一次用心交出的作業，都是你變得更好的證明 ✨', '謝謝你一路堅持，你的努力大家都看見了 💛', '你比你想像的更厲害，下一堂課繼續發光吧 🌟', '願意開始就是最棒的一步，為你感到驕傲 🎉'];
+  const msg = r ? `在「${esc(c.title)}」中表現優異、努力不懈，榮獲第 ${r.rank} 名，特頒此狀，恭喜你！` : `恭喜你完成「${esc(c.title)}」課程任務，特頒此獎狀以資鼓勵。<br>${cheer[(nm.charCodeAt(0) || 0) % cheer.length]}`;
+  const P = C.pet;
+  return `<div class="certtop"><button class="btn sm ghost" onclick="back()">‹ 返回</button><span class="cmeta">📸 截圖分享到限動吧</span></div>
+  <div class="cert ${tier}">
+    <div class="cbrand">DCT 學習護照・CERTIFICATE</div>
+    <div class="ckind">${title}</div>
+    <div class="cava">${u.avatar ? avatarHtml(u, 84) : `<span>${esc(nm.slice(0, 1))}</span>`}</div>
+    <div class="cname">${esc(nm)}</div>
+    <div class="cmsg">${msg}</div>
+    <div class="cprize">${r && r.prize ? `<div class="cpz">🎁 獎品：${esc(r.prize)}</div>` : ''}${r && Number(r.points) ? `<div>🪙 獎勵金幣 +${r.points}</div>` : ''}${!r && C.endBonus ? `<div>🪙 結業獎勵 +${C.endBonus}</div>` : ''}<div class="ccoin">🪙 這堂課共獲得 ${st.total} 金幣</div></div>
+    ${P ? `<div class="cpet">${petFigure(Object.assign({}, P, { id: '', full: 100 }), 130, { mood: 'happy' })}<div><b>${esc(P.name || '')}</b><span>Lv.${P.level || 1}${P.levelName ? '・' + esc(P.levelName) : ''}</span><span>陪我一起完成課程 💛</span></div></div>` : ''}
+    ${C.wrap.note ? `<div class="cnote">「${esc(C.wrap.note)}」</div>` : ''}
+    <div class="cfoot">${esc(c.title)}<br>${dateRange(c)}・頒發 ${localDate(C.wrap.at).replace(/-/g, '/')}${C.wrap.byName ? '・' + esc(C.wrap.byName) : ''}</div>
+  </div>`;
+}
 function vAdmin() {
   const a = S.ad, P = a.pendingList || [], own = !!a.overview;
   const ago = iso => { const h = Math.floor((Date.now() - new Date(iso).getTime()) / 3600000); return h < 1 ? '剛剛' : h < 24 ? h + ' 小時前' : Math.floor(h / 24) + ' 天前'; };
-  const L = a.courses.filter(c => !S.adBy || c.createdBy === S.adBy).slice().sort((x, y) => (x.archived === '1') - (y.archived === '1') || (y.toReview || 0) - (x.toReview || 0) || (y.waiting || 0) - (x.waiting || 0));
+  const L0 = a.courses.filter(c => !S.adBy || c.createdBy === S.adBy), PT = perTabs(L0, c => c.endDate || c.startDate || c.createdAt, 'adPer');
+  const L = PT.list.slice().sort((x, y) => (x.archived === '1') - (y.archived === '1') || (y.toReview || 0) - (x.toReview || 0) || (y.waiting || 0) - (x.waiting || 0));
   return `<header class="top"><div><div class="hi">${S.me.user.role === 'owner' ? '👑 最高管理員' : '管理員'}</div><h1 class="title">課程管理</h1></div>${isAdmin() ? `<button class="btn gold" onclick="go('courseEdit',{})">＋ 新增課程</button>` : ''}</header>
   <div class="panel pendp"><h3 style="margin-top:0">📝 需要回覆的作業${P.length ? `（${P.length}）` : ''}</h3>
   ${P.length ? P.slice(0, S.pendAll ? 999 : 6).map(x => `<button class="prow" onclick="openPend('${x.courseId}','${x.id}')">${avatarHtml(x, 40)}<div class="grow"><b>${esc(x.realName || x.name)}・${esc(x.taskTitle)}</b><div class="cmeta">${esc(x.courseTitle)}・${ago(x.at)}交</div></div><span class="cmeta">回覆 ›</span></button>`).join('')
     + (P.length > 6 && !S.pendAll ? `<button class="btn sm block" style="margin-top:8px" onclick="S.pendAll=1;render()">看全部 ${P.length} 份</button>` : '')
     : '<div class="cmeta">✨ 目前沒有需要回覆的作業</div>'}
   ${P.length ? '<div class="hint">最早交的排最前面，點下去直接批改</div>' : ''}</div>
-  <h2 class="sec">${own ? '所有課程' : '我的課程'}（${L.length}）</h2>
+  <h2 class="sec">${own ? '所有課程' : '我的課程'}（${L0.length}）</h2>
+  ${PT.html}
   ${(() => { if (!own) return ''; const cnt = {}; a.courses.forEach(c => { cnt[c.createdBy] = (cnt[c.createdBy] || 0) + 1; }); const ad = a.overview.byAdmin.filter(x => cnt[x.id]); if (ad.length < 2) return ''; return `<div class="adchips"><button class="${!S.adBy ? 'on' : ''}" onclick="S.adBy='';render()">全部 ${a.courses.length}</button>${ad.map(x => `<button class="${S.adBy === x.id ? 'on' : ''}" onclick="S.adBy='${x.id}';render()">${esc(x.name)}${x.role === 'owner' ? '👑' : ''} ${cnt[x.id]}</button>`).join('')}</div>`; })()}
   ${L.length ? L.map(c => `<button class="ccard ${c.archived === '1' ? 'arch' : ''}" onclick="openBoard('${c.id}')">
     <div class="ctop"><span class="chip">${TYPE[c.type] || ''}</span>${c.toReview ? `<span class="badge">${c.toReview} 份待批改</span>` : c.waiting ? `<span class="badge">${c.waiting} 人等審核</span>` : ''}</div>
     <div class="ctitle">${esc(c.title)}${c.archived === '1' ? '<span class="cmeta">（已封存）</span>' : ''}</div>
     <div class="cmeta">${dateRange(c)}${c.creatorName && c.createdBy !== S.me.user.id ? `・建立者 <b>${esc(c.creatorName)}</b>` : ''}</div>
     <div class="cmeta" style="margin-top:6px">邀請碼 ${esc(c.code)}，成員 ${c.members} 人，任務 ${c.taskCount} 個${c.waiting && c.toReview ? `，<span style="color:var(--pend)">${c.waiting} 人等待審核</span>` : ''}</div>
-  </button>`).join('') : `<div class="empty">${S.adBy ? '這位管理員還沒有建立課程' : '還沒有課程<br>按右上角「新增課程」開第一個班'}</div>`}
+  </button>`).join('') : `<div class="empty">${L0.length ? '這段期間沒有課程，點上方其他分頁看更早的課程' : S.adBy ? '這位管理員還沒有建立課程' : '還沒有課程<br>按右上角「新增課程」開第一個班'}</div>`}
   <button class="btn block" style="margin:18px 0" onclick="openNoticeEdit()">📢 發公告給夥伴</button>
   ${ownerPanel(a)}`;
 }
@@ -1546,14 +1642,50 @@ function ownerTasksHTML() {
   const o = S.ad && S.ad.overview; if (!o || !o.taskList) return '';
   const q = String(S.otq || '').trim().toLowerCase();
   if (!q && !S.adBy) return '<div class="hint" style="margin-top:4px">輸入關鍵字就會列出任務；在「所有課程」選管理員，也會列出她發的任務</div>';
-  const L = o.taskList.filter(t => (!S.adBy || t.createdBy === S.adBy) && (!q || [t.title, t.courseTitle, t.creatorName].some(v => String(v || '').toLowerCase().indexOf(q) >= 0)));
-  if (!L.length) return '<div class="empty" style="padding:14px">找不到符合的任務</div>';
-  return `<div class="cmeta" style="margin:6px 0">找到 ${L.length} 個任務</div>` + L.slice(0, S.otLimit || 40).map(t => `<button class="trow" onclick="openTaskAdmin('${t.courseId}','${t.id}')"><div class="tt"><div>${t.kind === 'choice' ? '🎮 ' : ''}${esc(t.title)}</div><div class="cmeta">${esc(t.courseTitle)}${t.archived === '1' ? '（已封存）' : ''}・${esc(t.creatorName || '—')} 建立${t.dueDate ? '・' + fmtD(t.dueDate) + ' 截止' : ''}<br>已交 ${t.subs} 份${t.pending ? `・<b style="color:#C0392B">待批改 ${t.pending}</b>` : ''}</div></div><span class="cmeta">看 ›</span></button>`).join('') + (L.length > (S.otLimit || 40) ? `<button class="btn block" onclick="S.otLimit=(S.otLimit||40)+40;$('oTasks').innerHTML=ownerTasksHTML()">顯示更多</button>` : '');
+  const L0 = o.taskList.filter(t => (!S.adBy || t.createdBy === S.adBy) && (!q || [t.title, t.courseTitle, t.creatorName].some(v => String(v || '').toLowerCase().indexOf(q) >= 0)));
+  if (!L0.length) return '<div class="empty" style="padding:14px">找不到符合的任務</div>';
+  const PT = perTabs(L0, t => t.createdAt || t.dueDate, 'otPer'), L = PT.list;
+  return PT.html + `<div class="cmeta" style="margin:6px 0">${perLabel(PT.cur)} ${L.length} 個任務（全部 ${L0.length} 個）</div>` + L.slice(0, S.otLimit || 40).map(t => `<button class="trow" onclick="openTaskAdmin('${t.courseId}','${t.id}')"><div class="tt"><div>${t.kind === 'choice' ? '🎮 ' : ''}${esc(t.title)}</div><div class="cmeta">${esc(t.courseTitle)}${t.archived === '1' ? '（已封存）' : ''}・${esc(t.creatorName || '—')} 建立${t.dueDate ? '・' + fmtD(t.dueDate) + ' 截止' : ''}<br>已交 ${t.subs} 份${t.pending ? `・<b style="color:#C0392B">待批改 ${t.pending}</b>` : ''}</div></div><span class="cmeta">看 ›</span></button>`).join('') + (L.length > (S.otLimit || 40) ? `<button class="btn block" onclick="S.otLimit=(S.otLimit||40)+40;$('oTasks').innerHTML=ownerTasksHTML()">顯示更多</button>` : '');
 }
 function openTaskAdmin(cid, tid) { run(async () => { await loadBoard(cid); go('board', { id: cid, tab: 'tasks' }); go('taskEdit', { taskId: tid }); }, '載入中…'); }
+function backupPanel() {
+  const L = S.bk || null;
+  return `<div class="panel ownerp"><h3 style="margin-top:0">💾 備份</h3>
+    <div class="hint">把整個後台（所有夥伴、課程、作業、金幣、星寵）複製一份到你的 Google 雲端硬碟「DCT學習護照_後台備份」資料夾。每週一也會自動備份一次（保留 12 週）。</div>
+    <button class="btn gold block" style="margin-top:10px" onclick="backupNow()">立即備份整個後台</button>
+    ${L ? (L.length ? `<h4 style="margin:14px 0 6px">最近的備份</h4>${L.slice(0, 8).map(b => `<a class="bkrow" href="${esc(b.url)}" target="_blank" rel="noopener"><span>📄</span><div class="grow"><b>${esc(b.name.replace('DCT後台備份_', ''))}</b><div class="cmeta">${fmtT(b.at)}</div></div><span class="cmeta">開啟 ›</span></a>`).join('')}` : '<div class="cmeta" style="margin-top:8px">還沒有備份</div>') : `<button class="btn sm ghost" style="margin-top:8px" onclick="loadBackups()">看備份紀錄</button>`}
+  </div>`;
+}
+function loadBackups() { run(async () => { S.bk = (await api('backupList')).list; render(); }, '讀取中…'); }
+function backupNow() { run(async () => { const r = await api('backupNow'); S.bk = r.list; render(); toast('✅ 已備份：' + r.backup.name.replace('DCT後台備份_', '')); }, '備份中，約 10 秒…'); }
+/* 匯出 CSV（Excel、Numbers、Google 試算表都能開） */
+function csvCell(v) { v = v == null ? '' : String(v); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+async function exportCSV(name, rows) {
+  const txt = '\ufeff' + rows.map(r => r.map(csvCell).join(',')).join('\r\n');
+  const file = new File([txt], name + '.csv', { type: 'text/csv;charset=utf-8' });
+  try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = file.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  toast('已匯出 ' + file.name);
+}
+function exportScores() {
+  const bd = S.bd, ms = memberStats(bd), stat = { pass: '通過', pending: '待批改', revise: '需修改' }, t0 = today();
+  const head = ['名次', '本名', 'LINE名字', '手機', '組別'].concat(bd.tasks.map((t, i) => stampLabel(t, i) + ' ' + t.title)).concat(['完成率', '作業分', '額外加分', '總分']);
+  const R0 = ms.map(x => Object.assign({ x }, scoreOf(x.m.id))).sort((a, b) => b.total - a.total);
+  const rows = R0.map((r, i) => [i + 1, r.x.m.realName || r.x.m.name, r.x.m.lineName || r.x.m.name, r.x.m.phone, gName(r.x.m.groupId) || ''].concat(bd.tasks.map(t => { const s = r.x.by[t.id]; return s ? stat[s.status] || s.status : !tFor(t, r.x.m.groupId) ? '不用交' : t.dueDate && t.dueDate < t0 ? '漏交' : ''; })).concat([Math.round(r.x.rate * 100) + '%', r.task, r.bonus, r.total]));
+  exportCSV(bd.course.title + '_成績表_' + t0, [head].concat(rows));
+}
+function exportSubs() {
+  const bd = S.bd, stat = { pass: '通過', pending: '待批改', revise: '需修改' };
+  const head = ['本名', '組別', '任務', '狀態', '星等', '交的時間', '內容', '連結', '照片影片', '老師回覆'];
+  const rows = bd.subs.filter(s => taskOf(s.taskId) && gOK(s.userId)).map(s => { const m = bd.members.find(x => x.id === s.userId) || {}, t = taskOf(s.taskId);
+    return [m.realName || m.name || '', gName(m.groupId) || '', t.title, stat[s.status] || s.status, s.stars || '', fmtT(s.submittedAt),
+      [s.text || ''].concat(Object.keys(s.extra || {}).map(k => k + '：' + s.extra[k])).filter(Boolean).join('\n'), (s.links || []).join('\n'),
+      (s.files || []).map(f => 'https://drive.google.com/file/d/' + f.id + '/view').join('\n'), (s.comments || []).map(c => (c.authorName || '') + '：' + c.text).join('\n')]; });
+  exportCSV(bd.course.title + '_作業內容_' + today(), [head].concat(rows));
+}
 function ownerPanel(a) {
   const o = a.overview; if (!o) return '';
-  return `<div class="panel ownerp"><h3 style="margin-top:0">👑 總後台</h3>
+  return `${backupPanel()}<div class="panel ownerp"><h3 style="margin-top:0">👑 總後台</h3>
   <div class="ostat">${[['夥伴', o.users], ['管理員', o.admins], ['課程', o.courses], ['任務', o.tasks], ['作業', o.subs], ['待批改', o.pending], ['星寵', o.pets]].map(([l, n]) => `<div><b>${n}</b><span>${l}</span></div>`).join('')}</div>
   <label class="f">🔍 搜尋任務</label><input id="oTaskQ" placeholder="任務名稱、課程、建立者" value="${esc(S.otq || '')}" oninput="qIn(this,v=>{S.otq=v;$('oTasks').innerHTML=ownerTasksHTML()})">
   <div id="oTasks">${ownerTasksHTML()}</div>
@@ -1581,13 +1713,14 @@ function vCourseEdit() {
   <label class="f">課程說明</label><textarea id="cDesc" placeholder="這個班要做什麼、每天要交什麼">${esc(c.desc)}</textarea>
   <label class="ck"><input type="checkbox" id="cApprove" ${c.needApprove === '1' ? 'checked' : ''}>加入課程要經過管理員審核</label>
   <label class="ck"><input type="checkbox" id="cFb" ${c.feedbackOn === '1' ? 'checked' : ''}>開放課程回饋問卷</label>
+  <label class="f">自動封存日期（選填）</label><input id="cArch" type="date" value="${esc(c.archiveAt || '')}"><div class="hint">設定後，每天早上會提醒還沒完成任務的夥伴「還剩幾天封存」。過了這天課程自動封存，沒交的作業不能再交，沒填回饋的也領不到獎狀。不用每天都完成才能結業，隨時都能依積分頒獎。</div>
   ${admins.length ? `<label class="f">一起管理這個課程的管理員</label>${admins.map(u => `<label class="ck"><input type="checkbox" class="cAdm" value="${u.id}" ${sel.indexOf(u.id) >= 0 ? 'checked' : ''}>${esc(FN(u))}</label>`).join('')}` : ''}
   <button class="btn gold block" onclick="saveCourse()">${S.p.id ? '儲存' : '建立課程'}</button>`;
 }
 async function saveCourse() {
   const data = {
     id: S.p.id || '', title: val('cTitle'), type: val('cType'), startDate: val('cStart'), endDate: val('cEnd'), desc: val('cDesc'),
-    needApprove: chk('cApprove'), feedbackOn: chk('cFb'), genTasks: 0,
+    needApprove: chk('cApprove'), feedbackOn: chk('cFb'), genTasks: 0, archiveAt: val('cArch'),
     admins: Array.prototype.slice.call(document.querySelectorAll('.cAdm:checked')).map(x => x.value),
     listedAdmins: Array.prototype.slice.call(document.querySelectorAll('.cAdm')).map(x => x.value)
   };
@@ -1738,6 +1871,8 @@ function bClass() {
     <div class="num"><b>${Math.round(sum('total') / R0.length)}</b><span>平均分數</span></div></div>
   ${(bd.groups || []).length && !S.p.g ? (() => { const GR = bd.groups.filter(g => !bd.leaderOnly || (bd.myLeads || []).indexOf(g.id) >= 0).map(g => { const rs = R0.filter(r => (r.x.m.groupId || '') === g.id); const tot = rs.reduce((a, r) => a + r.total, 0); return { g, n: rs.length, tot, avg: rs.length ? Math.round(tot / rs.length) : 0, rate: rs.length ? Math.round(rs.reduce((a, r) => a + r.x.rate, 0) / rs.length * 100) : 0 }; }).sort((a, b) => b.avg - a.avg);
     return GR.length ? `<h2 class="sec">👥 小組排行</h2><div class="hint">依平均分數排名・點組別看該組成績</div><div class="mx"><table class="score"><tr><th>#</th><th>組別</th><th>人數</th><th>完成</th><th>總分</th><th>平均</th></tr>${GR.map((x, i) => `<tr onclick="S.p.g='${x.g.id}';render()"><td>${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td><td class="nm">${esc(x.g.name)}${x.g.leaderName ? `<div class="cmeta" style="font-weight:400">組長 ${esc(x.g.leaderName)}</div>` : ''}</td><td>${x.n}</td><td>${x.rate}%</td><td>${x.tot}</td><td><b>${x.avg}</b></td></tr>`).join('')}</table></div>` : ''; })() : ''}
+  ${bd.leaderOnly ? '' : `<button class="btn gold block" style="margin-top:14px" onclick="go('wrap',{})">🏆 ${bd.course.wrap ? '課程總結・獎狀（已發布）' : '課程結束總結・頒獎'}</button>`}
+  <div class="row" style="gap:8px;margin:14px 0 0"><button class="btn sm" onclick="exportScores()">📥 匯出成績表</button><button class="btn sm" onclick="exportSubs()">📥 匯出作業內容</button></div>
   <h2 class="sec">🏆 ${S.p.g && S.p.g !== '__none' ? esc(gName(S.p.g)) + ' 成績表' : '全班成績表'}</h2>
   <div class="hint">✓ 通過　… 待批改　✎ 需修改　✕ 漏交・點格子直接批改・點名字可以加分<br>分數＝交作業 5～30＋通過 10（闖關 5）＋額外加分</div>
   <div class="mx gb"><table>
@@ -1819,6 +1954,13 @@ function setMemberGroup(uid, gid, self) {
   else { S.cd.myGroup = gid; render(); }
   api('setMemberGroup', { courseId: cid, userId: uid, groupId: gid }).then(() => { toast(self ? '已選擇組別' : '已更新組別'); if (self) { delete MEM['cd_' + cid]; loadCourse(cid).then(() => render()); } }).catch(e => toast(e.message || '更新失敗'));
 }
+function delCourse() {
+  const c = S.bd.course;
+  const name = prompt(`確定要刪除「${c.title}」嗎？\n任務、作業、回覆都會刪除（金幣保留）。\n請輸入課程名稱確認：`);
+  if (name == null) return;
+  if (name.trim() !== String(c.title).trim()) return toast('課程名稱不一樣，沒有刪除');
+  run(async () => { const r = await api('deleteCourse', { courseId: c.id, confirm: name }); Object.keys(MEM).forEach(k => { if (k.indexOf(c.id) >= 0 || k === 'me' || k === 'notifs' || k === 'mySubs') delete MEM[k]; }); S.ad = MEM.ad = await api('adminCourses'); S.me = await api('me'); saveBootCache(); go('admin', {}, true); toast(`已刪除課程（${r.people} 人的金幣都保留）`); }, '刪除中…');
+}
 function bSetting() {
   const bd = S.bd, c = bd.course, L = EMBED ? window.parent.location : location, link = L.origin + L.pathname + '?code=' + c.code;
   const wait = bd.members.filter(m => m.status === 'pending'), act = bd.members.filter(m => m.status === 'active');
@@ -1837,7 +1979,8 @@ function bSetting() {
     <button class="btn sm ${c.archived === '1' ? '' : 'red'}" onclick="archive(${c.archived === '1' ? 'false' : 'true'})">${c.archived === '1' ? '取消封存' : '封存課程'}</button></div></div>
   ${wait.length ? `<h2 class="sec">等待審核（${wait.length}）</h2>${wait.map(m => `<div class="urow"><div class="grow"><b>${esc(FN(m))}</b><div class="cmeta">${esc(m.phone)}${m.ig ? '，IG ' + esc(m.ig) : ''}</div></div><button class="btn sm gold" onclick="approve('${m.enrollId}',true)">通過</button><button class="btn sm red" onclick="approve('${m.enrollId}',false)">拒絕</button></div>`).join('')}` : ''}
   <h2 class="sec">成員（${act.length}）</h2>
-  ${act.length ? act.map(m => `<div class="urow">${avatarHtml(m, 40)}<div class="grow" style="cursor:pointer" onclick="memberPop('${m.id}')"><b>${esc(FN(m))} <span class="cmeta">›</span></b><div class="cmeta">總分 ${scoreOf(m.id).total}${scoreOf(m.id).bonus ? `（含加分 ${scoreOf(m.id).bonus > 0 ? '+' : ''}${scoreOf(m.id).bonus}）` : ''}</div></div><button class="btn sm gold" onclick="memberPop('${m.id}')">＋加分</button><button class="btn sm ghost" onclick="removeMember('${m.enrollId}')">移出</button></div>`).join('') : '<div class="empty">還沒有成員</div>'}`;
+  ${act.length ? act.map(m => `<div class="urow">${avatarHtml(m, 40)}<div class="grow" style="cursor:pointer" onclick="memberPop('${m.id}')"><b>${esc(FN(m))} <span class="cmeta">›</span></b><div class="cmeta">總分 ${scoreOf(m.id).total}${scoreOf(m.id).bonus ? `（含加分 ${scoreOf(m.id).bonus > 0 ? '+' : ''}${scoreOf(m.id).bonus}）` : ''}</div></div><button class="btn sm gold" onclick="memberPop('${m.id}')">＋加分</button><button class="btn sm ghost" onclick="removeMember('${m.enrollId}')">移出</button></div>`).join('') : '<div class="empty">還沒有成員</div>'}
+  ${S.me.user.role === 'owner' || c.createdBy === S.me.user.id ? `<div class="panel dangerp"><h3>🗑 刪除課程</h3><div class="hint">會刪除這堂課的任務、所有人交的作業、回覆、加分紀錄和公告，刪了就救不回來。<br>大家已經拿到的金幣會保留，不會被扣掉。<br>只是不想再顯示的話，用上面的「封存」就好。</div><button class="btn block" style="margin-top:10px;background:#B0405A;color:#fff" onclick="delCourse()">刪除這堂課程</button></div>` : ''}`;
 }
 async function adminCode(off) {
   if (off && !confirm('停用後，這組管理員邀請碼就不能再用（已加入的管理員不受影響）')) return;
@@ -2065,7 +2208,7 @@ function roomSVG0(w) {
   <rect width="360" height="8" fill="url(#rgold)"/><rect y="8" width="360" height="3" fill="${T.top}" opacity=".7"/>
   <rect y="176" width="360" height="84" fill="url(#rherr)"/><rect y="176" width="360" height="30" fill="#fff" opacity="${T.sheen}"/><path d="M60 200 L110 176 H150 L100 200Z M200 200 L250 176 H270 L220 200Z" fill="#fff" opacity=".2"/>
   <rect y="168" width="360" height="10" fill="${T.base}"/><rect y="176" width="360" height="2.5" fill="url(#rgold)"/>
-  ${mv('window', h('window'))}${L('deco').length ? many('deco', x => x) : mv('deco', HOME_DECO_DEFAULT)}${many('lamp', x => x)}${many('bed', x => `<g transform="translate(30 0)">${x}</g>`)}${many('figure', x => `<g transform="translate(318 186) scale(.82) translate(-320 -236)">${x}</g>`)}${many('rug', x => x)}${many('toy', x => `<g transform="translate(172 75) scale(.72)">${x}</g>`)}
+  ${mv('window', h('window'))}${mv('plant', h('plant'))}${L('deco').length ? many('deco', x => x) : mv('deco', HOME_DECO_DEFAULT)}${many('lamp', x => x)}${many('bed', x => `<g transform="translate(30 0)">${x}</g>`)}${many('figure', x => `<g transform="translate(318 186) scale(.82) translate(-320 -236)">${x}</g>`)}${many('rug', x => x)}${many('toy', x => `<g transform="translate(172 75) scale(.72)">${x}</g>`)}
   ${[[70, 150], [150, 40], [230, 100], [330, 150], [20, 60]].map(([x, y], i) => `<path class="spk" style="animation-delay:${i * .7}s" d="M${x} ${y - 4} L${x + 1} ${y - 1} L${x + 4} ${y} L${x + 1} ${y + 1} L${x} ${y + 4} L${x - 1} ${y + 1} L${x - 4} ${y} L${x - 1} ${y - 1}Z" fill="#F6EABD"/>`).join('')}
   ${many('fest', x => `<g transform="translate(0 -42)">${x}</g>`)}${T.fx && THEME_FX[T.fx] ? THEME_FX[T.fx]() : ''}
   <rect width="360" height="260" fill="url(#rvig)"/></svg>`;
@@ -2073,6 +2216,7 @@ function roomSVG0(w) {
 function accIcon(k) { return `<svg viewBox="${ACC_BOX[k]}" class="accico" aria-hidden="true">${ACC[k]()}</svg>`; }
 function foodIcon(k, kind) {
   const svgw = b => `<svg viewBox="0 0 100 100" class="accico" aria-hidden="true">${b}</svg>`;
+  if (FOOD_EXTRA[k]) return svgw(FOOD_EXTRA[k]);
   if (k === 'strawberry') return svgw(`<path d="M50 90 C24 74 18 46 30 36 C40 28 50 34 50 34 C50 34 60 28 70 36 C82 46 76 74 50 90Z" fill="#FF5C7E" stroke="#E23E62" stroke-width="3"/><path d="M34 34 L42 22 L50 30 L58 22 L66 34 Q50 42 34 34Z" fill="#6CC17A" stroke="#4FAE63" stroke-width="2"/>${[[40, 50], [56, 48], [48, 62], [38, 66], [60, 64], [50, 76]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="1.8" ry="2.6" fill="#FFE7A8"/>`).join('')}<ellipse cx="36" cy="46" rx="4" ry="7" fill="#fff" opacity=".45"/>`);
   if (k === 'apple') return svgw(`<path d="M50 34 C30 20 12 36 16 58 C20 82 38 92 50 84 C62 92 80 82 84 58 C88 36 70 20 50 34Z" fill="#F0506A" stroke="#C93650" stroke-width="3"/><path d="M50 34 q2 -14 8 -20" stroke="#8A5A2B" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M54 22 q14 -10 22 2 q-12 8 -22 -2z" fill="#6CC17A"/><ellipse cx="32" cy="50" rx="5" ry="10" fill="#fff" opacity=".45" transform="rotate(20 32 50)"/>`);
   if (k === 'onigiri') return svgw(`<path d="M50 14 C62 14 90 64 86 76 C82 88 18 88 14 76 C10 64 38 14 50 14Z" fill="#fff" stroke="#E2DCE0" stroke-width="3"/><rect x="34" y="58" width="32" height="30" rx="3" fill="#3E4A3E"/><path d="M38 64 h24" stroke="#566656" stroke-width="2"/><circle cx="42" cy="44" r="2.5" fill="#3A2A2E"/><circle cx="58" cy="44" r="2.5" fill="#3A2A2E"/><path d="M46 50 q4 4 8 0" stroke="#3A2A2E" stroke-width="2" fill="none" stroke-linecap="round"/><ellipse cx="36" cy="50" rx="4" ry="2.5" fill="#FFB8CF"/><ellipse cx="64" cy="50" rx="4" ry="2.5" fill="#FFB8CF"/>`);
@@ -2395,6 +2539,37 @@ Object.assign(ROOM_TH, {
   val: ['情人節', { fx: 'val', wall: '#FFE1EA', dia: '#FFC9D8', wain: '#FFFFFF', wainOp: '.6', base: '#fff', top: '#fff', f1: '#F7D8DE', f2: '#EDBFC8', l1: '#E2A9B6', l2: '#F4CFD7', vig: '#8A2A4A', vigOp: '.14', sheen: '.2' }],
   hw: ['萬聖夜', { fx: 'hw', wall: '#3B2A55', dia: '#4A3768', wain: '#2A1E40', wainOp: '.7', base: '#5B3A86', top: '#F2994A', f1: '#5A4636', f2: '#3E3026', l1: '#2C2119', l2: '#6E5644', vig: '#0E0820', vigOp: '.35', sheen: '.06' }]
 });
+/* ===== 新增商品：食物、佈置、小窩、付費背景 ===== */
+const FOOD_EXTRA = {
+  mochi: `<ellipse cx="50" cy="76" rx="36" ry="10" fill="#E9D6E8"/><path d="M16 66 Q16 36 50 34 Q84 36 84 66 Q84 78 50 78 Q16 78 16 66Z" fill="#FFF4F8" stroke="#F2C6D7" stroke-width="3"/><path d="M28 50 Q50 40 72 50" stroke="#F7D7E4" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="38" cy="60" r="3" fill="#5A4050"/><circle cx="62" cy="60" r="3" fill="#5A4050"/><path d="M45 66 q5 4 10 0" stroke="#5A4050" stroke-width="2.5" fill="none" stroke-linecap="round"/><ellipse cx="31" cy="66" rx="5" ry="3" fill="#FFB3C9"/><ellipse cx="69" cy="66" rx="5" ry="3" fill="#FFB3C9"/><path d="M44 30 q6 -12 14 -6 q-6 2 -8 10z" fill="#8BCB8F"/>`,
+  croissant: `<path d="M12 64 Q18 30 50 26 Q82 30 88 64 Q78 58 70 66 Q62 50 50 52 Q38 50 30 66 Q22 58 12 64Z" fill="#E9A85A" stroke="#B8722E" stroke-width="3" stroke-linejoin="round"/><path d="M30 66 Q34 46 50 44 Q66 46 70 66" fill="#F2C07A" stroke="#B8722E" stroke-width="3"/><path d="M40 40 q-2 12 2 22 M60 40 q2 12 -2 22 M50 30 v30" stroke="#C98A44" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M24 50 q6 -8 14 -8" stroke="#FFE2B0" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+  parfait: `<path d="M30 40 H70 L62 86 H38Z" fill="#FFF" fill-opacity=".7" stroke="#D9C5E8" stroke-width="3"/><path d="M33 54 H67 L65 64 H35Z" fill="#FF9EB8"/><path d="M35 64 H65 L63 74 H37Z" fill="#FFF3D6"/><path d="M37 74 H63 L62 84 H38Z" fill="#B7E08A"/><circle cx="40" cy="36" r="10" fill="#fff" stroke="#EBDDE6" stroke-width="2"/><circle cx="58" cy="34" r="11" fill="#FFF7E8" stroke="#EBDDE6" stroke-width="2"/><circle cx="50" cy="24" r="8" fill="#E8344E"/><path d="M50 16 q4 -8 10 -6" stroke="#5AA05E" stroke-width="2.5" fill="none"/><path d="M64 26 l10 -14" stroke="#8B5A2B" stroke-width="3" stroke-linecap="round"/><path d="M36 92 h28" stroke="#D9C5E8" stroke-width="4" stroke-linecap="round"/>`,
+  tiramisu: `<path d="M16 46 L84 46 L84 80 L16 80Z" fill="#F7E7C9" stroke="#B08A5A" stroke-width="3"/><path d="M16 58 H84 M16 70 H84" stroke="#9C6B3E" stroke-width="5"/><path d="M16 46 L28 30 H72 L84 46Z" fill="#8A5A34" stroke="#6E4424" stroke-width="3"/>${[[34,38],[50,36],[64,40],[44,42],[58,34]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="1.8" fill="#5A3418"/>`).join('')}<path d="M62 22 q6 -10 12 -4 q-6 2 -6 8z" fill="#7CC27E"/><path d="M60 28 q4 -4 8 -2" stroke="#C0392B" stroke-width="4" stroke-linecap="round"/>`,
+  steak: `<ellipse cx="50" cy="66" rx="40" ry="18" fill="#F2F2F2" stroke="#D5D5D5" stroke-width="3"/><path d="M24 58 Q22 40 44 38 Q66 34 76 48 Q82 62 62 68 Q38 74 24 58Z" fill="#A45A3A" stroke="#6E3420" stroke-width="3"/><path d="M34 50 l24 10 M40 44 l24 10 M30 56 l20 8" stroke="#6E3420" stroke-width="3" stroke-linecap="round"/><circle cx="72" cy="66" r="6" fill="#F6C343"/><path d="M20 66 q4 -6 10 -2" stroke="#6BBF6B" stroke-width="4" stroke-linecap="round"/>`,
+  hotpot: `<path d="M14 50 H86 Q84 84 50 86 Q16 84 14 50Z" fill="#C0392B" stroke="#8E2A1F" stroke-width="3"/><ellipse cx="50" cy="50" rx="36" ry="10" fill="#E8584A" stroke="#8E2A1F" stroke-width="3"/><circle cx="36" cy="49" r="5" fill="#F8E0A8"/><circle cx="58" cy="47" r="4" fill="#fff"/><path d="M44 52 q6 -4 12 0" stroke="#7CC27E" stroke-width="4" stroke-linecap="round"/><circle cx="66" cy="52" r="4" fill="#F2A7B5"/><path d="M8 50 h8 M84 50 h8" stroke="#8E2A1F" stroke-width="5" stroke-linecap="round"/><path d="M38 34 q-4 -8 2 -14 M52 32 q-4 -8 2 -14 M64 34 q-4 -8 2 -14" stroke="#CFCFD8" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>`
+};
+Object.assign(HOME, {
+  monstera: () => `<g class="sway"><path d="M30 190 h44 l-6 44 h-32z" fill="#F2E3CF" stroke="#C9A87C" stroke-width="2.5"/><path d="M52 190 Q50 160 40 140 M52 190 Q58 156 72 140 M52 190 Q46 170 26 160" stroke="#4E9A5A" stroke-width="3" fill="none"/><path d="M40 140 Q20 126 30 108 Q48 104 52 124 Q50 138 40 140Z M72 140 Q92 126 84 106 Q66 100 62 122 Q62 138 72 140Z M26 160 Q8 152 12 136 Q28 132 34 150Z" fill="#5DB46B" stroke="#3E8A4A" stroke-width="2"/><path d="M36 118 l6 4 M78 116 l-6 4 M20 146 l6 2" stroke="#E8F7E8" stroke-width="2"/></g>`,
+  cactus: () => `<g><path d="M34 200 h36 l-5 34 h-26z" fill="#E7A27C" stroke="#B9724E" stroke-width="2.5"/><rect x="42" y="140" width="20" height="62" rx="10" fill="#6CC17A" stroke="#4A9A58" stroke-width="2.5"/><path d="M42 172 h-8 q-6 0 -6 -6 v-14" stroke="#4A9A58" stroke-width="2.5" fill="#6CC17A"/><path d="M62 164 h8 q6 0 6 -6 v-10" stroke="#4A9A58" stroke-width="2.5" fill="#6CC17A"/><circle cx="52" cy="136" r="6" fill="#FF8FB1"/><path d="M48 156 v4 M56 170 v4 M50 184 v4" stroke="#E8F7E8" stroke-width="2"/></g>`,
+  neon_dct: () => `<g><rect x="168" y="38" width="92" height="50" rx="10" fill="#1E2A4F" opacity=".85"/><text x="214" y="73" text-anchor="middle" font-family="Arial Black,Arial" font-weight="900" font-size="28" fill="#FFE7A8" stroke="#FF9EC4" stroke-width="1.2" style="filter:drop-shadow(0 0 4px #FF9EC4)">DCT</text><path d="M176 46 h76" stroke="#FF9EC4" stroke-width="1.5" opacity=".6"/></g>`,
+  photo_wall: () => `<g><path d="M160 34 Q214 46 268 34" stroke="#C8A27A" stroke-width="2" fill="none"/>${[[166, 38, -6, '#FFD1DC'], [196, 43, 4, '#CDE7FF'], [226, 42, -3, '#FFF1B8'], [252, 36, 6, '#D6F5D6']].map(([x, y, r, c]) => `<g transform="rotate(${r} ${x + 12} ${y})"><rect x="${x}" y="${y}" width="24" height="30" fill="#fff" stroke="#E6DCE3" stroke-width="1.2"/><rect x="${x + 3}" y="${y + 3}" width="18" height="18" fill="${c}"/><circle cx="${x + 12}" cy="${y + 12}" r="4" fill="#fff" opacity=".8"/><circle cx="${x + 12}" cy="${y}" r="2" fill="#E8C46A"/></g>`).join('')}</g>`,
+  teddy: () => `<g><circle cx="86" cy="224" r="14" fill="#C98A5A"/><circle cx="74" cy="212" r="6" fill="#C98A5A"/><circle cx="98" cy="212" r="6" fill="#C98A5A"/><ellipse cx="86" cy="244" rx="15" ry="11" fill="#C98A5A"/><ellipse cx="86" cy="229" rx="6" ry="4.5" fill="#F0D2B0"/><circle cx="81" cy="221" r="1.8" fill="#3A2400"/><circle cx="91" cy="221" r="1.8" fill="#3A2400"/><path d="M80 236 l6 4 l6 -4" stroke="#E8577A" stroke-width="3" fill="none"/></g>`,
+  rug_round: () => `<g><ellipse cx="180" cy="232" rx="82" ry="20" fill="#CDB7F0"/><ellipse cx="180" cy="232" rx="66" ry="15" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="6 5"/><ellipse cx="180" cy="232" rx="40" ry="9" fill="#E7DCFB"/></g>`,
+  bed_basket: () => `<g><path d="M244 206 Q244 236 296 238 Q348 236 348 206Z" fill="#D9A774" stroke="#A8743E" stroke-width="3"/>${[256, 270, 284, 298, 312, 326, 340].map(x => `<path d="M${x} 208 q4 14 0 26" stroke="#B9844E" stroke-width="2" fill="none"/>`).join('')}<path d="M246 214 Q296 226 346 214 M248 224 Q296 234 344 224" stroke="#B9844E" stroke-width="2" fill="none"/><ellipse cx="296" cy="206" rx="52" ry="11" fill="#FFF3E6" stroke="#E8C49A" stroke-width="2"/><ellipse cx="296" cy="204" rx="38" ry="7" fill="#FFD6E2"/></g>`,
+  bed_cloud: () => `<g><path d="M244 230 q-12 -20 10 -26 q4 -18 26 -14 q12 -14 32 -4 q22 -8 30 12 q22 4 12 32z" fill="#DDEBFF" stroke="#A9C3EE" stroke-width="3"/><ellipse cx="296" cy="216" rx="40" ry="10" fill="#fff" opacity=".9"/><circle cx="270" cy="200" r="3" fill="#FFE7A8"/><circle cx="326" cy="196" r="2.5" fill="#FFE7A8"/><path d="M300 190 l2 5 l5 1 l-4 3 l1 5 l-4 -3 l-4 3 l1 -5 l-4 -3 l5 -1z" fill="#FFD66B"/></g>`,
+  bed_tent: () => `<g><path d="M296 108 L240 232 H352Z" fill="#FFF0E0" stroke="#E0A86A" stroke-width="3" stroke-linejoin="round"/><path d="M296 108 L276 232 H316Z" fill="#F6C99A"/><path d="M296 108 v-16" stroke="#A8743E" stroke-width="3"/><path d="M296 92 l14 5 l-14 5z" fill="#FF8FB1"/><path d="M244 150 Q296 174 348 150" stroke="#C8A27A" stroke-width="1.5" fill="none"/>${[256, 272, 288, 304, 320, 336].map((x, i) => `<circle cx="${x}" cy="${156 + (i === 0 || i === 5 ? -2 : 6)}" r="3.5" fill="${['#FFE07A', '#FF9EC4', '#9ED7FF'][i % 3]}"/>`).join('')}<ellipse cx="296" cy="232" rx="30" ry="6" fill="#FFD6E2"/></g>`,
+  bed_princess: () => `<g><path d="M250 96 Q296 70 342 96" fill="#FFE3EE" stroke="url(#rgold)" stroke-width="4"/><path d="M252 96 Q246 160 256 214 L270 214 Q262 150 272 100Z M340 96 Q346 160 336 214 L322 214 Q330 150 320 100Z" fill="#FFC9DC" opacity=".9"/><rect x="252" y="196" width="88" height="30" rx="8" fill="#FFF6FA" stroke="url(#rgold)" stroke-width="3"/><ellipse cx="296" cy="196" rx="44" ry="10" fill="#FFD6E2"/><ellipse cx="276" cy="190" rx="12" ry="6" fill="#fff" stroke="#F2C6D6" stroke-width="1.5"/><path d="M290 70 l6 -10 l6 10 l-6 -3z" fill="#F2D27A" stroke="#C8961E" stroke-width="1.5"/><path d="M258 226 v8 M334 226 v8" stroke="#DAB360" stroke-width="4" stroke-linecap="round"/></g>`
+});
+Object.assign(HOME_BOX, { monstera: '6 100 96 136', cactus: '24 124 58 112', neon_dct: '164 32 100 60', photo_wall: '156 26 118 54', teddy: '66 204 40 54', rug_round: '96 210 168 44', bed_basket: '238 188 116 54', bed_cloud: '232 178 124 60', bed_tent: '236 86 120 152', bed_princess: '238 56 116 182' });
+Object.assign(ROOM_TH, {
+  sakura: ['櫻花粉', { wall: '#FFEFF4', dia: '#FFD9E5', wain: '#FFFFFF', wainOp: '.6', base: '#fff', top: '#fff', f1: '#F6DCE3', f2: '#EBC4CF', l1: '#E3B1BF', l2: '#F1D0DA', vig: '#8A3050', vigOp: '.14', sheen: '.2' , fx: 'sakura'}],
+  forest: ['森林綠', { wall: '#EAF5E4', dia: '#D3EBC8', wain: '#FFFFFF', wainOp: '.5', base: '#F6FBF2', top: '#fff', f1: '#E0CCAA', f2: '#CDB28A', l1: '#BFA27A', l2: '#D9C29E', vig: '#2F5A2A', vigOp: '.16', sheen: '.16' , fx: 'forest'}],
+  ocean: ['海洋藍', { wall: '#E4F4FF', dia: '#C9E7FB', wain: '#FFFFFF', wainOp: '.55', base: '#F2FAFF', top: '#fff', f1: '#F1E6D2', f2: '#E2D1B2', l1: '#D3BE98', l2: '#EBDDC1', vig: '#1B4F7A', vigOp: '.18', sheen: '.2' , fx: 'ocean'}],
+  sunset: ['夕陽橘', { wall: '#FFEBDD', dia: '#FFD6BE', wain: '#FFFFFF', wainOp: '.5', base: '#FFF5EE', top: '#fff', f1: '#EBCDB4', f2: '#D9B192', l1: '#CB9E7C', l2: '#E5C2A6', vig: '#8A3A1A', vigOp: '.18', sheen: '.16' , fx: 'sunset'}],
+  lavender: ['薰衣草紫', { wall: '#F2ECFF', dia: '#E1D5FA', wain: '#FFFFFF', wainOp: '.55', base: '#FBF8FF', top: '#fff', f1: '#E6DDF2', f2: '#D3C5E6', l1: '#C4B3DB', l2: '#DDD1EC', vig: '#4A2F7A', vigOp: '.18', sheen: '.18' , fx: 'lavender'}],
+  luxgold: ['奢華黑金', { wall: '#1A1A1F', dia: '#2A2A31', wain: '#121216', wainOp: '.9', base: '#222228', top: '#2A2A31', f1: '#3A2E22', f2: '#2A2018', l1: '#20180F', l2: '#4A3A2A', vig: '#000', vigOp: '.4', sheen: '.06' , fx: 'luxgold'}]
+});
+
 const THEME_FX = {
   xmas: () => `<path d="M0 16 Q90 40 180 16 Q270 40 360 16" stroke="#3B5A2E" stroke-width="2" fill="none"/>${Array.from({ length: 14 }, (_, i) => { const x = 12 + i * 25.5, y = 16 + 12 * Math.sin((x % 180) / 180 * Math.PI); return `<ellipse class="twk" style="animation-delay:${i * .2}s" cx="${x}" cy="${y + 5}" rx="3.5" ry="5" fill="${['#FF5C7E', '#FFD24D', '#7FD1FF', '#8CE08A'][i % 4]}"/>`; }).join('')}${Array.from({ length: 16 }, (_, i) => `<circle class="snow" style="animation-delay:${(i * .43) % 4}s;animation-duration:${4 + (i % 4)}s" cx="${(i * 23 + 7) % 360}" cy="-6" r="${1.6 + (i % 3)}" fill="#fff" opacity=".9"/>`).join('')}`,
   cny: () => `${[40, 110, 250, 320].map((x, i) => `<g class="lantern" style="animation-delay:${i * .3}s;transform-origin:${x}px 0"><path d="M${x} 0 v14" stroke="#E4B65A" stroke-width="1.5"/><rect x="${x - 7}" y="14" width="14" height="4" fill="#E4B65A"/><ellipse cx="${x}" cy="32" rx="16" ry="14" fill="#E23A3A" stroke="#B82020" stroke-width="1.5"/><path d="M${x - 8} 20 q-4 12 0 24 M${x + 8} 20 q4 12 0 24 M${x} 18 v28" stroke="#F7C35A" stroke-width="1" fill="none" opacity=".8"/><rect x="${x - 6}" y="45" width="12" height="4" fill="#E4B65A"/><path d="M${x - 3} 49 v10 M${x} 49 v12 M${x + 3} 49 v10" stroke="#F7C35A" stroke-width="1.5"/></g>`).join('')}<g transform="translate(330 120) rotate(45)"><rect x="-14" y="-14" width="28" height="28" fill="#D8323F" stroke="#E4B65A" stroke-width="2"/></g><text x="330" y="126" font-size="16" font-weight="900" text-anchor="middle" fill="#FFD24D" font-family="PingFang TC,Noto Sans TC,sans-serif">福</text>`,
@@ -2422,6 +2597,12 @@ Object.assign(ROOM_TH, {
   xmasred: ['聖誕紅', { fx: 'xmasred', wall: '#A61E2C', dia: '#B8303C', wain: '#FFF6E6', wainOp: '.25', base: '#F2D58E', top: '#2F8F5B', f1: '#B98B5E', f2: '#9C7048', l1: '#7E5634', l2: '#C79C6E', vig: '#3A0A10', vigOp: '.22', sheen: '.12' }]
 });
 Object.assign(THEME_FX, {
+  sakura: () => `<path d="M0 0 Q60 26 120 10" stroke="#8A5A44" stroke-width="4" fill="none"/>${[[24, 12], [54, 20], [88, 16], [112, 8]].map(([x, y]) => `<g transform="translate(${x} ${y})">${[0, 72, 144, 216, 288].map(r => `<ellipse rx="4" ry="7" cy="-6" fill="#FFB7CE" transform="rotate(${r})"/>`).join('')}<circle r="2.5" fill="#FFE07A"/></g>`).join('')}${[[160, 50], [230, 90], [300, 40], [190, 130], [330, 110], [60, 100]].map(([x, y], i) => `<ellipse class="twk" style="animation-delay:${i * .4}s" cx="${x}" cy="${y}" rx="4" ry="6" fill="#FFC6D8" transform="rotate(${i * 40} ${x} ${y})"/>`).join('')}`,
+  forest: () => `${[[0, 0], [330, 0]].map(([x]) => `<g transform="translate(${x} 0)"><path d="M${x ? 30 : 0} 0 Q${x ? 4 : 26} 40 ${x ? 20 : 10} 90" stroke="#5E8C4A" stroke-width="3" fill="none"/>${[18, 40, 62, 84].map((y, i) => `<ellipse cx="${x ? 14 + (i % 2) * 10 : 16 - (i % 2) * 8}" cy="${y}" rx="9" ry="5" fill="#7DBB6A" transform="rotate(${i % 2 ? 30 : -30} ${x ? 14 : 16} ${y})"/>`).join('')}</g>`).join('')}${[[120, 40], [250, 60], [190, 100]].map(([x, y], i) => `<circle class="twk" style="animation-delay:${i * .5}s" cx="${x}" cy="${y}" r="3" fill="#FFF6A8"/>`).join('')}`,
+  ocean: () => `${[[40, 140], [90, 100], [150, 60], [260, 120], [310, 70], [210, 30]].map(([x, y], i) => `<circle class="twk" style="animation-delay:${i * .35}s" cx="${x}" cy="${y}" r="${4 + (i % 3) * 2}" fill="none" stroke="#7CC4EE" stroke-width="2" opacity=".8"/>`).join('')}<path d="M300 40 q10 -10 20 0 q-10 10 -20 0z M296 40 l-6 -5 v10z" fill="#FFB36B"/>`,
+  sunset: () => `<circle cx="300" cy="44" r="22" fill="#FFB36B" opacity=".75"/><path d="M0 0 H360 V60 Q180 90 0 60Z" fill="#FFCBA4" opacity=".35"/>${[[80, 40], [140, 26]].map(([x, y]) => `<path d="M${x} ${y} q6 -6 12 0 q6 -6 12 0" stroke="#8A5A44" stroke-width="2" fill="none"/>`).join('')}`,
+  lavender: () => `${[20, 44, 316, 340].map((x, i) => `<g><path d="M${x} 176 V${120 - (i % 2) * 10}" stroke="#7FA36A" stroke-width="2"/>${[0, 1, 2, 3, 4].map(k => `<ellipse cx="${x}" cy="${118 - (i % 2) * 10 + k * 7}" rx="4" ry="3.5" fill="#B89AE8"/>`).join('')}</g>`).join('')}${[[150, 50], [220, 90], [280, 40]].map(([x, y], i) => `<circle class="twk" style="animation-delay:${i * .5}s" cx="${x}" cy="${y}" r="2.5" fill="#E7DCFB"/>`).join('')}`,
+  luxgold: () => `${[[50, 40], [120, 80], [200, 30], [270, 70], [330, 120], [90, 130], [240, 140]].map(([x, y], i) => `<path class="twk" style="animation-delay:${i * .3}s" d="M${x} ${y - 6} L${x + 1.5} ${y - 1.5} L${x + 6} ${y} L${x + 1.5} ${y + 1.5} L${x} ${y + 6} L${x - 1.5} ${y + 1.5} L${x - 6} ${y} L${x - 1.5} ${y - 1.5}Z" fill="#F2D27A"/>`).join('')}<rect y="8" width="360" height="2" fill="#F2D27A" opacity=".8"/>`,
   snow: () => `${[[60, 60], [150, 30], [250, 70], [320, 34], [110, 120], [200, 110], [300, 130]].map(([x, y], i) => `<g class="twk" style="animation-delay:${i * .3}s" stroke="#A8C4E8" stroke-width="1.6" stroke-linecap="round">${[0, 60, 120].map(a => `<path d="M${x} ${y} l${(7 * Math.cos(a * Math.PI / 180)).toFixed(1)} ${(7 * Math.sin(a * Math.PI / 180)).toFixed(1)} M${x} ${y} l${(-7 * Math.cos(a * Math.PI / 180)).toFixed(1)} ${(-7 * Math.sin(a * Math.PI / 180)).toFixed(1)}"/>`).join('')}</g>`).join('')}${[[34, 150], [336, 150]].map(([x, y]) => `<g opacity=".95"><circle cx="${x}" cy="${y + 6}" r="9" fill="#fff" stroke="#CFDCEC"/><circle cx="${x}" cy="${y - 7}" r="6.5" fill="#fff" stroke="#CFDCEC"/><path d="M${x} ${y - 6} l5 1.5 l-5 1z" fill="#F2882A"/><rect x="${x - 5}" y="${y - 19}" width="10" height="6" fill="#2B2B3A"/><path d="M${x - 6} ${y - 1} h12" stroke="#D8323F" stroke-width="2.5"/></g>`).join('')}${Array.from({ length: 18 }, (_, i) => `<circle class="snow" style="animation-delay:${(i * .37) % 4}s;animation-duration:${4 + (i % 4)}s" cx="${(i * 21 + 5) % 360}" cy="-6" r="${1.6 + (i % 3)}" fill="#C9DAF2"/>`).join('')}<path d="M0 176 q30 -8 60 0 q30 -8 60 0 q30 -8 60 0 q30 -8 60 0 q30 -8 60 0 q30 -8 60 0 v6 h-360z" fill="#fff" opacity=".9"/>`,
   xmasred: () => `<path d="M0 14 Q45 34 90 14 Q135 34 180 14 Q225 34 270 14 Q315 34 360 14 v-14 h-360z" fill="#2F8F5B"/>${[45, 135, 225, 315].map(x => `<g><path d="M${x - 10} 28 q-8 -8 -2 -14 q4 6 12 6z M${x + 10} 28 q8 -8 2 -14 q-4 6 -12 6z" fill="#3BA36A"/><circle cx="${x - 3}" cy="28" r="3.5" fill="#E23A4A"/><circle cx="${x + 3}" cy="28" r="3.5" fill="#E23A4A"/><circle cx="${x}" cy="23" r="3.5" fill="#E23A4A"/></g>`).join('')}${[[70, 70], [160, 100], [250, 60], [320, 110], [30, 120], [200, 140]].map(([x, y], i) => `<path class="twk" style="animation-delay:${i * .35}s" d="M${x} ${y - 6} l1.8 4.2 l4.2 1.8 l-4.2 1.8 l-1.8 4.2 l-1.8 -4.2 l-4.2 -1.8 l4.2 -1.8z" fill="#FFD84D"/>`).join('')}${Array.from({ length: 12 }, (_, i) => `<circle class="snow" style="animation-delay:${(i * .5) % 4}s;animation-duration:${5 + (i % 3)}s" cx="${(i * 31 + 9) % 360}" cy="-6" r="${1.5 + (i % 3)}" fill="#fff" opacity=".85"/>`).join('')}`
 });
@@ -2462,6 +2643,16 @@ HOME.wreath = () => `<g transform="translate(211 56) scale(.82) translate(-211 -
 HOME.minisnowman = () => `<g transform="translate(-6 0)"><ellipse cx="62" cy="234" rx="20" ry="4" fill="#000" opacity=".1"/><circle cx="62" cy="216" r="17" fill="#fff" stroke="#D5DEEA" stroke-width="1.6"/><circle cx="62" cy="190" r="12" fill="#fff" stroke="#D5DEEA" stroke-width="1.6"/><rect x="53" y="172" width="18" height="8" rx="1" fill="#D8323F"/><rect x="50" y="179" width="24" height="3" rx="1.5" fill="#D8323F"/><circle cx="62" cy="171" r="3" fill="#fff"/><circle cx="58" cy="188" r="1.6" fill="#2B2B3A"/><circle cx="66" cy="188" r="1.6" fill="#2B2B3A"/><path d="M62 191 l7 2 l-7 1.5z" fill="#F2882A"/><path d="M51 199 q11 6 22 0" stroke="#2F8F5B" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M70 201 l3 10" stroke="#2F8F5B" stroke-width="4" stroke-linecap="round"/>${[210, 220].map(y => `<circle cx="62" cy="${y}" r="1.8" fill="#2B2B3A"/>`).join('')}<path d="M46 212 l-12 -8 M78 212 l12 -8" stroke="#8A5A3A" stroke-width="2" stroke-linecap="round"/></g>`;
 Object.assign(HOME_BOX, { wreath: '170 14 82 100', minisnowman: '26 164 70 74' });
 const FEST_ORDER = { xmas: 1, cny: 2, val: 3, hw: 4 };
+Object.assign(FOOD_EXTRA, {
+  strawmilk: `<path d="M32 30 H68 L64 88 H36Z" fill="#fff" fill-opacity=".85" stroke="#F2C6D7" stroke-width="3"/><path d="M34 48 H66 L63 86 H37Z" fill="#FFC2D4"/><path d="M38 30 l4 -14 h16 l4 14" fill="#FF8FB1" stroke="#E86A92" stroke-width="2.5"/><path d="M56 16 l8 -10" stroke="#5AA05E" stroke-width="3" stroke-linecap="round"/><path d="M44 62 C38 56 40 50 46 52 C48 52 50 54 50 54 C50 54 52 52 54 52 C60 50 62 56 56 62 L50 68Z" fill="#E8344E"/><circle cx="44" cy="74" r="2" fill="#fff"/><circle cx="58" cy="78" r="2" fill="#fff"/>`,
+  strawdaifuku: `<ellipse cx="50" cy="80" rx="34" ry="8" fill="#F2DCE6"/><path d="M16 70 Q14 34 50 32 Q86 34 84 70 Q84 82 50 82 Q16 82 16 70Z" fill="#FFF6FA" stroke="#F2C6D7" stroke-width="3"/><path d="M34 46 C34 30 46 26 50 26 C54 26 66 30 66 46 C66 58 56 64 50 66 C44 64 34 58 34 46Z" fill="#E8344E"/><path d="M42 26 q8 -10 16 0 q-8 -4 -16 0z" fill="#5AA05E"/>${[[42, 40], [56, 42], [48, 52], [58, 54], [40, 52]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="1.4" ry="2" fill="#FFE07A"/>`).join('')}<path d="M22 66 Q50 58 78 66" stroke="#fff" stroke-width="4" fill="none" opacity=".9"/>`,
+  strawcrepe: `<path d="M50 92 L20 34 Q50 20 80 34Z" fill="#F6D7A6" stroke="#D9A86A" stroke-width="3" stroke-linejoin="round"/><path d="M22 36 Q50 22 78 36 Q72 46 50 44 Q28 46 22 36Z" fill="#fff" stroke="#EBDDE6" stroke-width="2"/>${[[34, 30], [50, 24], [66, 30]].map(([x, y]) => `<path d="M${x} ${y + 10} C${x - 8} ${y + 4} ${x - 6} ${y - 6} ${x} ${y - 4} C${x + 6} ${y - 6} ${x + 8} ${y + 4} ${x} ${y + 10}Z" fill="#E8344E"/><path d="M${x - 3} ${y - 4} q3 -5 6 0" fill="#5AA05E"/>`).join('')}<path d="M34 52 l32 0 M38 62 l24 0 M42 72 l16 0" stroke="#E2B27A" stroke-width="2"/>`,
+  strawtart: `<ellipse cx="50" cy="70" rx="38" ry="14" fill="#E3A866" stroke="#B9782E" stroke-width="3"/><ellipse cx="50" cy="62" rx="34" ry="11" fill="#FFF3D6"/>${[[30, 56], [44, 52], [58, 52], [72, 56], [38, 64], [52, 62], [66, 64]].map(([x, y]) => `<path d="M${x} ${y + 8} C${x - 7} ${y + 2} ${x - 6} ${y - 6} ${x} ${y - 5} C${x + 6} ${y - 6} ${x + 7} ${y + 2} ${x} ${y + 8}Z" fill="#E8344E" stroke="#C02040" stroke-width="1"/>`).join('')}${[20, 34, 48, 62, 76].map(x => `<path d="M${x} 74 v8" stroke="#B9782E" stroke-width="2"/>`).join('')}`,
+  strawparfait: `<path d="M28 38 H72 L64 84 H36Z" fill="#fff" fill-opacity=".75" stroke="#F2C6D7" stroke-width="3"/><path d="M31 52 H69 L67 62 H33Z" fill="#FF8FB1"/><path d="M33 62 H67 L65 72 H35Z" fill="#FFF7E8"/><path d="M35 72 H65 L64 82 H36Z" fill="#E8344E" opacity=".85"/><path d="M30 38 Q30 22 50 22 Q70 22 70 38Z" fill="#FFE3EE" stroke="#F2C6D7" stroke-width="2"/><path d="M50 22 C42 14 44 6 50 8 C56 6 58 14 50 22Z" fill="#E8344E"/><path d="M47 8 q3 -6 6 0" fill="#5AA05E"/><path d="M62 30 l10 -18" stroke="#8B5A2B" stroke-width="3" stroke-linecap="round"/><path d="M36 90 h28" stroke="#F2C6D7" stroke-width="4" stroke-linecap="round"/>`,
+  strawcake: `<path d="M14 54 L50 40 L86 54 V82 L50 92 L14 82Z" fill="#FFF8F0" stroke="#EBD8C4" stroke-width="3" stroke-linejoin="round"/><path d="M14 66 L50 54 L86 66 M14 66 L50 78 L86 66" stroke="#FF8FB1" stroke-width="4" fill="none"/><path d="M14 54 L50 66 L86 54" fill="none" stroke="#EBD8C4" stroke-width="3"/><path d="M50 66 V92" stroke="#EBD8C4" stroke-width="2"/>${[[28, 46], [50, 38], [72, 46]].map(([x, y]) => `<ellipse cx="${x}" cy="${y + 4}" rx="9" ry="4" fill="#fff"/><path d="M${x} ${y + 4} C${x - 6} ${y} ${x - 5} ${y - 7} ${x} ${y - 6} C${x + 5} ${y - 7} ${x + 6} ${y} ${x} ${y + 4}Z" fill="#E8344E"/><path d="M${x - 3} ${y - 6} q3 -5 6 0" fill="#5AA05E"/>`).join('')}`
+});
+FEST_TAG.berry = '🍓草莓季限定'; FEST_ORDER.berry = 5;
+
 function shopSort(shop, arr) { return arr.slice().sort((a, b) => (FEST_ORDER[shop[a].fest] || 0) - (FEST_ORDER[shop[b].fest] || 0) || (shop[a].minLv || 1) - (shop[b].minLv || 1) || shop[a].price - shop[b].price); }
 function festHead(shop, arr, k) { const f = shop[k].fest, i = arr.indexOf(k); if (!f || (i > 0 && shop[arr[i - 1]].fest === f)) return ''; return `<div class="shophead">${FEST_TAG[f]}系列</div>`; }
 function curPet() { const P = S.pet; if (!P || !P.pets || !P.pets.length) return null; return P.pets.find(x => x.id === S.petSel) || P.pets[0]; }
@@ -2589,7 +2780,10 @@ function vPet() {
   ${tab === 'food' ? `<div class="hint" style="margin-top:0;${p.full >= 100 ? 'color:var(--late);font-weight:700' : ''}">${p.full >= 100 ? `「${esc(p.name)}」已經吃飽了（飽足 100%），明天再來餵吧！` : `現在餵的是「${esc(p.name)}」・飽足 ${p.full}%・每天最多可以餵到 100%・🔒 的食物升級後解鎖`}</div><div class="shop">${foods.map(k => festHead(shop, foods, k) + (() => { const it = shop[k]; if ((it.minLv || 1) > p.level) return lockItem(foodIcon(k, p.kind), k === 'fish' ? PET_FOOD_NAME[p.kind] : it.name, it.minLv, P, `飽足 +${it.add}`); return `<div class="item"><div class="ic">${foodIcon(k, p.kind)}</div>${it.fest ? `<div class="festtag">${FEST_TAG[it.fest]}</div>` : ''}<div class="nm">${k === 'fish' ? PET_FOOD_NAME[p.kind] : it.name}</div><div class="sm2">飽足 +${it.add}</div><button ${P.coins < it.price || p.full >= 100 ? 'disabled' : ''} onclick="petCall('petBuy',{item:'${k}'},{eat:'${k}',say:'好吃！'})">${coinIco()} ${it.price} 餵牠</button></div>`; })()).join('')}</div>${p.full >= 100 ? '<div class="hint">吃飽飽了，晚點再餵吧</div>' : ''}` : ''}
   ${tab === 'wear' ? `<div class="hint" style="margin-top:0">幫「${esc(p.name)}」打扮・買過的裝扮每隻都可以戴・🔒 是等級專屬</div><div class="shop">${wears.map(k => festHead(shop, wears, k) + (() => { const it = shop[k], own = owned.indexOf(k) >= 0, on = w[it.slot] === k, lock = it.minLv && p.level < it.minLv; if (lock) return lockItem(accIcon(k), it.name, it.minLv, P); return `<div class="item ${on ? 'wear' : ''} ${it.minLv >= 5 ? 'vip' : ''}"><div class="ic">${accIcon(k)}</div>${it.fest ? `<div class="festtag">${FEST_TAG[it.fest]}</div>` : ''}<div class="nm">${it.name}</div><div class="sm2">${{ head: '頭上', face: '臉上', neck: '脖子', back: '背上' }[it.slot]}</div>
     ${own ? `<button class="${on ? 'ghost2' : ''}" onclick="petCall('petWear',${on ? `{slot:'${it.slot}',item:''}` : `{item:'${k}'}`},{say:'${on ? '換一下～' : '好看嗎？'}'})">${on ? '脫下' : '穿上'}</button>` : `<button ${P.coins < it.price ? 'disabled' : ''} onclick="petCall('petBuy',{item:'${k}'},{say:'謝謝你！'})">${coinIco()} ${it.price} 購買</button>`}</div>`; })()).join('')}</div>` : ''}
-  ${tab === 'home' ? `<label class="f" style="margin-top:4px">房間風格（免費・看等級最高的那隻解鎖）</label><div class="themes">${Object.keys(ROOM_TH).map(k => { const tl = (P.themeLv || {})[k] || 1; return tl > (P.homeLevel || 1) ? `<button disabled class="tlock"><span class="thm">${roomSVG({ theme: k })}</span><span>🔒 Lv.${tl} 解鎖</span></button>` : `<button class="${(hm.theme || 'bluegold') === k ? 'on' : ''}" onclick="petCall('petStyle',{theme:'${k}'},{say:'換新家！'})"><span class="thm">${roomSVG({ theme: k })}</span><span>${ROOM_TH[k][0]}</span></button>`; }).join('')}</div><label class="f">家具（大家一起住・看等級最高的那隻解鎖）</label><div class="hint" style="margin-top:0">同一類（牆上裝飾、玩具、節慶擺飾、人偶、燈、地毯、小床）最多同時擺 2 個，擺好可以用「🪑 佈置小窩」拖到喜歡的位置</div><div class="shop">${homes.map(k => festHead(shop, homes, k) + (() => { const it = shop[k], own = owned.indexOf(k) >= 0, on = Array.isArray(hm[it.slot]) ? hm[it.slot].indexOf(k) >= 0 : hm[it.slot] === k; if ((it.minLv || 1) > (P.homeLevel || 1)) return lockItem(homeIcon(k), it.name, it.minLv, P, '要有一隻升到這級'); return `<div class="item ${on ? 'wear' : ''}"><div class="ic">${homeIcon(k)}</div>${it.fest ? `<div class="festtag">${FEST_TAG[it.fest]}</div>` : ''}<div class="nm">${it.name}</div><div class="sm2">${{ wall: '牆面', window: '窗戶', lamp: '燈飾', rug: '地毯', plant: '植物', toy: '玩具', bed: '小床', deco: '牆上裝飾', fest: '節慶擺飾', figure: '節慶人偶' }[it.slot]}</div>
+  ${tab === 'home' ? `<label class="f" style="margin-top:4px">房間背景（部分免費・🪙 標示的要用金幣買）</label><div class="themes">${Object.keys(ROOM_TH).map(k => { const tl = (P.themeLv || {})[k] || 1, pr = (P.themePrice || {})[k], own = !pr || (P.owned || []).indexOf('th_' + k) >= 0;
+    if (tl > (P.homeLevel || 1)) return `<button disabled class="tlock"><span class="thm">${roomSVG({ theme: k })}</span><span>🔒 Lv.${tl} 解鎖</span></button>`;
+    if (!own) return `<button class="tbuy" onclick="if(confirm('用 🪙 ${pr} 買「${ROOM_TH[k][0]}」背景？'))petCall('petStyle',{theme:'${k}',buy:1},{say:'哇！新背景！'})"><span class="thm">${roomSVG({ theme: k })}</span><span>${ROOM_TH[k][0]}・🪙${pr}</span></button>`;
+    return `<button class="${(hm.theme || 'bluegold') === k ? 'on' : ''}" onclick="petCall('petStyle',{theme:'${k}'},{say:'換新家！'})"><span class="thm">${roomSVG({ theme: k })}</span><span>${ROOM_TH[k][0]}</span></button>`; }).join('')}</div><label class="f">家具（大家一起住・看等級最高的那隻解鎖）</label><div class="hint" style="margin-top:0">同一類（牆上裝飾、玩具、節慶擺飾、人偶、燈、地毯、小床）最多同時擺 2 個，擺好可以用「🪑 佈置小窩」拖到喜歡的位置</div><div class="shop">${homes.map(k => festHead(shop, homes, k) + (() => { const it = shop[k], own = owned.indexOf(k) >= 0, on = Array.isArray(hm[it.slot]) ? hm[it.slot].indexOf(k) >= 0 : hm[it.slot] === k; if ((it.minLv || 1) > (P.homeLevel || 1)) return lockItem(homeIcon(k), it.name, it.minLv, P, '要有一隻升到這級'); return `<div class="item ${on ? 'wear' : ''}"><div class="ic">${homeIcon(k)}</div>${it.fest ? `<div class="festtag">${FEST_TAG[it.fest]}</div>` : ''}<div class="nm">${it.name}</div><div class="sm2">${{ wall: '牆面', window: '窗戶', lamp: '燈飾', rug: '地毯', plant: '植物', toy: '玩具', bed: '小床', deco: '牆上裝飾', fest: '節慶擺飾', figure: '節慶人偶' }[it.slot]}</div>
     ${own ? `<button class="${on ? 'ghost2' : ''}" onclick="petCall('petWear',${on ? `{slot:'${it.slot}',item:'',remove:'${k}'}` : `{item:'${k}'}`},{say:'${on ? '收起來～' : '好漂亮！'}'})">${on ? '收起來' : '擺上'}</button>` : `<button ${P.coins < it.price ? 'disabled' : ''} onclick="petCall('petBuy',{item:'${k}'},{say:'新家具耶！'})">${coinIco()} ${it.price} 購買</button>`}</div>`; })()).join('')}</div>` : ''}
   ${tab === 'adopt' ? adoptBox(P, false) : ''}
 
@@ -2819,6 +3013,7 @@ function nfGo(g) {
   if (g === 'team') return tab('team');
   if (g === 'me') return tab('me');
   if (g === 'notice') return openNotices();
+  if (p[0] === 'cert') return openCert(p[1]);
 }
 function vNotifs() {
   const L = (S.nf && S.nf.list) || [], seen = S.nfSeenBefore || '';
