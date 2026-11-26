@@ -266,6 +266,17 @@ html.petmode .trow .cmeta{color:#5B6585 !important;text-shadow:none !important}
 .mx.gb th.tt,.mx.gb td.tt{background:#14204E !important;color:#FFE7A8 !important;position:-webkit-sticky;position:sticky;right:0;min-width:46px}
 .mx.gb tr.tot td{background:#F6F1FA;font-weight:700;color:#22315E}
 .mx.gb td,.mx.gb th{color:#22315E}
+html,body{height:100%;overflow:hidden}
+#scr{position:fixed;top:0;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.bell{position:relative;border:0;background:rgba(255,255,255,.16);width:40px;height:40px;border-radius:50%;font-size:19px;cursor:pointer;flex:0 0 auto}
+.bell i{position:absolute;top:-4px;right:-6px;background:#E0607A;color:#fff;font:700 11px/18px -apple-system,sans-serif;min-width:18px;height:18px;border-radius:9px;padding:0 4px;font-style:normal}
+.nfbadge{background:#E0607A;color:#fff;border-radius:9px;padding:0 7px;font-size:12px;vertical-align:middle}
+.nfday{margin:14px 2px 6px;font-size:13px;color:#FFE7A8;letter-spacing:.05em}
+.nfrow{display:flex;gap:12px;align-items:center;width:100%;text-align:left;border:0;background:rgba(255,255,255,.92);color:#22315E;border-radius:14px;padding:11px 14px;margin-bottom:7px;font:inherit;cursor:pointer}
+.nfrow b{color:#22315E;font-size:15px;line-height:1.35;display:block}.nfrow .cmeta{color:#6B7899 !important;font-size:13px}
+.nfrow.new{box-shadow:inset 4px 0 0 #E0607A}
+.nfi{font-size:24px;width:32px;text-align:center;flex:0 0 auto}
+.nfc{font-weight:800;color:#B8862E;background:#FFF4D6;border-radius:99px;padding:3px 10px;font-size:14px;flex:0 0 auto}.nfc.neg{color:#B0405A;background:#FBE3E8}
 </style>
 <style id="pinkTheme">
 :root{--bg:#FFE8F4;--bg2:#FFF6FA;--card:rgba(255,255,255,.72);--line:#F2C6D7;--gold:#C8748A;--gold2:#E2A2B6;--ink:#2C2226;--mute:#8A6B78;--pend:#5B84D6;--revise:#E0883A;--late:#D65A6A;--serif:"Cormorant Garamond","Noto Serif TC",Georgia,serif}
@@ -905,7 +916,7 @@ html.petmode .kindpick button.on::before{content:"✓ "}
 </head>
 <body>
 <script>if (window.parent !== window) document.documentElement.className = 'embed';</script>
-<div id="app"></div>
+<div id="scr"><div id="app"></div></div>
 <nav class="nav" id="nav" style="display:none"></nav>
 <div id="busy"><div id="busyText">處理中…</div></div>
 <div id="toast"></div>
@@ -999,7 +1010,7 @@ async function run(fn, text) {
 function go(v, p, reset) {
   if (reset) S.hist = []; else S.hist.push({ v: S.v, p: S.p });
   S.v = v; S.p = p || {};
-  render(); window.scrollTo(0, 0);
+  render(); SCR().scrollTop = 0;
 }
 function back() {
   const h = S.hist.pop();
@@ -1007,7 +1018,7 @@ function back() {
   S.v = h.v; S.p = h.p; refreshAfterBack();
 }
 async function refreshAfterBack() {
-  render(); window.scrollTo(0, 0);
+  render(); SCR().scrollTop = 0;
   const v = S.v, id = S.p && S.p.id, same = () => S.v === v && (!id || (S.p && S.p.id === id));
   if (v === 'home') bgFresh('me', () => api('me'), x => { S.me = x; afterMe(); }, same);
   if (v === 'admin') bgFresh('ad', () => api('adminCourses'), x => { S.ad = x; }, same);
@@ -1026,7 +1037,7 @@ function tab(v) {
 const backBar = (txt) => `<button class="back" onclick="back()">‹ ${esc(txt || '返回')}</button>`;
 
 function render() {
-  const views = { pet: vPet, care: vCare, team: vTeam, member: vMember, notices: vNotices, noticeEdit: vNoticeEdit, auth: vAuth, home: vHome, course: vCourse, task: vTask, admin: vAdmin, courseEdit: vCourseEdit, board: vBoard, review: vReview, taskEdit: vTaskEdit, me: vMe, users: vUsers, pinfo: vPinfo, tsubs: vTsubs, mysubs: vMySubs };
+  const views = { pet: vPet, care: vCare, team: vTeam, member: vMember, notices: vNotices, notifs: vNotifs, noticeEdit: vNoticeEdit, auth: vAuth, home: vHome, course: vCourse, task: vTask, admin: vAdmin, courseEdit: vCourseEdit, board: vBoard, review: vReview, taskEdit: vTaskEdit, me: vMe, users: vUsers, pinfo: vPinfo, tsubs: vTsubs, mysubs: vMySubs };
   document.documentElement.classList.add('petmode');
   $('app').innerHTML = (views[S.v] || vHome)();
   const nav = $('nav');
@@ -1042,7 +1053,8 @@ function render() {
 
 /* ---------- 載入 ---------- */
 const MEM = {};
-const APP_VER = '20261125-2355';
+function SCR() { return document.getElementById('scr') || document.scrollingElement; }
+const APP_VER = '20261126-1340';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1061,7 +1073,7 @@ document.addEventListener('focusin', e => { if (/INPUT|TEXTAREA|SELECT/.test(e.t
 document.addEventListener('focusout', () => setTimeout(() => { const a = document.activeElement; if (!a || !/INPUT|TEXTAREA|SELECT/.test(a.tagName)) document.body.classList.remove('kb'); }, 50));
 function typing() { const a = document.activeElement; return !!(a && $('app').contains(a) && /INPUT|TEXTAREA|SELECT/.test(a.tagName)); }
 function bgFresh(key, fetcher, apply, still) {
-  fetcher().then(fr => { const old = MEM[key]; MEM[key] = fr; if (JSON.stringify(old) === JSON.stringify(fr)) return; apply(fr); if (still() && !typing() && !document.querySelector('.sysmodal')) { const y = window.pageYOffset; render(); window.scrollTo(0, y); } }).catch(() => {});
+  fetcher().then(fr => { const old = MEM[key]; MEM[key] = fr; if (JSON.stringify(old) === JSON.stringify(fr)) return; apply(fr); if (still() && !typing() && !document.querySelector('.sysmodal')) { const y = SCR().scrollTop; render(); SCR().scrollTop = y; } }).catch(() => {});
 }
 function saveBootCache() { try { if (S.me) store.set('dct_cache_me', JSON.stringify(Object.assign({}, S.me, { __t: S.token }))); if (S.pet) store.set('dct_cache_pet', JSON.stringify(S.pet)); } catch (e) {} }
 function poll() {
@@ -1121,7 +1133,7 @@ async function boot() {
     const saveC = () => { try { store.set('dct_cache_me', JSON.stringify(Object.assign({}, S.me, { __t: S.token }))); if (S.pet) store.set('dct_cache_pet', JSON.stringify(S.pet)); } catch (e) {} };
     if (fast || cm) {
       if (!fast) { S.me = MEM.me = cm; S.pet = cp; }
-      (async () => { try { const [m, p] = await Promise.all([pMe, pPet]); S.me = MEM.me = m; setTimeout(bonusPop, 300); if (p) S.pet = p; saveC(); if (!typing() && !document.querySelector('.sysmodal') && ['home', 'me', 'pet'].indexOf(S.v) >= 0) { const y = window.pageYOffset; render(); window.scrollTo(0, y); } downReqPop(); todoPop(); bonusPop(); if (pushState() !== 'off') pushInit(); } catch (e) {} })();
+      (async () => { try { const [m, p] = await Promise.all([pMe, pPet]); S.me = MEM.me = m; setTimeout(bonusPop, 300); if (p) S.pet = p; saveC(); if (!typing() && !document.querySelector('.sysmodal') && ['home', 'me', 'pet'].indexOf(S.v) >= 0) { const y = SCR().scrollTop; render(); SCR().scrollTop = y; } downReqPop(); todoPop(); bonusPop(); if (pushState() !== 'off') pushInit(); } catch (e) {} })();
     } else {
       const [m, p] = await Promise.all([pMe, pPet]); S.me = MEM.me = m; setTimeout(bonusPop, 300); if (p) S.pet = p; saveC();
       downReqPop(); todoPop(); bonusPop(); if (pushState() !== 'off') pushInit();
@@ -1206,7 +1218,7 @@ async function doAuth(e) {
 /* ---------- 首頁 ---------- */
 function vHome() {
   const m = S.me, act = m.courses.filter(c => !ended(c)), past = m.courses.filter(ended);
-  return `<header class="top"><div><div class="hi">嗨，${esc(FN(m.user))}</div><h1 class="title">我的學習護照</h1></div><button class="btn sm" onclick="openNotices()">📢 公告</button></header>
+  return `<header class="top"><div><div class="hi">嗨，${esc(FN(m.user))}</div><h1 class="title">我的學習護照</h1></div><div class="row" style="gap:8px;flex-wrap:nowrap"><button class="bell" onclick="openNotifs()" aria-label="系統通知">🔔${nfNew() ? `<i>${nfNew() > 99 ? '99+' : nfNew()}</i>` : ''}</button><button class="btn sm" onclick="openNotices()">📢 公告</button></div></header>
   ${m.unreadNotices ? `<button class="notice-bar" onclick="openNotices()">📢 你有 ${m.unreadNotices} 則新公告，點我查看</button>` : ''}
   ${todoHTML()}
   ${petCard()}
@@ -1229,7 +1241,7 @@ function bonusPop() {
   const nw = L.filter(b => seen.indexOf(b.id) < 0); if (!nw.length) return;
   try { localStorage.setItem('dct_bonus_seen', JSON.stringify(seen.concat(nw.map(b => b.id)).slice(-200))); } catch (e) {}
   const tot = nw.reduce((a, b) => a + b.points, 0);
-  setTimeout(() => sysPop({ title: tot >= 0 ? `🌟 老師幫你加分了！+${tot}` : `📝 分數調整 ${tot}`, body: nw.map(b => `${b.points > 0 ? '+' : ''}${b.points}｜${b.courseTitle}${b.reason ? '・' + b.reason : ''}${b.byName ? '（' + b.byName + '）' : ''}`).join('\n') + (tot > 0 ? `\n🪙 金幣也一起 +${tot}，快去餵星寵吧！` : ''), btn: '太開心了' }), 2600);
+  setTimeout(() => sysPop({ title: tot >= 0 ? `🌟 額外加分 +${tot}・🪙 金幣 +${tot}` : `📝 分數調整 ${tot}・🪙 金幣 ${tot}`, body: nw.map(b => `${b.points > 0 ? '+' : ''}${b.points}｜${b.courseTitle}${b.reason ? '・' + b.reason : ''}${b.byName ? '（' + b.byName + '）' : ''}`).join('\n') + (tot > 0 ? `\n🪙 金幣也一起 +${tot}，快去餵星寵吧！` : ''), btn: '太開心了' }), 2600);
 }
 function todoPop() {
   const T = (S.me && S.me.todo) || []; if (!T.length) return;
@@ -1472,7 +1484,7 @@ async function sendWork() {
     const k = cd.subs.findIndex(x => x.taskId === t.id); if (k >= 0) cd.subs[k] = sub; else cd.subs.push(sub);
     if (--BG_JOBS <= 0) bgBar('');
     toast('作業已送出 ✓'); loadPet();
-    if (S.cd === cd && (S.v === 'task' || S.v === 'course') && !typing() && !document.querySelector('.sysmodal')) { const y = window.pageYOffset; render(); window.scrollTo(0, y); }
+    if (S.cd === cd && (S.v === 'task' || S.v === 'course') && !typing() && !document.querySelector('.sysmodal')) { const y = SCR().scrollTop; render(); SCR().scrollTop = y; }
   } catch (e) {
     if (--BG_JOBS <= 0) bgBar('');
     const k = cd.subs.findIndex(x => x.taskId === t.id); if (old) cd.subs[k] = old; else if (k >= 0) cd.subs.splice(k, 1);
@@ -1573,7 +1585,7 @@ async function saveCourse() {
   if (S.p.id) back();
   else { await run(loadAdmin); S.hist = [{ v: 'admin', p: {} }]; openBoardReplace(c.id, 'tasks'); }
 }
-function openBoardReplace(id, t) { run(async () => { await loadBoard(id); S.v = 'board'; S.p = { id, tab: t || 'review', f: 'pending' }; render(); window.scrollTo(0, 0); }); }
+function openBoardReplace(id, t) { run(async () => { await loadBoard(id); S.v = 'board'; S.p = { id, tab: t || 'review', f: 'pending' }; render(); SCR().scrollTop = 0; }); }
 
 /* ---------- 班級看板 ---------- */
 function memberStats(bd) {
@@ -1876,13 +1888,13 @@ async function qSubmit() {
   const i = S.cd.subs.findIndex(x => x.taskId === t.id); if (i >= 0) S.cd.subs[i] = sub; else S.cd.subs.push(sub);
   if (rv.correct) {
     if (rv.full) t.choice.qs = rv.full;
-    delete S.qQ[t.id]; render(); window.scrollTo(0, 0);
+    delete S.qQ[t.id]; render(); SCR().scrollTop = 0;
     sysPop({ title: '💯 100 分！關卡完成', body: `🪙 金幣 +${rv.coin}\n${rv.tries === 1 ? '一次就全對，太厲害了 ✨' : `第 ${rv.tries} 次作答拿到 100 分 ✨`}`, btn: '收下獎勵' }); loadPet();
   } else {
     const wrong = rv.right.map((r, k) => r ? -1 : k).filter(k => k >= 0);
     wrong.forEach(k => { A[k] = ''; });
     S.qQ[t.id] = { list: wrong, step: 0, round: Q.round + 1, last: rv.score };
-    render(); window.scrollTo(0, 0);
+    render(); SCR().scrollTop = 0;
     sysPop({ warn: true, title: `這次 ${rv.score} 分`, body: `答對 ${rv.right.length - wrong.length} 題、答錯 ${wrong.length} 題\n答錯的題目會再出現一次，全部答對就過關！\n金幣一樣拿 ${rv.coin} 🪙`, btn: '🔁 再答一次錯的題目' });
   }
 }
@@ -2468,7 +2480,7 @@ async function petCall(action, data, fx) {
   if (cp && r.pets) { const np = r.pets.find(x => x.id === cp.id); if (np && np.level > cp.level) { const L = (r.levels || [])[np.level - 1] || {}, un = Object.keys(r.shop).filter(k => r.shop[k].minLv === np.level).map(k => r.shop[k].name).concat(Object.keys(r.themeLv || {}).filter(t => r.themeLv[t] === np.level).map(t => ROOM_TH[t][0] + '房間')); setTimeout(() => lvCard(np, L, un), fx && fx.eat ? 3800 : 300); } }
   if (r.newId) { S.petSel = r.newId; S.petTab = 'food'; }
   S.pet = r; S.petFx = fx || null; render();
-  if (fx && (fx.eat || r.newId)) { const rm = document.querySelector('.petstage'); if (rm) { const y = rm.getBoundingClientRect().top + window.pageYOffset - 70; if (y < window.pageYOffset) window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' }); } }
+  if (fx && (fx.eat || r.newId)) { const rm = document.querySelector('.petstage'); if (rm) { const y = rm.getBoundingClientRect().top + SCR().scrollTop - 70; if (y < SCR().scrollTop) SCR().scrollTo({ top: Math.max(0, y), behavior: 'smooth' }); } }
   clearTimeout(S.petFxT);
   if (fx) S.petFxT = setTimeout(() => { S.petFx = null; if (S.v === 'pet') render(); }, fx.eat ? 4600 : 2000);
 }
@@ -2550,7 +2562,7 @@ function tPick(inp, kind) {
   $('tFiles').innerHTML = tFileList();
 }
 function qdSync() { document.querySelectorAll('.qdq,.qda,.qdb,.qdn').forEach(el => { const q = S.qd[+el.dataset.i]; if (q) q[{ qdq: 'q', qda: 'a', qdb: 'b', qdn: 'note' }[el.className]] = el.value; }); if ($('qCoin')) S.qdCoin = $('qCoin').value; }
-function qdKeep(fn) { ['tTitle', 'tDue', 'tDesc', 'tLinks', 'tCoin'].forEach(id => { if ($(id)) S.tkeep = Object.assign(S.tkeep || {}, { [id]: $(id).value }); }); qdSync(); fn(); const y = window.pageYOffset; render(); Object.keys(S.tkeep || {}).forEach(id => { if ($(id)) $(id).value = S.tkeep[id]; }); S.tkeep = null; window.scrollTo(0, y); }
+function qdKeep(fn) { ['tTitle', 'tDue', 'tDesc', 'tLinks', 'tCoin'].forEach(id => { if ($(id)) S.tkeep = Object.assign(S.tkeep || {}, { [id]: $(id).value }); }); qdSync(); fn(); const y = SCR().scrollTop; render(); Object.keys(S.tkeep || {}).forEach(id => { if ($(id)) $(id).value = S.tkeep[id]; }); S.tkeep = null; SCR().scrollTop = y; }
 function qdAdd() { qdKeep(() => S.qd.push({ q: '', a: '', b: '', ans: 'a', note: '' })); }
 function qdDel(i) { qdKeep(() => S.qd.splice(i, 1)); }
 function qdAns(i, k) { qdKeep(() => { S.qd[i].ans = k; }); }
@@ -2576,7 +2588,7 @@ async function saveTask() {
     busyText('儲存中…');
     await api('saveTask', data); await loadBoard(S.bd.course.id); S.tdraft = null; S.qd = null; return true;
   }, '準備中…');
-  if (ok) { toast('已儲存'); S.hist.pop(); S.v = 'board'; S.p = { id: S.bd.course.id, tab: 'tasks', f: 'pending' }; render(); window.scrollTo(0, 0); }
+  if (ok) { toast('已儲存'); S.hist.pop(); S.v = 'board'; S.p = { id: S.bd.course.id, tab: 'tasks', f: 'pending' }; render(); SCR().scrollTop = 0; }
 }
 async function deleteTask() {
   if (!confirm('刪除後，這個任務的作業也不會再顯示。確定刪除？')) return;
@@ -2588,7 +2600,7 @@ async function deleteTask() {
 function openReview(id) {
   const s = S.bd.subs.find(x => x.id === id);
   S.rv = { status: s.status === 'pending' ? '' : s.status, stars: Number(s.stars) || 0 };
-  if (S.v === 'review') { S.p = { subId: id }; render(); window.scrollTo(0, 0); }
+  if (S.v === 'review') { S.p = { subId: id }; render(); SCR().scrollTop = 0; }
   else go('review', { subId: id });
 }
 function fillReply(tpl, s) { const m = S.bd.members.find(x => x.id === s.userId) || {}, t = taskOf(s.taskId) || {}; return String(tpl || '').replace(/\{名字\}/g, FN(m)).replace(/\{任務\}/g, t.title || ''); }
@@ -2634,6 +2646,7 @@ function vMe() {
   <div class="panel" style="text-align:center"><div style="display:inline-block;cursor:pointer" onclick="pickAvatar()">${avatarHtml(u, 96)}</div>
     <div class="row" style="justify-content:center;gap:8px;margin-top:10px"><button class="btn sm gold" onclick="pickAvatar()">📷 ${u.avatar ? '更換頭貼' : '設定頭貼'}</button></div>
     <div class="hint">上家和老師批改作業時都看得到</div><div class="cmeta" style="margin-top:6px;opacity:.6">版本 ${APP_VER}</div></div>
+  <button class="panel mysubsbtn" onclick="openNotifs()"><span>🔔</span><div class="grow"><b>系統通知${nfNew() ? ` <span class="nfbadge">${nfNew()}</span>` : ''}</b><div class="cmeta">金幣、任務、課程、團隊的所有紀錄</div></div><span class="cmeta">›</span></button>
   <button class="panel mysubsbtn" onclick="openMySubs()"><span>📂</span><div class="grow"><b>我交過的作業</b><div class="cmeta">所有照片、影片、老師回覆都在這裡，隨時可以點開看</div></div><span class="cmeta">›</span></button>
   <div class="panel"><label class="f" style="margin-top:0">LINE 名字</label><input id="pName" value="${esc(u.name)}" placeholder="跟你 LINE 上顯示的名字一樣">
   <label class="f">等級</label><select id="pLv">${['', '實習', '三級零售', '三級輔導', '二級輔導', '一級輔導', '皇家輔導'].map(l => `<option value="${l}" ${(u.level || moneyProfile().level) === l ? 'selected' : ''}>${l || '請選擇等級'}</option>`).join('')}</select>
@@ -2733,6 +2746,32 @@ async function resetPw(id) {
 }
 
 /* ---------- 公告 ---------- */
+/* ---------- 🔔 系統通知 ---------- */
+function nfSeen() { try { return localStorage.getItem('dct_nf_seen_' + (S.me && S.me.user.id)) || ''; } catch (e) { return ''; } }
+function nfNew() { const T = (S.me && S.me.nfTimes) || [], s = nfSeen(); return s ? T.filter(t => t > s).length : Math.min(T.length, 9); }
+function openNotifs() {
+  const done = () => { try { const top = ((S.nf && S.nf.list[0]) || {}).t; if (top) localStorage.setItem('dct_nf_seen_' + S.me.user.id, top); } catch (e) {} };
+  if (MEM.notifs) { S.nf = MEM.notifs; S.nfSeenBefore = nfSeen(); go('notifs'); done(); bgFresh('notifs', () => api('notifs'), x => { S.nf = x; done(); }, () => S.v === 'notifs'); return; }
+  run(async () => { S.nf = MEM.notifs = await api('notifs'); S.nfSeenBefore = nfSeen(); go('notifs'); done(); }, '載入中…');
+}
+function nfGo(g) {
+  if (!g) return; const p = g.split(':');
+  if (p[0] === 'c') return openCourse(p[1]);
+  if (p[0] === 't') { const k = 'cd_' + p[1]; if (MEM[k] || (S.cd && S.cd.course && S.cd.course.id === p[1])) { S.cd = MEM[k] || S.cd; return openTask(p[2]); } return run(async () => { await loadCourse(p[1]); go('course', { id: p[1] }); openTask(p[2]); }, '載入中…'); }
+  if (p[0] === 'r') return run(async () => { await loadBoard(p[1]); go('board', { id: p[1], tab: 'review', f: 'pending' }); if (S.bd.subs.find(x => x.id === p[2])) openReview(p[2]); }, '載入中…');
+  if (g === 'team') return tab('team');
+  if (g === 'me') return tab('me');
+  if (g === 'notice') return openNotices();
+}
+function vNotifs() {
+  const L = (S.nf && S.nf.list) || [], seen = S.nfSeenBefore || '';
+  const shown = L;
+  const coinSum = L.filter(x => x.coin).reduce((a, x) => a + Number(x.coin), 0);
+  let lastDay = '';
+  return `${backBar('我的課程')}<h1 class="title" style="margin-bottom:2px">🔔 系統通知</h1><div class="cmeta" style="margin-bottom:10px">最近 90 天的金幣、任務、課程、團隊紀錄・累積拿到 🪙 ${coinSum}</div>
+  ${shown.length ? shown.map(x => { const d = localDate(x.t), head = d !== lastDay ? `<div class="nfday">${d}</div>` : ''; lastDay = d;
+    return head + `<button class="nfrow ${seen && x.t > seen ? 'new' : ''}" ${x.go ? `onclick="nfGo('${x.go}')"` : ''}><span class="nfi">${x.i}</span><div class="grow"><b>${esc(x.h)}</b><div class="cmeta">${esc(x.b || '')}・${fmtT(x.t).split(' ').pop()}</div></div>${x.coin ? `<span class="nfc ${x.coin < 0 ? 'neg' : ''}">${x.coin > 0 ? '+' : ''}${x.coin}</span>` : ''}</button>`; }).join('') : '<div class="empty">還沒有通知</div>'}`;
+}
 function openNotices() {
   run(async () => {
     S.notices = await api('listNotices');
