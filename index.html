@@ -221,6 +221,7 @@ html.petmode .links a{display:block;background:rgba(255,255,255,.93);color:#3B5A
 .cropv img{position:absolute;left:0;top:0;max-width:none;transform-origin:0 0;pointer-events:none}
 .cropmask{position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 999px rgba(0,0,0,.45);border:2px solid #fff;pointer-events:none}
 .adchips{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;margin:-4px -18px 12px;padding:2px 18px 6px;scrollbar-width:none}.adchips::-webkit-scrollbar{display:none}
+.gask{display:flex;flex-direction:column;gap:10px;margin:4px 0 12px}.gask button{background:#F6E7B8 !important;color:#14204E !important;font-size:17px;display:flex;flex-direction:column;align-items:center;gap:2px}.lvgrid{display:grid;grid-template-columns:1fr 1fr}.gask button small{font-size:12px;font-weight:500;opacity:.75}html .sysbox button.gask-later,html.petmode .sysbox button.gask-later{background:transparent !important;color:#E9DBF7 !important;border:1px solid rgba(255,255,255,.4) !important;font-weight:500}
 .adchips button{flex:0 0 auto;border:0;border-radius:99px;padding:8px 16px;font-size:15px;background:rgba(255,255,255,.85);color:#22315E;white-space:nowrap}.adchips button.on{background:#E8C46A;color:#14204E;font-weight:700}
 .lvcard{position:relative;background:linear-gradient(170deg,#FFF8E6,#FFE3EE);border:3px solid #E8C46A;border-radius:24px;padding:22px 20px 18px;width:100%;max-width:340px;text-align:center;color:#5A1530;animation:lvpop .45s cubic-bezier(.2,1.4,.4,1);overflow:hidden}
 .lvtop{font:900 15px/1 -apple-system,sans-serif;letter-spacing:3px;color:#C8961E}
@@ -1091,7 +1092,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261126-2300';
+const APP_VER = '20261127-0010';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1258,6 +1259,7 @@ function vHome() {
   return `<header class="top"><div><div class="hi">嗨，${esc(FN(m.user))}</div><h1 class="title bxt">DCT <i>x</i> 大瑩家</h1></div><div class="row" style="gap:8px;flex-wrap:nowrap"><button class="bell" onclick="openNotifs()" aria-label="系統通知">🔔${nfNew() ? `<i>${nfNew() > 99 ? '99+' : nfNew()}</i>` : ''}</button><button class="btn sm" onclick="openNotices()">📢 公告</button></div></header>
   ${m.unreadNotices ? `<button class="notice-bar" onclick="openNotices()">📢 你有 ${m.unreadNotices} 則新公告，點我查看</button>` : ''}
   ${(m.leads || []).length ? `<h2 class="sec">👑 我帶的小組</h2>${m.leads.map(l => `<button class="qcard" onclick="openBoard('${l.courseId}')"><div class="q1"><b>${esc(l.title)}</b>${l.pending ? `<span class="st pending">待批改 ${l.pending}</span>` : ''}</div><div class="cmeta">${esc(l.groups.join('、'))}・組員 ${l.members} 人</div></button>`).join('')}` : ''}
+  ${homeSys()}
   ${todoHTML()}
   ${petCard()}
   <div class="join"><input id="joinCode" placeholder="輸入邀請碼加入課程" autocapitalize="characters" autocomplete="off"><button class="btn gold" onclick="joinByCode()">加入</button></div>
@@ -1307,12 +1309,23 @@ async function joinByCode() {
     const r = await api('joinCourse', { code });
     toast(r.admin ? `你已成為「${r.title}」的管理員 🖋` : r.status === 'pending' ? `已申請加入「${r.title}」，等待審核` : `已加入「${r.title}」🪙 金幣 +10`);
     await loadMe(); render();
+    if (r.courseId && r.status === 'active' && !r.admin) openCourse(r.courseId);
   });
+}
+function groupAsk() {
+  const d = S.cd; if (S.v !== 'course' || !d || !d.course || document.querySelector('.sysmodal')) return;
+  const c = d.course; S.gAsk = S.gAsk || {};
+  if (c.groupSelf !== '1' || !(d.groups || []).length || d.myGroup || c.archived === '1' || S.gAsk[c.id]) return;
+  S.gAsk[c.id] = 1;
+  const el = document.createElement('div'); el.className = 'sysmodal gaskm';
+  el.innerHTML = `<div class="sysbox"><div class="ding">叮！【系統提示】</div><h3>👥 選擇你的組別</h3><p style="text-align:center">「${esc(c.title)}」有分組，請選擇你的組別</p><div class="gask">${d.groups.map(g => `<button data-g="${esc(g.id)}">${esc(g.name)}${g.leaderName ? '<small>組長 ' + esc(g.leaderName) + '</small>' : ''}</button>`).join('')}</div><button class="gask-later">等一下再選</button></div>`;
+  el.onclick = e => { const b = e.target.closest('button'); if (!b) return; if (b.dataset.g) { setMemberGroup(S.me.user.id, b.dataset.g, 1); } el.remove(); };
+  document.body.appendChild(el);
 }
 function openCourse(id) {
   const k = 'cd_' + id;
-  if (MEM[k]) { S.cd = MEM[k]; go('course', { id }); bgFresh(k, () => api('getCourse', { courseId: id }), v => { if (S.cd && S.cd.course && S.cd.course.id === id) S.cd = v; }, () => S.v === 'course' && S.p.id === id); return; }
-  run(async () => { await loadCourse(id); go('course', { id }); }, '載入中…');
+  if (MEM[k]) { S.cd = MEM[k]; go('course', { id }); setTimeout(groupAsk, 500); bgFresh(k, () => api('getCourse', { courseId: id }), v => { if (S.cd && S.cd.course && S.cd.course.id === id) S.cd = v; }, () => S.v === 'course' && S.p.id === id); return; }
+  run(async () => { await loadCourse(id); go('course', { id }); setTimeout(groupAsk, 400); }, '載入中…');
 }
 
 /* ---------- 課程（夥伴） ---------- */
@@ -1329,7 +1342,6 @@ function vCourse() {
     if (my) return `<div class="mygroup">👥 你的組別：<b>${esc(my.name)}</b>${my.leaderName ? `・組長 ${esc(my.leaderName)}` : ''}${(d.myLeads || []).indexOf(my.id) >= 0 ? ' 👑' : ''}${c.groupSelf === '1' ? `<div class="adchips">${d.groups.map(g => `<button class="${g.id === d.myGroup ? 'on' : ''}" onclick="setMemberGroup(S.me.user.id,'${g.id}',1)">${esc(g.name)}</button>`).join('')}</div>` : ''}</div>`;
     return c.groupSelf === '1' ? `<div class="mygroup">👥 <b>請選擇你的組別</b><div class="adchips">${d.groups.map(g => `<button onclick="setMemberGroup(S.me.user.id,'${g.id}',1)">${esc(g.name)}${g.leaderName ? '・' + esc(g.leaderName) : ''}</button>`).join('')}</div></div>` : `<div class="mygroup cmeta">👥 老師還沒幫你分組</div>`; })() : ''}
   ${(d.bonus || []).length ? `<div class="bonusme">🌟 額外加分 <b>${(d.bonus.reduce((a, b) => a + (Number(b.points) || 0), 0) > 0 ? '+' : '') + d.bonus.reduce((a, b) => a + (Number(b.points) || 0), 0)}</b>${d.bonus.slice(0, 3).map(b => `<div class="cmeta">${Number(b.points) > 0 ? '+' : ''}${b.points}｜${esc(b.reason || '老師加分')}・${esc(b.byName || '')}</div>`).join('')}</div>` : ''}
-  ${sysPanel(d)}
   <div class="legend"><span class="l1">已通過</span><span class="l2">待批改</span><span class="l3">需修改</span><span class="l4">未交</span></div>
   ${d.tasks.length ? `<div class="stamps">${d.tasks.map((t, i) => {
     const s = subOf(t.id), st = stampState(t, s);
@@ -2068,6 +2080,16 @@ function taskXp(t, s) {
   if (!s) return 0;
   if (t.kind === 'choice') return s.status === 'pass' ? 50 : 0;
   return 10 + (s.status === 'pass' ? 30 : 0);
+}
+function homeSys() {
+  const cs = ((S.me && S.me.courses) || []).filter(c => c.enroll !== 'pending'); if (!cs.length) return '';
+  const xp = cs.reduce((a, c) => a + (c.xp != null ? Number(c.xp) || 0 : (Number(c.submitted) || 0) * 10 + (Number(c.passed) || 0) * 30), 0);
+  const lv = Math.floor(xp / 100) + 1, into = xp % 100, title = LV_TITLES[Math.min(lv - 1, LV_TITLES.length - 1)];
+  const passed = cs.reduce((a, c) => a + (Number(c.passed) || 0), 0);
+  return `<div class="sysp"><div class="tag">【 經營者系統 】</div>
+  <div class="lv"><b>Lv.${lv}</b><span>${title}</span></div>
+  <div class="xpbar"><i style="width:${into}%"></i></div>
+  <div class="meta">經驗值 ${xp}　距離下一級還差 ${100 - into}｜通過任務 ${passed}｜參加課程 ${cs.length}</div></div>`;
 }
 function sysPanel(d) {
   const xp = d.tasks.reduce((a, t) => a + taskXp(t, d.subs.find(s => s.taskId === t.id)), 0);
