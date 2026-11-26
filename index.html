@@ -313,6 +313,7 @@ html,body{height:100%;overflow:hidden}
 #fbPanel.flash{animation:fbflash 1.6s ease 2}@keyframes fbflash{0%,100%{box-shadow:0 0 0 0 rgba(232,196,106,0)}50%{box-shadow:0 0 0 6px rgba(232,196,106,.9)}}
 .selbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:rgba(255,255,255,.95);color:#22315E;border-radius:14px;padding:8px 12px;margin-bottom:10px;position:sticky;top:6px;z-index:5;box-shadow:0 4px 14px rgba(10,15,40,.15)}.selbar label{display:flex;gap:6px;align-items:center;font-weight:700}.selbar .cmeta{flex:1;color:#6B7899 !important;text-shadow:none !important}
 .selck{width:22px;height:22px;flex:0 0 22px;accent-color:#C8961E;margin:0 4px 0 0}.selcard{display:flex;gap:10px;align-items:flex-start;cursor:pointer}.selcard.on{outline:3px solid #E8C46A}
+.bxt{letter-spacing:.08em;word-spacing:.05em}.bxt i{font-style:normal;font-weight:400;opacity:.75;font-size:.8em;margin:0 .05em}
 </style>
 <style id="pinkTheme">
 :root{--bg:#FFE8F4;--bg2:#FFF6FA;--card:rgba(255,255,255,.72);--line:#F2C6D7;--gold:#C8748A;--gold2:#E2A2B6;--ink:#2C2226;--mute:#8A6B78;--pend:#5B84D6;--revise:#E0883A;--late:#D65A6A;--serif:"Cormorant Garamond","Noto Serif TC",Georgia,serif}
@@ -1090,7 +1091,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261126-2200';
+const APP_VER = '20261126-2300';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1202,7 +1203,7 @@ async function joinPendingCode() {
 
 /* ---------- 設定畫面 ---------- */
 function vSetup() {
-  return `<div class="auth"><div class="brand"><div class="seal">DCT</div><h1>DCTx大瑩家</h1><p>還差一步就能開始使用</p></div>
+  return `<div class="auth"><div class="brand"><div class="seal">DCT</div><h1 class="bxt">DCT <i>x</i> 大瑩家</h1><p>還差一步就能開始使用</p></div>
   <div class="panel"><h3>請先設定後台網址</h3><p class="cmeta">打開 index.html，找到最上面的 API_URL，把 Apps Script 部署後的網址貼進去，再上傳到 GitHub。</p></div></div>`;
 }
 
@@ -1210,7 +1211,7 @@ function vSetup() {
 function vAuth() {
   const reg = S.authMode === 'reg', code = store.get('dct_code') || '';
   return `<div class="auth">
-  <div class="brand"><div class="seal">DCT</div><h1>DCTx大瑩家</h1><p>每一次作業，都是一枚印章</p></div>
+  <div class="brand"><div class="seal">DCT</div><h1 class="bxt">DCT <i>x</i> 大瑩家</h1><p>每一次作業，都是一枚印章</p></div>
   <div class="seg"><button class="${reg ? '' : 'on'}" onclick="S.authMode='login';render()">登入</button><button class="${reg ? 'on' : ''}" onclick="S.authMode='reg';render()">註冊</button></div>
   <form onsubmit="doAuth(event)">
     <label class="f">手機號碼</label><input id="aPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="0912345678">
@@ -1254,7 +1255,7 @@ async function doAuth(e) {
 /* ---------- 首頁 ---------- */
 function vHome() {
   const m = S.me, act = m.courses.filter(c => !ended(c)), past = m.courses.filter(ended);
-  return `<header class="top"><div><div class="hi">嗨，${esc(FN(m.user))}</div><h1 class="title">DCTx大瑩家</h1></div><div class="row" style="gap:8px;flex-wrap:nowrap"><button class="bell" onclick="openNotifs()" aria-label="系統通知">🔔${nfNew() ? `<i>${nfNew() > 99 ? '99+' : nfNew()}</i>` : ''}</button><button class="btn sm" onclick="openNotices()">📢 公告</button></div></header>
+  return `<header class="top"><div><div class="hi">嗨，${esc(FN(m.user))}</div><h1 class="title bxt">DCT <i>x</i> 大瑩家</h1></div><div class="row" style="gap:8px;flex-wrap:nowrap"><button class="bell" onclick="openNotifs()" aria-label="系統通知">🔔${nfNew() ? `<i>${nfNew() > 99 ? '99+' : nfNew()}</i>` : ''}</button><button class="btn sm" onclick="openNotices()">📢 公告</button></div></header>
   ${m.unreadNotices ? `<button class="notice-bar" onclick="openNotices()">📢 你有 ${m.unreadNotices} 則新公告，點我查看</button>` : ''}
   ${(m.leads || []).length ? `<h2 class="sec">👑 我帶的小組</h2>${m.leads.map(l => `<button class="qcard" onclick="openBoard('${l.courseId}')"><div class="q1"><b>${esc(l.title)}</b>${l.pending ? `<span class="st pending">待批改 ${l.pending}</span>` : ''}</div><div class="cmeta">${esc(l.groups.join('、'))}・組員 ${l.members} 人</div></button>`).join('')}` : ''}
   ${todoHTML()}
@@ -2382,7 +2383,7 @@ const POSES = [[1, 'jump', '跳跳'], [2, 'sway', '搖擺'], [3, 'tilt', '歪頭
 function splashShow() {
   if ($('splash')) return;
   const d = document.createElement('div'); d.id = 'splash';
-  d.innerHTML = `<div class="spbox"><div class="splogo">✦ DCT 星寵契約 ✦</div><div class="sppets">${['cat', 'dog', 'capybara', 'rabbit', 'duck'].map((k, i) => `<span style="animation-delay:${i * .15}s">${petFigure({ kind: k, full: 80 }, 56)}</span>`).join('')}</div><div class="spbar"><i id="spfill"></i></div><div class="sptxt" id="sptxt">星寵連線中…</div></div>`;
+  d.innerHTML = `<div class="spbox"><div class="splogo">✦ DCT x 大瑩家星寵契約 ✦</div><div class="sppets">${['cat', 'dog', 'capybara', 'rabbit', 'duck'].map((k, i) => `<span style="animation-delay:${i * .15}s">${petFigure({ kind: k, full: 80 }, 56)}</span>`).join('')}</div><div class="spbar"><i id="spfill"></i></div><div class="sptxt" id="sptxt">星寵連線中…</div></div>`;
   document.body.appendChild(d); S.spT = Date.now();
   setTimeout(() => { const f = $('spfill'); if (f) { f.style.transition = 'width .6s ease-out'; f.style.width = '96%'; } }, 20);
 }
@@ -2409,7 +2410,7 @@ function petZoom() {
   const p = curPet(); if (!p) return;
   const d = document.createElement('div'); d.className = 'pzfull'; d.id = 'pzoom';
   d.innerHTML = `<div class="pzroom">${roomSVG((S.pet && S.pet.home) || {})}${S.pet && S.pet.dirty ? dirtHtml() : ''}<div class="pzpet pzstage">${petFigure(p, 300, { poke: true })}<span class="tag main ${p.full < 30 ? 'low' : ''}">${esc(p.name)}</span></div>
-    <button class="pzx" onclick="document.getElementById('pzoom').remove()" aria-label="關閉">✕</button><div class="pzlogo">✦ DCT 星寵契約 ✦</div></div>
+    <button class="pzx" onclick="document.getElementById('pzoom').remove()" aria-label="關閉">✕</button><div class="pzlogo">✦ DCT x 大瑩家星寵契約 ✦</div></div>
   <div class="pzpanel"><div class="petlv" style="margin:0"><span class="lvb lv${Math.min(8, p.level)}">Lv.${p.level} ${esc(p.levelName)}</span><span class="days">已陪伴 <b>${p.days}</b> 天</span></div>
   ${poseBar(p, '#pzoom .pzstage .petwrap')}
   <div class="row" style="margin-top:10px;gap:8px"><button class="btn ghost" style="flex:1" onclick="document.getElementById('pzoom').remove()">‹ 返回</button><button class="btn gold" style="flex:2" onclick="petSnap(true)">📸 截圖這一隻</button></div></div>`;
@@ -2449,7 +2450,7 @@ async function petSnap(single) {
     const W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
     const F = '"PingFang TC","Heiti TC","Noto Sans TC","Microsoft JhengHei",sans-serif';
     let gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#FFE1EE'); gr.addColorStop(1, '#FFF6EA'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
-    g.textAlign = 'center'; g.fillStyle = '#B0567A'; g.font = `800 42px ${F}`; g.fillText('✦ DCT 星寵契約 ✦', W / 2, 92);
+    g.textAlign = 'center'; g.fillStyle = '#B0567A'; g.font = `800 34px ${F}`; g.fillText('✦ DCT x 大瑩家星寵契約 ✦', W / 2, 92);
     const rr = (x, y, w, h, r) => { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); };
     const fx = 40, fy = 130, fw = 1000, fh = 736;
     gr = g.createLinearGradient(fx, fy, fx + fw, fy + fh); ['#F7E3A8', '#D9A84E', '#FFF1C9', '#C8923A', '#F2D58E'].forEach((s, i) => gr.addColorStop(i / 4, s));
@@ -2500,7 +2501,7 @@ function petGreet() {
   const hi = h < 11 ? '早安' : h < 14 ? '午安' : h < 18 ? '午後好' : '晚安';
   const who = FN(S.me && S.me.user);
   const m = document.createElement('div'); m.className = 'pzoom'; m.id = 'pgreet';
-  m.innerHTML = `<div class="pzbox greet"><div class="sysname">✦ DCT 星寵契約 ✦</div><div class="gbub">${hi}${who ? '，' + esc(who) : ''}！<br>${esc(PET_CHEER[Math.floor(Math.random() * PET_CHEER.length)])}</div>${petFigure(lead, 200)}<div class="pzname" style="font-size:20px">— ${esc(lead.name)}</div>${P.pets.length > 1 ? `<div class="cmeta" style="text-align:center">${P.pets.filter(x => x.id !== lead.id).map(x => esc(x.name)).join('、')} 也在等你喔</div>` : ''}<button class="btn gold block" style="margin-top:14px" onclick="document.getElementById('pgreet').remove()">一起加油！</button></div>`;
+  m.innerHTML = `<div class="pzbox greet"><div class="sysname">✦ DCT x 大瑩家星寵契約 ✦</div><div class="gbub">${hi}${who ? '，' + esc(who) : ''}！<br>${esc(PET_CHEER[Math.floor(Math.random() * PET_CHEER.length)])}</div>${petFigure(lead, 200)}<div class="pzname" style="font-size:20px">— ${esc(lead.name)}</div>${P.pets.length > 1 ? `<div class="cmeta" style="text-align:center">${P.pets.filter(x => x.id !== lead.id).map(x => esc(x.name)).join('、')} 也在等你喔</div>` : ''}<button class="btn gold block" style="margin-top:14px" onclick="document.getElementById('pgreet').remove()">一起加油！</button></div>`;
   document.body.appendChild(m);
   setTimeout(() => { const w = m.querySelector('.petwrap'); if (w) { w.classList.add('jump'); } }, 300);
 }
@@ -2777,13 +2778,13 @@ function adoptBox(P, first) {
 function vPet() {
   const P = S.pet;
   if (!P || !P.pets) { loadPet(); return backBar('我的課程') + '<div class="empty">載入中…</div>'; }
-  if (!P.pets.length) return `${backBar('我的課程')}<div class="sysname" style="margin-top:4px">✦ DCT 星寵契約 ✦</div><h1 class="title">締結你的第一隻星寵</h1><p class="cmeta">完成任務會得到金幣，用金幣買飼料、裝扮，還能領養更多夥伴。太久沒餵會餓肚子喔！</p>${adoptBox(P, true)}`;
+  if (!P.pets.length) return `${backBar('我的課程')}<div class="sysname" style="margin-top:4px">✦ DCT x 大瑩家星寵契約 ✦</div><h1 class="title">締結你的第一隻星寵</h1><p class="cmeta">完成任務會得到金幣，用金幣買飼料、裝扮，還能領養更多夥伴。太久沒餵會餓肚子喔！</p>${adoptBox(P, true)}`;
   const p = curPet(), shop = P.shop, w = p.wearing || {}, hm = P.home || {}, owned = P.owned || [], fx = S.petFx || {};
   const foods = shopSort(shop, Object.keys(shop).filter(k => shop[k].type === 'food')), wears = shopSort(shop, Object.keys(shop).filter(k => shop[k].type === 'wear')), homes = shopSort(shop, Object.keys(shop).filter(k => shop[k].type === 'home'));
   const tab = S.petTab || 'food', others = P.pets.filter(x => x.id !== p.id && ((P.home || {}).hide || []).indexOf(x.id) < 0).slice(0, 4);
   const SPOTS = [['5%', '12%'], ['74%', '12%'], ['17%', '28%'], ['62%', '28%']];
   return `${backBar('我的課程')}
-  <div class="panel petstage ${petMood(p.full)}"><div class="sysname">✦ DCT 星寵契約 ✦</div>${dirtyBanner(P)}${S.arrange ? `<div class="arrbar"><span>🪑 拖曳家具移動</span><div class="btns"><button class="sub" onclick="arrangeReset()">還原</button><button class="sub" onclick="arrangeCancel()">取消</button><button class="ok" onclick="arrangeSave()">完成</button></div></div>` : ''}<div class="roomframe"><div class="room${S.arrange ? ' arranging' : ''}">${roomSVG(S.arrange ? Object.assign({}, hm, { pos: S.arrPos || {} }) : hm)}${P.dirty ? dirtHtml() : ''}
+  <div class="panel petstage ${petMood(p.full)}"><div class="sysname">✦ DCT x 大瑩家星寵契約 ✦</div>${dirtyBanner(P)}${S.arrange ? `<div class="arrbar"><span>🪑 拖曳家具移動</span><div class="btns"><button class="sub" onclick="arrangeReset()">還原</button><button class="sub" onclick="arrangeCancel()">取消</button><button class="ok" onclick="arrangeSave()">完成</button></div></div>` : ''}<div class="roomframe"><div class="room${S.arrange ? ' arranging' : ''}">${roomSVG(S.arrange ? Object.assign({}, hm, { pos: S.arrPos || {} }) : hm)}${P.dirty ? dirtHtml() : ''}
     ${others.map((x, i) => `<div class="roomother ${x.full < 30 ? 'low' : ''}" style="left:${SPOTS[i][0]};bottom:${SPOTS[i][1]}" onclick="S.petSel='${x.id}';render()">${petFigure(x, 80)}<span class="tag">${esc(x.name)}</span></div>`).join('')}
     <div class="roompet">${petFigure(p, 190, { poke: true, eat: fx.eat, say: fx.say })}<span class="tag main ${p.full < 30 ? 'low' : ''}">${esc(p.name)}</span></div></div></div>
     <div class="ptool"><button onclick="petZoom()">🔍 放大看牠</button><button onclick="arrangeStart()">🪑 佈置小窩</button><button onclick="petSnap(false)">📸 截圖</button></div>${poseBar(p)}
