@@ -1092,7 +1092,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261127-0040';
+const APP_VER = '20261127-0110';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1335,7 +1335,7 @@ function vCourse() {
   const subOf = id => d.subs.find(s => s.taskId === id);
   return `${backBar('我的課程')}
   <div class="chead"><span class="chip">${TYPE[c.type] || ''}</span><h1 class="title">${esc(c.title)}</h1><div class="cmeta">${dateRange(c)}</div>${c.desc ? `<p class="desc">${nl(c.desc)}</p>` : ''}</div>
-  ${c.archived === '1' ? `<div class="wrapbar" style="border-color:#B9C2D6;background:#EEF1F8"><div style="font-size:26px">🔒</div><div class="grow"><b>這堂課已經封存</b><div class="cmeta">不能再交作業了${c.wrap ? (c.feedbackOn === '1' && !d.feedback ? '，封存前沒有填回饋，所以領不到獎狀' : '') : ''}</div></div>${c.wrap && !(c.feedbackOn === '1' && !d.feedback) ? `<button class="btn sm gold" onclick="openCert('${c.id}')">🏅 看獎狀</button>` : ''}</div>` : ''}
+  ${c.archived === '1' ? `<div class="wrapbar" style="border-color:#B9C2D6;background:#EEF1F8"><div style="font-size:26px">🔒</div><div class="grow"><b>這堂課已經封存</b><div class="cmeta">不能再交作業了${c.wrap ? (c.feedbackOn === '1' && !d.feedback ? '，封存前沒有填回饋，所以領不到獎狀' : '') : ''}</div>${c.videoClean ? '<div class="cmeta">🧹 作業影片已在封存 30 天後清除，照片和文字都還在</div>' : c.archivedAt ? `<div class="cmeta">🎬 ${vcDay(c.archivedAt)} 會清除這堂課的作業影片，想留念請先下載</div>` : ''}</div>${c.wrap && !(c.feedbackOn === '1' && !d.feedback) ? `<button class="btn sm gold" onclick="openCert('${c.id}')">🏅 看獎狀</button>` : ''}</div>` : ''}
   ${c.archiveAt && c.archived !== '1' ? (() => { const left = Math.round((new Date(c.archiveAt) - new Date(today())) / 86400000); return `<div class="wrapbar" style="border-color:#F2B8C6"><div style="font-size:26px">⏰</div><div class="grow"><b>${left <= 0 ? '今天' : left + ' 天後'}封存（${c.archiveAt.slice(5).replace('-', '/')}）</b><div class="cmeta">封存後就不能交作業、領獎狀，把握時間喔！不用全部做完也能結業</div></div></div>`; })() : ''}
   ${c.wrap && c.archived !== '1' ? (() => { const fbNeed = c.feedbackOn === '1' && !d.feedback; return `<div class="wrapbar"><div style="font-size:30px">🎓</div><div class="grow"><b>課程結業了！</b><div class="cmeta">${fbNeed ? '填完最下面的「課程回饋」，就能領取你的獎狀 👇' : '你的獎狀已經準備好了'}</div></div>${fbNeed ? `<button class="btn sm gold" onclick="const p=$('fbPanel');if(p){p.scrollIntoView({behavior:'smooth',block:'start'});p.classList.add('flash')}">去填回饋</button>` : `<button class="btn sm gold" onclick="openCert('${c.id}')">🏅 看獎狀</button>`}</div>`; })() : ''}
   ${(d.groups || []).length ? (() => { const my = d.groups.find(g => g.id === d.myGroup);
@@ -1388,10 +1388,13 @@ function openTask(id) {
 function extraList(t) { return String(t.extraFields || '').split('\n').map(x => x.trim()).filter(Boolean); }
 function driveImg(id, w) { return `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w${w || 600}`; }
 function driveView(id) { return `https://drive.google.com/file/d/${encodeURIComponent(id)}/view`; }
-function mediaHtml(files) {
-  if (!files || !files.length) return '';
+function vcDay(a) { const p = String(a).split('-').map(Number), d = new Date(p[0], p[1] - 1, p[2] + 30); return (d.getMonth() + 1) + '/' + d.getDate(); }
+function mediaHtml(files0) {
+  if (!files0 || !files0.length) return '';
+  const files = files0.filter(f => !f.cleared), gone = files0.length - files.length;
+  if (!files.length) return `<div class="cmeta">🎬 ${gone} 支影片已在課程封存 30 天後清除</div>`;
   const k = MV.push(files) - 1;
-  return `<div class="media">${files.map((f, i) => `<button type="button" class="mvb" onclick="mvOpen(${k},${i})"><img src="${driveImg(f.id)}" loading="lazy" alt="">${f.type === 'video' ? '<span class="play">▶</span>' : ''}</button>`).join('')}</div>`;
+  return `${gone ? `<div class="cmeta">🎬 ${gone} 支影片已在課程封存 30 天後清除</div>` : ''}<div class="media">${files.map((f, i) => `<button type="button" class="mvb" onclick="mvOpen(${k},${i})"><img src="${driveImg(f.id)}" loading="lazy" alt="">${f.type === 'video' ? '<span class="play">▶</span>' : ''}</button>`).join('')}</div>`;
 }
 /* 作業照片／影片：在 App 裡直接看，可左右滑 */
 const MV = [];
@@ -1424,7 +1427,7 @@ function vMySubs() {
   const L = (S.ms && S.ms.subs) || [], f = S.msF || 'all';
   const shown = L.filter(x => f === 'all' || (f === 'media' ? (x.files || []).length : x.courseId === f));
   const courses = []; L.forEach(x => { if (courses.indexOf(x.courseId) < 0) courses.push(x.courseId); });
-  const allMedia = []; L.forEach(x => (x.files || []).forEach(m => allMedia.push(m)));
+  const allMedia = []; L.forEach(x => (x.files || []).forEach(m => { if (!m.cleared) allMedia.push(m); }));
   return `${backBar('我的')}<h1 class="title" style="margin-bottom:4px">📂 我交過的作業</h1><div class="cmeta" style="margin-bottom:10px">共 ${L.length} 份・照片影片 ${allMedia.length} 個，點開就能看</div>
   <div class="adchips"><button class="${f === 'all' ? 'on' : ''}" onclick="S.msF='all';render()">全部</button><button class="${f === 'media' ? 'on' : ''}" onclick="S.msF='media';render()">🖼 有照片影片</button>${courses.map(id => `<button class="${f === id ? 'on' : ''}" onclick="S.msF='${id}';render()">${esc((L.find(x => x.courseId === id) || {}).courseTitle || '課程')}</button>`).join('')}</div>
   ${f === 'media' && allMedia.length ? `<div class="mgrid">${(() => { const k = MV.push(allMedia) - 1; return allMedia.map((m, i) => `<button onclick="mvOpen(${k},${i})"><img src="${driveImg(m.id, 400)}" loading="lazy" alt="">${m.type === 'video' ? '<span class="play">▶</span>' : ''}</button>`).join(''); })()}</div>` : ''}
@@ -1462,7 +1465,7 @@ function vTask() {
       <div class="uploads">
         ${t.allowPhoto === '1' ? `<label>📷 加照片<input type="file" accept="image/*" multiple onchange="pickFiles(this,'image')"></label>` : ''}
         ${t.allowVideo === '1' ? `<label>🎬 加影片<input type="file" accept="video/*" onchange="pickFiles(this,'video')"></label>` : ''}
-      </div>${t.allowVideo === '1' ? '<div class="hint">影片限 1 分鐘內，太大的影片請改貼連結</div>' : ''}
+      </div>${t.allowVideo === '1' ? '<div class="hint">影片限 1 分鐘、80MB 以內，太大的影片請改貼連結<br>📌 課程封存 30 天後會自動清除作業影片，照片和文字會保留</div>' : ''}
       <div id="fileList">${fileListHtml()}</div>` : ''}
     <button class="btn gold block" onclick="sendWork()">${s ? '重新送出' : '送出作業'}</button>`
     : `<div class="empty">這份作業已通過，蓋章完成 ✓</div>`}`;
