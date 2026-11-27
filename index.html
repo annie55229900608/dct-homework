@@ -105,6 +105,7 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;margin:0;line-height:1.35}
 .bdtop{display:flex;justify-content:space-between;align-items:center;gap:8px}.bdact{display:flex;gap:6px;flex:none}
 .roster{background:rgba(255,255,255,.92);border-radius:18px;padding:12px 14px;margin:0 0 14px;color:#14204E}.roster summary{font-weight:700;font-size:16px;cursor:pointer}.roster .rg{margin-top:12px}.roster .rgh{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #E6E9F3;padding-bottom:4px}.roster .rgm{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.roster .rmem{display:flex;flex-direction:column;align-items:center;gap:3px;width:66px;background:none;border:0;padding:0;color:#14204E;font-size:12px}.roster .rmem span{max-width:66px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.roster .rgnone .rgh b{color:#C2334D}.roster .cmeta,.roster .hint{color:#5A6180;text-shadow:none}
 .roster .rlead{color:#B0405A !important;font-weight:800}
+.roster,.roster *{text-shadow:none !important}.roster .cmeta,.roster .hint,.roster .rgh span{color:#5A6180 !important}.roster b,.roster summary,.roster .rmem span:not(.rlead){color:#14204E !important}
 .item .unl{font-size:10px;font-weight:700;color:#1F8A55;margin:-2px 0 2px}
 .tact{display:flex;flex-direction:column;gap:6px;flex:none}.tact b{font-size:12px;font-weight:700;padding:5px 10px;border-radius:99px;background:#EEF1F8;color:#22315E;text-align:center}.tact b.del{background:#FCE8EC;color:#C2334D}
 .trow .tt div:first-child{font-weight:600}
@@ -1107,7 +1108,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261127-1250';
+const APP_VER = '20261127-1300';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1974,11 +1975,11 @@ async function reviewMany() {
 function rosterHTML(R, admin) {
   if (!R || !(R.groups || []).length) return '';
   const tot = R.groups.reduce((a, g) => a + g.members.length, 0) + R.none.length;
-  const chip = (m, g) => `<button class="rmem" ${admin ? `onclick="gPick('${m.id}')"` : 'tabindex="-1"'}>${avatarHtml(m, 42)}<span class="${g && g.leaderId === m.id ? 'rlead' : ''}">${g && g.leaderId === m.id ? '👑 ' : ''}${esc(m.name)}</span></button>`;
+  const chip = (m, g) => `<button class="rmem" ${admin ? `onclick="rosterTap('${m.id}')"` : 'tabindex="-1"'}>${avatarHtml(m, 42)}<span class="${g && g.leaderId === m.id ? 'rlead' : ''}">${g && g.leaderId === m.id ? '👑 ' : ''}${esc(m.name)}</span></button>`;
   return `<details class="roster" ${admin || S.rosterOpen ? 'open' : ''} ontoggle="S.rosterOpen=this.open"><summary>👥 分組名單・共 ${tot} 人${R.none.length ? `・未分組 ${R.none.length}` : ''}</summary>
   ${R.groups.map(g => `<div class="rg"><div class="rgh"><b>${esc(g.name)}</b><span class="cmeta">${g.leaderName ? '<b class="rlead">👑 組長 ' + esc(g.leaderName) + '</b>・' : ''}${g.members.length} 人</span></div><div class="rgm">${g.members.map(m => chip(m, g)).join('') || '<span class="cmeta">還沒有組員</span>'}</div></div>`).join('')}
   ${R.none.length ? `<div class="rg rgnone"><div class="rgh"><b>未分組</b><span class="cmeta">${R.none.length} 人</span></div><div class="rgm">${R.none.map(m => chip(m)).join('')}</div></div>` : ''}
-  ${admin ? '<div class="hint">點頭像可以直接幫她選組別</div>' : ''}</details>`;
+  ${admin ? '<div class="hint">點頭像可以幫她加分、更改組別</div>' : ''}</details>`;
 }
 function boardRoster() {
   const bd = S.bd, G = bd.groups || []; if (!G.length) return null;
@@ -1986,6 +1987,7 @@ function boardRoster() {
   const mk = m => ({ id: m.id, name: FN(m), avatar: m.avatar || '' });
   return { groups: G.map(g => ({ id: g.id, name: g.name, leaderId: g.leaderId || '', leaderName: nm(g.leaderId), members: act.filter(m => m.groupId === g.id).map(mk) })), none: act.filter(m => !m.groupId || !G.some(g => g.id === m.groupId)).map(mk) };
 }
+function rosterTap(uid) { if ((S.bd.members || []).some(x => x.id === uid)) memberPop(uid); else if (!S.bd.leaderOnly) gPick(uid); else bonusQuick(uid); }
 function gPick(uid) {
   const bd = S.bd, m = (bd.members || []).find(x => x.id === uid); if (!m) return;
   const el = document.createElement('div'); el.className = 'sysmodal';
@@ -2063,9 +2065,9 @@ function bClass() {
   const R = boardRoster(), g = S.p.g;
   if (R && g) { if (g === '__none') R.groups = []; else { R.groups = R.groups.filter(x => x.id === g); R.none = []; } }
   const gb = g && g !== '__none' ? `<button class="btn gold" onclick="groupBonusPop('${g}')">🎁 「${esc(gName(g))}」組別加分</button>` : '';
-  return `<div class="row" style="gap:8px;margin:0 0 12px;flex-wrap:wrap"><button class="btn gold" onclick="bonusQuick()">🌟 額外加分</button>${gb}</div>` + bPendTop() + rosterHTML(R, !S.bd.leaderOnly) + bClass0();
+  return `<div class="row" style="gap:8px;margin:0 0 12px;flex-wrap:wrap"><button class="btn gold" onclick="bonusQuick()">🌟 額外加分</button>${gb}</div>` + bPendTop() + rosterHTML(R, true) + bClass0();
 }
-function bonusQuick() {
+function bonusQuick(pre) {
   const bd = S.bd, act = (bd.allMembers || bd.members || []).filter(m => m.status === 'active').sort((a, b) => (gOK(b.id) ? 1 : 0) - (gOK(a.id) ? 1 : 0) || lvSort(a, b)), G = bd.groups || [];
   let mode = 'p';
   const el = document.createElement('div'); el.className = 'sysmodal';
@@ -2078,7 +2080,7 @@ function bonusQuick() {
     <input id="bqP" type="number" inputmode="numeric" placeholder="${mode === 'g' ? '總分（平分給組員）' : '分數，可輸入負數扣分'}" style="margin:6px 0"><input id="bqW" placeholder="原因（選填）" style="margin:0 0 10px">
     <button data-a="ok">確定加分</button><button data-a="x" class="gask-later" style="margin-top:8px">取消</button></div>`;
   };
-  draw(); document.body.appendChild(el);
+  draw(); document.body.appendChild(el); if (pre && el.querySelector('#bqU')) el.querySelector('#bqU').value = pre;
   el.onclick = async e => {
     const b = e.target.closest('button'); if (!b) { if (e.target === el) el.remove(); return; }
     if (b.dataset.m) { mode = b.dataset.m; draw(); return; }
