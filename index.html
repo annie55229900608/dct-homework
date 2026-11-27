@@ -1099,7 +1099,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261127-0240';
+const APP_VER = '20261127-0955';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1502,6 +1502,7 @@ function upStart(it, rer) {
   it.k = it.k || 'pv' + (++PV_N); it.st = 'up'; it.p = 0; if (rer) it.rer = rer;
   const tick = () => { if (it.rer) it.rer(); };
   it.promise = (async () => {
+    await new Promise(z => setTimeout(z, 120));
     try {
       const r = it.kind === 'image' ? await api('uploadFile', await compressImage(it.file)) : await upVideo(it.file, p => { it.p = p; tick(); });
       if (it.removed) { api('deleteUpload', { id: r.id }).catch(() => {}); return null; }
@@ -1539,7 +1540,7 @@ function videoDuration(file) {
     const done = d => { try { URL.revokeObjectURL(v.src); } catch (e) {} res(d); };
     v.onloadedmetadata = () => done(v.duration || 0); v.onerror = () => done(0);
     setTimeout(() => done(0), 5000);
-    v.src = URL.createObjectURL(file);
+    v.src = URL.createObjectURL(file); try { v.load(); } catch (e) {}
   });
 }
 async function pickFiles(inp, kind) {
@@ -1547,11 +1548,13 @@ async function pickFiles(inp, kind) {
   for (const f of list) {
     if (kind === 'video') {
       if (f.size > 80 * 1024 * 1024) { toast('影片超過 80MB，請剪短或改貼 IG 連結'); continue; }
-      const dur = await videoDuration(f);
-      if (dur > 65) { toast('影片超過 1 分鐘，請剪短或改貼連結'); continue; }
     }
     const it = { kind, file: f, url: URL.createObjectURL(f) }, rer = () => { if ($('fileList') && S.draft && S.draft.files.indexOf(it) >= 0) $('fileList').innerHTML = fileListHtml(); }; S.draft.files.push(it);
-    upStart(it, rer); if (kind === 'video') vidThumb(it, rer);
+    upStart(it, rer);
+    if (kind === 'video') {
+      vidThumb(it, rer);
+      videoDuration(f).then(dur => { if (dur > 65) { upDrop(it); const k = S.draft.files.indexOf(it); if (k >= 0) S.draft.files.splice(k, 1); if ($('fileList')) $('fileList').innerHTML = fileListHtml(); toast('影片超過 1 分鐘，請剪短或改貼連結'); } });
+    }
   }
   $('fileList').innerHTML = fileListHtml();
 }
@@ -1582,10 +1585,11 @@ function blobB64(b) {
   return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = () => rej(new Error('檔案讀取失敗')); r.readAsDataURL(b); });
 }
 async function upVideo(file, onp) {
-  if (file.size <= 20 * 1024 * 1024) return api('uploadFile', await readB64(file));
+  if (file.size <= 3 * 1024 * 1024) return api('uploadFile', await readB64(file));
   const s0 = await api('uploadStart', { name: file.name || 'video.mp4', mime: file.type || 'video/mp4', size: file.size });
-  const CH = 8 * 1024 * 1024; let off = 0, r = null;
+  const CH = 4 * 1024 * 1024; let off = 0, r = null;
   while (off < file.size) {
+    await new Promise(z => setTimeout(z, 30));
     r = await api('uploadPart', { uploadId: s0.uploadId, offset: off, data: await blobB64(file.slice(off, off + CH)) });
     if (r && r.id) return r;
     off = Number(r && r.next) || off + CH; if (onp) onp(Math.min(1, off / file.size));
