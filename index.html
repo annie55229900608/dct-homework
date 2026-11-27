@@ -1108,7 +1108,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261127-1350';
+const APP_VER = '20261127-1400';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -2150,25 +2150,24 @@ function bClass0() {
   const sum = k => R0.reduce((a, r) => a + r[k], 0), avg = Math.round(ms.reduce((a, x) => a + x.rate, 0) / ms.length * 100);
   return `<div class="nums">
     <div class="num"><b>${ms.length}</b><span>參加人數</span></div>
-    <div class="num"><b>${avg}%</b><span>平均完成度</span></div>
+    <div class="num"><b>${R0.reduce((a, r) => a + r.x.submitted, 0)}</b><span>完成數</span></div>
     <div class="num"><b>${sum('total')}</b><span>全班總分</span></div>
-    <div class="num"><b>${(() => { const ids = {}; R0.forEach(r => { ids[r.x.m.id] = 1; }); return bd.subs.filter(x => ids[x.userId] && taskOf(x.taskId)).length; })()}</b><span>總提交作業數</span></div></div>
-  ${(bd.groups || []).length && !S.p.g ? (() => { const GR = bd.groups.filter(g => !bd.leaderOnly || (bd.myLeads || []).indexOf(g.id) >= 0).map(g => { const rs = R0.filter(r => (r.x.m.groupId || '') === g.id); const tot = rs.reduce((a, r) => a + r.total, 0); return { g, n: rs.length, tot, avg: rs.length ? Math.round(tot / rs.length) : 0, rate: rs.length ? Math.round(rs.reduce((a, r) => a + r.x.rate, 0) / rs.length * 100) : 0 }; }).sort((a, b) => b.avg - a.avg);
-    return GR.length ? `<h2 class="sec">👥 小組排行</h2><div class="hint">依平均分數排名・點組別看該組成績</div><div class="mx"><table class="score"><tr><th>#</th><th>組別</th><th>人數</th><th>完成</th><th>總分</th><th>平均</th></tr>${GR.map((x, i) => `<tr onclick="S.p.g='${x.g.id}';render()"><td>${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td><td class="nm">${esc(x.g.name)}${x.g.leaderName ? `<div class="cmeta" style="font-weight:400">組長 ${esc(x.g.leaderName)}</div>` : ''}</td><td>${x.n}</td><td>${x.rate}%</td><td>${x.tot}</td><td><b>${x.avg}</b></td></tr>`).join('')}</table></div>` : ''; })() : ''}
+    <div class="num"><b>${(() => { const ids = {}; R0.forEach(r => { ids[r.x.m.id] = 1; }); return bd.subs.filter(x => ids[x.userId] && taskOf(x.taskId) && x.status === 'pass').length; })()}</b><span>通過數</span></div></div>
+  ${(bd.groups || []).length && !S.p.g ? (() => { const GR = bd.groups.filter(g => !bd.leaderOnly || (bd.myLeads || []).indexOf(g.id) >= 0).map(g => { const rs = R0.filter(r => (r.x.m.groupId || '') === g.id); const tot = rs.reduce((a, r) => a + r.total, 0); return { g, n: rs.length, tot, done: rs.reduce((a, r) => a + r.x.submitted, 0) }; }).sort((a, b) => b.tot - a.tot || b.done - a.done);
+    return GR.length ? `<h2 class="sec">👥 小組排行</h2><div class="hint">依總分排名・點組別看該組成績</div><div class="mx"><table class="score"><tr><th>#</th><th>組別</th><th>人數</th><th>完成數</th><th>總分</th></tr>${GR.map((x, i) => `<tr onclick="S.p.g='${x.g.id}';render()"><td>${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td><td class="nm">${esc(x.g.name)}${x.g.leaderName ? `<div class="cmeta" style="font-weight:400">組長 ${esc(x.g.leaderName)}</div>` : ''}</td><td>${x.n}</td><td>${x.done}</td><td><b>${x.tot}</b></td></tr>`).join('')}</table></div>` : ''; })() : ''}
   ${bd.leaderOnly ? '' : `<button class="btn gold block" style="margin-top:14px" onclick="go('wrap',{})">🏆 ${bd.course.wrap ? '課程總結・獎狀（已發布）' : '課程結束總結・頒獎'}</button>`}
   <div class="row" style="gap:8px;margin:14px 0 0"><button class="btn sm" onclick="exportScores()">📥 匯出成績表</button><button class="btn sm" onclick="exportSubs()">📥 匯出作業內容</button></div>
   <h2 class="sec">🏆 ${S.p.g && S.p.g !== '__none' ? esc(gName(S.p.g)) + ' 成績表' : '全班成績表'}</h2>
   <div class="hint">✓ 通過　… 待批改　✎ 需修改　✕ 漏交・點格子直接批改・點名字可以加分<br>分數＝交作業 5～30＋通過 10（闖關 5）＋額外加分</div>
   <div class="mx gb"><table>
-  <tr><th>夥伴</th>${bd.tasks.map((t, i) => `<th>${esc(stampLabel(t, i))}</th>`).join('')}<th>完成</th><th>加分</th><th class="tt">總分</th></tr>
+  <tr><th>夥伴</th>${bd.tasks.map((t, i) => `<th>${esc(stampLabel(t, i))}</th>`).join('')}<th>完成數</th><th>加分</th><th class="tt">總分</th></tr>
   ${R0.map((r, i) => `<tr><td onclick="memberPop('${r.x.m.id}')" style="cursor:pointer"><span class="rk">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span>${esc(FN(r.x.m))}${(bd.groups || []).length && !S.p.g && r.x.m.groupId ? `<div class="cmeta" style="font-weight:400;font-size:11px">${esc(gName(r.x.m.groupId))}</div>` : ''}</td>${bd.tasks.map(t => {
     const s = r.x.by[t.id];
     if (s) return `<td class="${s.status}" onclick="openReview('${s.id}')">${icon[s.status]}</td>`;
     if (!tFor(t, r.x.m.groupId)) return '<td style="color:#bbb">－</td>';
     return t.dueDate && t.dueDate < t0 ? '<td class="overdue">✕</td>' : '<td></td>';
-  }).join('')}<td>${Math.round(r.x.rate * 100)}%</td><td onclick="memberPop('${r.x.m.id}')">${r.bonus ? (r.bonus > 0 ? '+' : '') + r.bonus : '＋'}</td><td class="tt"><b>${r.total}</b></td></tr>`).join('')}
-  <tr class="tot"><td>全班合計</td>${bd.tasks.map(t => `<td>${bd.subs.filter(s => s.taskId === t.id).length}</td>`).join('')}<td>${avg}%</td><td>${sum('bonus')}</td><td class="tt"><b>${sum('total')}</b></td></tr>
-  <tr class="tot"><td>平均</td>${bd.tasks.map(() => '<td></td>').join('')}<td></td><td>${Math.round(sum('bonus') / R0.length)}</td><td class="tt"><b>${Math.round(sum('total') / R0.length)}</b></td></tr>
+  }).join('')}<td>${r.x.submitted}</td><td onclick="memberPop('${r.x.m.id}')">${r.bonus ? (r.bonus > 0 ? '+' : '') + r.bonus : '＋'}</td><td class="tt"><b>${r.total}</b></td></tr>`).join('')}
+  <tr class="tot"><td>全班合計</td>${bd.tasks.map(t => `<td>${bd.subs.filter(s => s.taskId === t.id).length}</td>`).join('')}<td>${R0.reduce((a, r) => a + r.x.submitted, 0)}</td><td>${sum('bonus')}</td><td class="tt"><b>${sum('total')}</b></td></tr>
   </table></div>
   ${S.p.g ? `<h2 class="sec">📋 ${S.p.g === '__none' ? '未分組' : esc(gName(S.p.g))} 組員作業</h2>${S.p.g !== '__none' ? `<button class="btn gold block" style="margin:4px 0 8px" onclick="groupBonusPop('${S.p.g}')">🎁 幫「${esc(gName(S.p.g))}」組別加分（平分給組員）</button>` : ''}<div class="hint">點名字展開，看她交的每一份作業</div>
   ${R0.map(r => { const x = r.x, mt = bd.tasks.filter(t => tFor(t, x.m.groupId)), subs = mt.map(t => ({ t, s: x.by[t.id] })), pct = Math.round(x.rate * 100);
