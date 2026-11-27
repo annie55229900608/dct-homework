@@ -1108,7 +1108,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261127-1300';
+const APP_VER = '20261127-1310';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -2104,7 +2104,7 @@ function bClass0() {
     <div class="num"><b>${ms.length}</b><span>參加人數</span></div>
     <div class="num"><b>${avg}%</b><span>平均完成度</span></div>
     <div class="num"><b>${sum('total')}</b><span>全班總分</span></div>
-    <div class="num"><b>${Math.round(sum('total') / R0.length)}</b><span>平均分數</span></div></div>
+    <div class="num"><b>${(() => { const ids = {}; R0.forEach(r => { ids[r.x.m.id] = 1; }); return bd.subs.filter(x => ids[x.userId] && taskOf(x.taskId)).length; })()}</b><span>總提交作業數</span></div></div>
   ${(bd.groups || []).length && !S.p.g ? (() => { const GR = bd.groups.filter(g => !bd.leaderOnly || (bd.myLeads || []).indexOf(g.id) >= 0).map(g => { const rs = R0.filter(r => (r.x.m.groupId || '') === g.id); const tot = rs.reduce((a, r) => a + r.total, 0); return { g, n: rs.length, tot, avg: rs.length ? Math.round(tot / rs.length) : 0, rate: rs.length ? Math.round(rs.reduce((a, r) => a + r.x.rate, 0) / rs.length * 100) : 0 }; }).sort((a, b) => b.avg - a.avg);
     return GR.length ? `<h2 class="sec">👥 小組排行</h2><div class="hint">依平均分數排名・點組別看該組成績</div><div class="mx"><table class="score"><tr><th>#</th><th>組別</th><th>人數</th><th>完成</th><th>總分</th><th>平均</th></tr>${GR.map((x, i) => `<tr onclick="S.p.g='${x.g.id}';render()"><td>${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td><td class="nm">${esc(x.g.name)}${x.g.leaderName ? `<div class="cmeta" style="font-weight:400">組長 ${esc(x.g.leaderName)}</div>` : ''}</td><td>${x.n}</td><td>${x.rate}%</td><td>${x.tot}</td><td><b>${x.avg}</b></td></tr>`).join('')}</table></div>` : ''; })() : ''}
   ${bd.leaderOnly ? '' : `<button class="btn gold block" style="margin-top:14px" onclick="go('wrap',{})">🏆 ${bd.course.wrap ? '課程總結・獎狀（已發布）' : '課程結束總結・頒獎'}</button>`}
