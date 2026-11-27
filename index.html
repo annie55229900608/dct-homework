@@ -1108,7 +1108,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261127-1310';
+const APP_VER = '20261127-1320';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1863,7 +1863,7 @@ function openBoard(id, tabName) {
 /* ---------- 新增／編輯課程 ---------- */
 function vCourseEdit() {
   const c = S.p.id ? S.bd.course : { type: 'camp', startDate: today(), feedbackOn: '1' };
-  const sel = (c.admins || '').split(',');
+  const sel = (c.admins || '').split(','); S.cAdmBase = sel.filter(Boolean);
   const admins = (S.ad ? S.ad.admins : S.bd.admins).filter(u => u.id !== S.me.user.id && u.role !== 'owner');
   const gen = { camp: 20, group: 4, offline: 1 };
   return `${backBar()}<h1 class="title" style="margin-bottom:6px">${S.p.id ? '編輯課程' : '新增課程'}</h1>
@@ -1884,7 +1884,7 @@ async function saveCourse() {
     id: S.p.id || '', title: val('cTitle'), type: val('cType'), startDate: val('cStart'), endDate: val('cEnd'), desc: val('cDesc'),
     needApprove: chk('cApprove'), feedbackOn: chk('cFb'), genTasks: 0, archiveAt: val('cArch'),
     admins: Array.prototype.slice.call(document.querySelectorAll('.cAdm:checked')).map(x => x.value),
-    listedAdmins: Array.prototype.slice.call(document.querySelectorAll('.cAdm')).map(x => x.value)
+    listedAdmins: Array.prototype.slice.call(document.querySelectorAll('.cAdm')).map(x => x.value), baseAdmins: S.cAdmBase || []
   };
   const c = await run(() => api('saveCourse', data), '儲存中…');
   if (!c) return;
