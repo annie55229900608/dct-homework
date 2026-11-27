@@ -1099,7 +1099,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261127-0955';
+const APP_VER = '20261127-1025';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1462,6 +1462,18 @@ function vTask() {
   const t = curTask(), bb = backBar(S.cd.course.title);
   return h.replace(bb, bb + `<button class="btn sm" style="margin:-4px 0 10px" onclick="openTaskAdmin('${S.cd.course.id}','${t.id}')">✏️ 編輯／刪除這個任務</button>`);
 }
+function subEdit() {
+  const h = [...document.querySelectorAll('h2.sec')].find(x => /修改後重新送出/.test(x.textContent));
+  if (h) h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  setTimeout(() => { const ta = document.querySelector('#scr textarea, textarea'); if (ta) ta.focus(); }, 450);
+  toast('改好後按「送出作業」就會更新');
+}
+async function subDel(id) {
+  if (!confirm('確定刪除這份作業？\n照片、影片會一起刪掉，交作業拿到的金幣也會收回。')) return;
+  const cid = S.cd.course.id, tid = curTask().id;
+  const ok = await run(async () => { await api('deleteSubmission', { submissionId: id }); await loadCourse(cid); return true; }, '刪除中…');
+  if (ok) { S.draft = null; openTask(tid); toast('已刪除'); loadPet(); }
+}
 function vTask0() {
   const t0 = curTask();
   if (t0.kind === 'choice') {
@@ -1476,7 +1488,7 @@ function vTask0() {
   ${t.desc ? `<p class="desc">${nl(t.desc)}</p>` : ''}${taskMediaHtml(t)}</div>
   ${t.template ? `<div class="row" style="justify-content:space-between;margin-top:6px"><b class="tplh" style="font-family:var(--serif)">參考模板</b><button class="btn sm" onclick="copyText(curTask().template)">複製模板</button></div><div class="tpl">${esc(t.template)}</div>` : ''}
   ${s ? `<div class="sub"><div class="row" style="justify-content:space-between"><b>我交的作業</b><span class="cmeta">${fmtT(s.updatedAt)}</span></div>
-     ${s.stars ? `<div class="stars">${starStr(s.stars)}</div>` : ''}${subBody(s)}</div>` : ''}
+     ${s.stars ? `<div class="stars">${starStr(s.stars)}</div>` : ''}${subBody(s)}${canEdit ? `<div class="row" style="gap:8px;margin-top:10px"><button class="btn sm" onclick="subEdit()">✏️ 編輯</button><button class="btn sm" style="background:#FCE8EC;color:#C2334D" onclick="subDel('${s.id}')">🗑 刪除</button></div>` : '<div class="cmeta" style="margin-top:8px">✅ 已通過，不能再修改或刪除</div>'}</div>` : ''}
   ${canEdit ? `<h2 class="sec">${s ? '修改後重新送出' : '交作業'}</h2>
     ${extraList(t).map((k, i) => `<label class="f">${esc(k)}</label><input value="${esc(dr.extra[k] || '')}" oninput="S.draft.extra[${JSON.stringify(k).replace(/"/g, '&quot;')}]=this.value">`).join('')}
     ${t.allowText === '1' ? `<label class="f">心得內容</label><textarea oninput="S.draft.text=this.value" placeholder="今天做了什麼、有什麼收穫">${esc(dr.text)}</textarea>` : ''}
@@ -1586,8 +1598,21 @@ function blobB64(b) {
 }
 async function upVideo(file, onp) {
   if (file.size <= 3 * 1024 * 1024) return api('uploadFile', await readB64(file));
-  const s0 = await api('uploadStart', { name: file.name || 'video.mp4', mime: file.type || 'video/mp4', size: file.size });
-  const CH = 4 * 1024 * 1024; let off = 0, r = null;
+  const mime = file.type || 'video/mp4';
+  try {
+    const d0 = await api('uploadStart', { name: file.name || 'video.mp4', mime, size: file.size, direct: 1 });
+    if (d0 && d0.url) {
+      const fid = await new Promise((res, rej) => {
+        const x = new XMLHttpRequest(); x.open('PUT', d0.url); x.setRequestHeader('Content-Type', mime);
+        x.upload.onprogress = e => { if (e.lengthComputable && onp) onp(e.loaded / e.total * 0.97); };
+        x.onload = () => { if (x.status === 200 || x.status === 201) { try { res(JSON.parse(x.responseText).id); } catch (e) { rej(new Error('回應格式不對')); } } else rej(new Error('上傳失敗 ' + x.status)); };
+        x.onerror = () => rej(new Error('網路錯誤')); x.send(file);
+      });
+      const done = await api('uploadDone', { uploadId: d0.uploadId, id: fid }); if (onp) onp(1); return done;
+    }
+  } catch (e) { /* 直傳不行就改用分段 */ }
+  const s0 = await api('uploadStart', { name: file.name || 'video.mp4', mime, size: file.size });
+  const CH = 8 * 1024 * 1024; let off = 0, r = null;
   while (off < file.size) {
     await new Promise(z => setTimeout(z, 30));
     r = await api('uploadPart', { uploadId: s0.uploadId, offset: off, data: await blobB64(file.slice(off, off + CH)) });
@@ -3102,7 +3127,7 @@ async function savePush() {
 }
 async function testPush() {
   const n = await run(() => api('testPush'));
-  if (n !== undefined) toast(n ? '已送出，看看手機有沒有跳通知 📲' : '送不出去：請確認已設定，而且這支手機已經按過「開啟通知」');
+  if (n !== undefined) { const k = typeof n === 'object' ? n.n : n, er = typeof n === 'object' ? n.err : ''; toast(k ? '已送出，看看手機有沒有跳通知 📲' : '送不出去：' + (er || '請確認已設定，而且這支手機已經按過「開啟通知」')); }
 }
 async function setProPw() {
   const pw = prompt('設定一級／皇家專區的解鎖密碼（至少 4 碼）');
@@ -3506,6 +3531,7 @@ function pushInit() {
       try {
         await OS.init({ appId: S.me.pushAppId, serviceWorkerPath: dir.replace(/^\//, '') + 'OneSignalSDKWorker.js', serviceWorkerParam: { scope: dir }, allowLocalhostAsSecureOrigin: true });
         try { await OS.login(S.me.user.id); } catch (e) {}
+        try { if (Notification.permission === 'granted' && OS.User && OS.User.PushSubscription && !OS.User.PushSubscription.optedIn) await OS.User.PushSubscription.optIn(); } catch (e) {}
         OS_OBJ = OS; clearTimeout(to); res(OS);
         OS.Notifications.addEventListener('permissionChange', () => { try { OS.login(S.me.user.id); } catch (e) {} if (S.v === 'me') render(); });
       } catch (e) { PUSH_ERR = (e && e.message) || String(e); clearTimeout(to); res(null); }
@@ -3549,15 +3575,36 @@ function pushAsk() {
     document.body.appendChild(el);
   }, 2600);
 }
+async function selfPushTest() {
+  const r = await run(async () => { await pushInit(); await pushHeal(); return api('testPush'); }, '送出中…');
+  if (r === undefined) return;
+  const n = typeof r === 'object' ? r.n : r, err = typeof r === 'object' ? r.err : '';
+  if (n) toast('已送出，10 秒內沒跳通知就按「重新連結」📲');
+  else sysPop({ warn: 1, title: '📲 這支手機還沒連上推播', body: (err ? err + '。' : '') + '請按「🔄 收不到？重新連結」，跳出允許就按「允許」；還是不行，請把主畫面的 App 刪掉、用 Safari 重新加入主畫面再試一次', btn: '知道了' });
+}
+async function pushHeal() {
+  const OS = OS_OBJ; if (!OS || !S.me) return;
+  try { await OS.login(S.me.user.id); } catch (e) {}
+  try { if (Notification.permission === 'granted' && OS.User && OS.User.PushSubscription && !OS.User.PushSubscription.optedIn) await OS.User.PushSubscription.optIn(); } catch (e) {}
+}
+function pushRelink() {
+  let p; try { p = OS_OBJ ? OS_OBJ.Notifications.requestPermission() : Notification.requestPermission(); } catch (e) { p = Promise.resolve(); }
+  run(async () => {
+    await Promise.resolve(p).catch(() => {}); const OS = await pushInit(); if (!OS) throw new Error(PUSH_ERR || '推播元件載入失敗，請稍後再試');
+    try { await OS.logout(); } catch (e) {}
+    await pushHeal(); await new Promise(z => setTimeout(z, 1500));
+    const r = await api('testPush'); return typeof r === 'object' ? r.n : r;
+  }, '重新連結中…').then(n => { if (n === undefined) return; toast(n ? '重新連結好了，看看有沒有收到測試通知 📲' : '還是連不上：請刪掉主畫面的 App，用 Safari 重新加入主畫面再開一次'); });
+}
 function pushPanel() {
   if (EMBED) return '';
   const st = pushState();
   if (st === 'off') return '';
   const T = {
-    on: '<div class="cmeta">✅ 已開啟。發公告、星寵肚子餓、每天早安都會跳通知</div>',
+    on: '<div class="cmeta">✅ 已開啟。發公告、星寵肚子餓、每天早安都會跳通知</div><div class="row wrap" style="margin-top:10px"><button class="btn sm" onclick="selfPushTest()">📲 傳測試通知給我</button><button class="btn sm" onclick="pushRelink()">🔄 收不到？重新連結</button></div>',
     ask: '<div class="cmeta">開啟後，發公告、星寵肚子餓、每天早安都會跳到手機上</div><button class="btn gold block" style="margin-top:10px" onclick="pushEnable()">🔔 開啟手機通知</button>',
     needHome: '<div class="cmeta">iPhone 要先把 DCTx大瑩家 放到主畫面才能收通知：<br>① 用 Safari 打開這個網站<br>② 按下方「分享」→「加入主畫面」<br>③ 從主畫面的圖示打開，再回來這裡按「開啟手機通知」</div>',
-    denied: '<div class="cmeta">你之前按了「不允許」。請到手機「設定 → 通知 → DCTx大瑩家」打開，再回來重新整理</div>',
+    denied: '<div class="cmeta">你之前按了「不允許」。請到手機「設定 → 通知 → 學習護照」打開，再回來重新整理</div>',
     unsupported: '<div class="cmeta">這個瀏覽器不支援通知，請用手機的 Safari 或 Chrome 打開</div>'
   };
   return `<div class="panel"><h3>🔔 手機通知</h3>${T[st]}</div>`;
