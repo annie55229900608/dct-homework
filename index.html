@@ -102,6 +102,9 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;margin:0;line-height:1.35}
 .trow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:14px 2px}
 .trow .tt{flex:1;min-width:0}
 .lvstat{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px}.lvstat>div{flex:1 1 72px;background:rgba(255,255,255,.9);border-radius:14px;padding:8px 6px;text-align:center;color:#14204E}.lvstat b{display:block;font-size:20px;font-family:var(--serif)}.lvstat span{font-size:11px;color:#5A6180}.lvstat .lvtot{background:#E8C46A}
+.bdtop{display:flex;justify-content:space-between;align-items:center;gap:8px}.bdact{display:flex;gap:6px;flex:none}
+.roster{background:rgba(255,255,255,.92);border-radius:18px;padding:12px 14px;margin:0 0 14px;color:#14204E}.roster summary{font-weight:700;font-size:16px;cursor:pointer}.roster .rg{margin-top:12px}.roster .rgh{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #E6E9F3;padding-bottom:4px}.roster .rgm{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.roster .rmem{display:flex;flex-direction:column;align-items:center;gap:3px;width:66px;background:none;border:0;padding:0;color:#14204E;font-size:12px}.roster .rmem span{max-width:66px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.roster .rgnone .rgh b{color:#C2334D}.roster .cmeta,.roster .hint{color:#5A6180;text-shadow:none}
+.item .unl{font-size:10px;font-weight:700;color:#1F8A55;margin:-2px 0 2px}
 .tact{display:flex;flex-direction:column;gap:6px;flex:none}.tact b{font-size:12px;font-weight:700;padding:5px 10px;border-radius:99px;background:#EEF1F8;color:#22315E;text-align:center}.tact b.del{background:#FCE8EC;color:#C2334D}
 .trow .tt div:first-child{font-weight:600}
 .st{font-size:13px;padding:2px 10px;border-radius:99px;white-space:nowrap;border:1px solid}
@@ -1101,7 +1104,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261127-1145';
+const APP_VER = '20261127-1210';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1352,6 +1355,7 @@ function vCourse() {
   ${(d.groups || []).length ? (() => { const my = d.groups.find(g => g.id === d.myGroup);
     if (my) return `<div class="mygroup">👥 你的組別：<b>${esc(my.name)}</b>${my.leaderName ? `・組長 ${esc(my.leaderName)}` : ''}${(d.myLeads || []).indexOf(my.id) >= 0 ? ' 👑' : ''}${c.groupSelf === '1' ? `<div class="adchips">${d.groups.map(g => `<button class="${g.id === d.myGroup ? 'on' : ''}" onclick="setMemberGroup(S.me.user.id,'${g.id}',1)">${esc(g.name)}</button>`).join('')}</div>` : ''}</div>`;
     return c.groupSelf === '1' ? `<div class="mygroup">👥 <b>請選擇你的組別</b><div class="adchips">${d.groups.map(g => `<button onclick="setMemberGroup(S.me.user.id,'${g.id}',1)">${esc(g.name)}${g.leaderName ? '・' + esc(g.leaderName) : ''}</button>`).join('')}</div></div>` : `<div class="mygroup cmeta">👥 老師還沒幫你分組</div>`; })() : ''}
+  ${rosterHTML(d.roster, false)}
   ${(d.bonus || []).length ? `<div class="bonusme">🌟 額外加分 <b>${(d.bonus.reduce((a, b) => a + (Number(b.points) || 0), 0) > 0 ? '+' : '') + d.bonus.reduce((a, b) => a + (Number(b.points) || 0), 0)}</b>${d.bonus.slice(0, 3).map(b => `<div class="cmeta">${Number(b.points) > 0 ? '+' : ''}${b.points}｜${esc(b.reason || '老師加分')}・${esc(b.byName || '')}</div>`).join('')}</div>` : ''}
   <div class="legend"><span class="l1">已通過</span><span class="l2">待批改</span><span class="l3">需修改</span><span class="l4">未交</span></div>
   ${d.tasks.length ? `<div class="stamps">${d.tasks.map((t, i) => {
@@ -1847,7 +1851,7 @@ function ownerPanel(a) {
   <div class="hint">你是最高管理員，可以打開所有人建立的課程、批改作業、看所有夥伴的團隊資料。在「所有課程」選管理員，可以只看她建立的課程和任務。</div></div>`;
 }
 function openBoard(id, tabName) {
-  const k = 'bd_' + id, p = { id, tab: tabName || 'review', f: 'pending' };
+  const k = 'bd_' + id, p = { id, tab: tabName || 'class', f: 'pending' };
   if (MEM[k]) { S.bd = MEM[k]; go('board', p); bgFresh(k, () => api('courseBoard', { courseId: id }), v => { if (S.bd && S.bd.course && S.bd.course.id === id) S.bd = v; }, () => S.v === 'board' && S.p.id === id); return; }
   run(async () => { await loadBoard(id); go('board', p); }, '載入中…');
 }
@@ -1884,7 +1888,7 @@ async function saveCourse() {
   if (S.p.id) back();
   else { await run(loadAdmin); S.hist = [{ v: 'admin', p: {} }]; openBoardReplace(c.id, 'tasks'); }
 }
-function openBoardReplace(id, t) { run(async () => { await loadBoard(id); S.v = 'board'; S.p = { id, tab: t || 'review', f: 'pending' }; render(); SCR().scrollTop = 0; }); }
+function openBoardReplace(id, t) { run(async () => { await loadBoard(id); S.v = 'board'; S.p = { id, tab: t || 'class', f: 'pending' }; render(); SCR().scrollTop = 0; }); }
 
 /* ---------- 班級看板 ---------- */
 function gOf(uid) { const m = (S.bd.members || []).find(x => x.id === uid); return m ? (m.groupId || '') : ''; }
@@ -1915,10 +1919,10 @@ function vBoard() {
   const bd = S.bd, c = bd.course, tb = S.p.tab;
   const pend = bd.subs.filter(s => s.status === 'pending' && bd.tasks.some(t => t.id === s.taskId)).length;
   const waiting = bd.members.filter(m => m.status === 'pending').length;
-  let tabs = [['review', '批改' + (pend ? ' ' + pend : '')], ['tasks', '任務'], ['class', '全班成績'], ['setting', '設定' + (waiting ? ' ' + waiting : '')], ['care', '需要關心'], ['fb', '回饋']];
-  if (bd.leaderOnly) { tabs = tabs.filter(x => ['review', 'class', 'care'].indexOf(x[0]) >= 0); if (['review', 'class', 'care'].indexOf(tb) < 0) S.p.tab = 'review'; }
+  let tabs = [['class', '全班成績'], ['review', '批改' + (pend ? ' ' + pend : '')], ['tasks', '任務'], ['setting', '設定' + (waiting ? ' ' + waiting : '')], ['care', '需要關心'], ['fb', '回饋']];
+  if (bd.leaderOnly) { tabs = tabs.filter(x => ['review', 'class', 'care'].indexOf(x[0]) >= 0); if (['review', 'class', 'care'].indexOf(tb) < 0) S.p.tab = 'class'; }
   const G = bd.groups || [], gShow = bd.leaderOnly ? G.filter(g => (bd.myLeads || []).indexOf(g.id) >= 0) : G;
-  return `${backBar('課程管理')}
+  return `<div class="bdtop">${backBar('課程管理')}${bd.leaderOnly ? '' : `<div class="bdact"><button class="btn sm gold" onclick="go('taskEdit',{})">＋ 新增任務</button><button class="btn sm" onclick="S.p.tab='setting';render()">⚙️ 設定</button></div>`}</div>
   <div class="chead" style="margin-bottom:14px"><span class="chip">${TYPE[c.type] || ''}</span><h1 class="title">${esc(c.title)}</h1><div class="cmeta">${dateRange(c)}，邀請碼 ${esc(c.code)}</div></div>
   ${bd.leaderOnly ? `<div class="leadbar">👑 你是 ${esc(gShow.map(g => g.name).join('、'))} 的組長・可以批改組員作業、幫組員加分<button class="btn sm gold" onclick="go('noticeEdit',{})">📢 發公告給小組</button></div>` : ''}
   <div class="tabs">${tabs.map(([k, l]) => `<button class="${S.p.tab === k ? 'on' : ''}" onclick="S.p.tab='${k}';render()">${l}</button>`).join('')}</div>
@@ -1927,7 +1931,7 @@ function vBoard() {
 }
 function whoCard(m) {
   return `<div class="row" style="gap:10px;align-items:center;margin:6px 0 8px">${avatarHtml(m, 52)}<b style="font-size:17px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.35)">${esc(m.realName || m.name)}</b></div><div class="whocard"><div><span>級別</span><b>${esc(m.level || '未填')}</b></div><div><span>上家</span><b>${esc(m.uplineName || m.upName || '未填')}</b></div><div><span>皇家</span><b>${esc(m.royal || '未填')}</b></div><div><span>IG</span>${m.ig ? `<a href="https://instagram.com/${encodeURIComponent(m.ig)}" target="_blank" rel="noopener">@${esc(m.ig)} ↗</a>` : '<b>未填</b>'}</div>
-  <div class="wline"><span>LINE 名字</span><div class="row"><input id="wLine" value="${esc(m.lineName || '')}" placeholder="幫她填 LINE 名字" autocapitalize="off" autocorrect="off"><button class="btn sm gold" onclick="saveMemberLine('${m.id}')">儲存</button></div></div></div>
+  ${(S.bd && (S.bd.groups || []).length) ? `<div class="wline"><span>組別</span><div class="row" style="gap:8px;align-items:center"><b style="flex:1">${esc(gName(m.groupId) || '未分組')}</b>${S.bd.leaderOnly ? '' : `<button class="btn sm gold" onclick="gPick('${m.id}')">更改組別</button>`}</div></div>` : ''}</div>
   <button class="btn block pinfo-go" onclick="openPinfo('${m.id}')">👤 看她的完整資料、參加的群組、所有作業 ›</button>`;
 }
 async function saveMemberLine(id) {
@@ -1953,7 +1957,7 @@ function vPinfo() {
     <div class="cmeta" style="cursor:pointer" onclick="S.piOpen['${s.id}']=!S.piOpen['${s.id}'];render()">${esc(s.courseTitle)}，${fmtT(s.updatedAt)}${s.files.length ? `，${s.files.length} 個檔案` : ''}　${S.piOpen[s.id] ? '收起 ▴' : '展開 ▾'}</div>
     ${S.piOpen[s.id] ? `<div class="sub" style="margin-top:10px">${subBody(s)}</div>` : (s.text ? `<div class="q2">${esc(s.text)}</div>` : '')}</div>`).join('') : '<div class="empty">這堂課還沒有交作業</div>'}`; })()}`;
 }
-function nameOf(id) { const m = S.bd.members.find(x => x.id === id); return m ? m.name : '已離開的夥伴'; }
+function nameOf(id) { const m = S.bd.members.find(x => x.id === id); return m ? FN(m) : '已離開的夥伴'; }
 function taskOf(id) { return S.bd.tasks.find(t => t.id === id); }
 async function reviewMany() {
   const bd = S.bd, ids = bd.subs.filter(s => (S.selSub || {})[s.id]).map(s => s.id); if (!ids.length) return;
@@ -1963,6 +1967,33 @@ async function reviewMany() {
   S.selMode = 0; S.selSub = {}; render(); toast(`已通過 ${ids.length} 份 ✓`);
   try { const r = await api('reviewBatch', { subIds: ids, status: 'pass', comment: cmt.trim() }); if (r.coin) { toast(`✅ 已通過 ${r.ok} 份・🪙 批改獎勵 +${r.coin}`); if (S.pet) S.pet.coins = (Number(S.pet.coins) || 0) + r.coin; } if (r.fail && r.fail.length) toast('有 ' + r.fail.length + ' 份沒成功：' + r.fail[0]); delete MEM.notifs; await loadBoard(bd.course.id); if (S.v === 'board') render(); }
   catch (e) { bd.subs = bd.subs.map(s => old[s.id] || s); render(); sysPop({ warn: true, title: '批次批改沒有成功', body: e.message || '網路不穩，請再試一次', btn: '知道了' }); }
+}
+function rosterHTML(R, admin) {
+  if (!R || !(R.groups || []).length) return '';
+  const tot = R.groups.reduce((a, g) => a + g.members.length, 0) + R.none.length;
+  const chip = (m, g) => `<button class="rmem" ${admin ? `onclick="gPick('${m.id}')"` : 'tabindex="-1"'}>${avatarHtml(m, 42)}<span>${g && g.leaderId === m.id ? '👑 ' : ''}${esc(m.name)}</span></button>`;
+  return `<details class="roster" ${admin || S.rosterOpen ? 'open' : ''} ontoggle="S.rosterOpen=this.open"><summary>👥 分組名單・共 ${tot} 人${R.none.length ? `・未分組 ${R.none.length}` : ''}</summary>
+  ${R.groups.map(g => `<div class="rg"><div class="rgh"><b>${esc(g.name)}</b><span class="cmeta">${g.leaderName ? '組長 ' + esc(g.leaderName) + '・' : ''}${g.members.length} 人</span></div><div class="rgm">${g.members.map(m => chip(m, g)).join('') || '<span class="cmeta">還沒有組員</span>'}</div></div>`).join('')}
+  ${R.none.length ? `<div class="rg rgnone"><div class="rgh"><b>未分組</b><span class="cmeta">${R.none.length} 人</span></div><div class="rgm">${R.none.map(m => chip(m)).join('')}</div></div>` : ''}
+  ${admin ? '<div class="hint">點頭像可以直接幫她選組別</div>' : ''}</details>`;
+}
+function boardRoster() {
+  const bd = S.bd, G = bd.groups || []; if (!G.length) return null;
+  const act = (bd.members || []).filter(m => m.status === 'active'), nm = id => { const m = act.find(x => x.id === id); return m ? FN(m) : ''; };
+  const mk = m => ({ id: m.id, name: FN(m), avatar: m.avatar || '' });
+  return { groups: G.map(g => ({ id: g.id, name: g.name, leaderId: g.leaderId || '', leaderName: nm(g.leaderId), members: act.filter(m => m.groupId === g.id).map(mk) })), none: act.filter(m => !m.groupId || !G.some(g => g.id === m.groupId)).map(mk) };
+}
+function gPick(uid) {
+  const bd = S.bd, m = (bd.members || []).find(x => x.id === uid); if (!m) return;
+  const el = document.createElement('div'); el.className = 'sysmodal';
+  el.innerHTML = `<div class="sysbox"><div class="ding">叮！【分組】</div><h3>👥 ${esc(FN(m))}</h3><p style="text-align:center">幫她選組別</p><div class="gask">${(bd.groups || []).map(g => `<button data-g="${esc(g.id)}" style="${m.groupId === g.id ? 'outline:3px solid #fff' : ''}">${esc(g.name)}${m.groupId === g.id ? '（目前）' : ''}</button>`).join('')}<button data-g="__none">未分組</button></div><button class="gask-later">取消</button></div>`;
+  el.onclick = e => { const b = e.target.closest('button'); if (!b) { if (e.target === el) el.remove(); return; } el.remove(); if (b.dataset.g) setMemberGroup(uid, b.dataset.g === '__none' ? '' : b.dataset.g); };
+  document.body.appendChild(el);
+}
+function bPendTop() {
+  const bd = S.bd, L = bd.subs.filter(s => s.status === 'pending' && taskOf(s.taskId) && taskOf(s.taskId).kind !== 'choice' && gOK(s.userId)).sort((a, b) => (a.updatedAt < b.updatedAt ? -1 : 1));
+  if (!L.length) return '';
+  return `<div class="panel pendp" style="margin-top:0"><h3 style="margin-top:0">📝 待批改（${L.length}）</h3>${L.slice(0, 5).map(s => { const m = (bd.members || []).find(x => x.id === s.userId) || {}; return `<button class="prow" onclick="openReview('${s.id}')">${avatarHtml(m, 38)}<div class="grow"><b>${esc(FN(m))}・${esc(taskOf(s.taskId).title)}</b><div class="cmeta">${fmtT(s.updatedAt || s.submittedAt)}</div></div><span class="cmeta">批改 ›</span></button>`; }).join('')}${L.length > 5 ? `<button class="btn sm block" style="margin-top:8px" onclick="S.p.tab='review';render()">看全部 ${L.length} 份 ›</button>` : ''}</div>`;
 }
 function bReview() {
   const f = S.p.f;
@@ -2023,7 +2054,8 @@ function memberPop(uid) {
     }
   };
 }
-function bClass() {
+function bClass() { return bPendTop() + rosterHTML(boardRoster(), !S.bd.leaderOnly) + bClass0(); }
+function bClass0() {
   const bd = S.bd, ms = memberStats(bd), t0 = today();
   if (!ms.length) return `<div class="empty">還沒有夥伴加入<br>到「設定」複製邀請連結發給大家</div>`;
   const icon = { pass: '✓', pending: '…', revise: '✎' };
@@ -2529,6 +2561,7 @@ function petFigure(p, size, opt) {
   opt = opt || {};
   return `<div class="petwrap" id="${opt.wid || ''}" style="width:${size}px;height:${size}px" ${opt.poke ? 'onclick="petPoke(this)"' : ''}>${petSVG(p, opt)}${opt.eat ? `<span class="food">${foodIcon(opt.eat, p.kind)}</span>` : ''}${opt.say ? `<span class="bubble"${opt.eat ? ' style="animation-delay:2s;animation-duration:2.4s"' : ''}>${esc(opt.say)}</span>` : ''}</div>`;
 }
+function unlTag(it) { return (it.minLv || 1) > 1 ? `<div class="unl">✓ Lv.${it.minLv} 已解鎖</div>` : ''; }
 function lockItem(ic, name, lv, P, sub) { return `<div class="item locked"><div class="ic">${ic}</div><div class="nm">${esc(name)}</div><div class="sm2">${sub || `Lv.${lv} ${esc(((P.levels || [])[lv - 1] || {}).name || '')}`}</div><button disabled>🔒 Lv.${lv} 解鎖</button></div>`; }
 /* ---------- 星寵：進場條、動作、放大、截圖、日記、問候 ---------- */
 const PET_CHEER = ['要認真賺金幣喔，我等你帶好吃的回來！', '繼續加油，你是最棒的！', '工作辛苦了，先摸摸我休息一下吧', '我每天都會在這裡等你唷 💕', '今天也要努力賺金幣，餵飽我喔～', '辛苦了！有你照顧我好幸福', '不管多累，回來看看我就好了', '今天的任務完成了嗎？我幫你加油！', '你努力的樣子最帥／最美了 ✨', '賺到金幣記得買好吃的給我喔 🍰', '累了就跟我說，我陪你', '今天也一起變更好吧！', '我最喜歡你了，明天也要來看我喔', '加油加油！夢想就快實現了 🌟', '謝謝你今天也有來看我', '慢慢來沒關係，我會一直等你'];
@@ -2912,7 +2945,7 @@ function lvCard(np, L, un) {
   el.innerHTML = `<div class="lvcard"><div class="lvburst">${'✦'.repeat(12).split('').map((c, i) => `<i style="--a:${i * 30}deg">✦</i>`).join('')}</div>
     <div class="lvtop">LEVEL UP!</div><div class="lvfig">${petFigure(Object.assign({}, np, { id: '', full: 100 }), 150, { mood: 'happy' })}</div>
     <h3>🎉 ${esc(np.name)} 升級了！</h3><div class="lvbadge">Lv.${np.level - 1} → <b>Lv.${np.level}</b>「${esc(np.levelName || '')}」</div>
-    <ul>${[`🪙 獲得 ${L.reward || 0} 金幣`, L.decay != null ? `🍙 每天只會餓 ${L.decay}%` : '', un.length ? `🔓 解鎖「${esc(un.join('、'))}」` : '', np.level === 5 ? '✨ 身邊出現紫色光暈' : np.level === 7 ? '🌟 光暈升級成金色' : ''].filter(Boolean).map(x => `<li>${x}</li>`).join('')}</ul>
+    <ul>${[`🪙 獲得 ${L.reward || 0} 金幣`, L.decay != null ? `🍙 每天只會餓 ${L.decay}%` : '', un.length ? '🔓 新的食物、飾品、佈置解鎖了，快去商店看看！' : '', np.level === 5 ? '✨ 身邊出現紫色光暈' : np.level === 7 ? '🌟 光暈升級成金色' : ''].filter(Boolean).map(x => `<li>${x}</li>`).join('')}</ul>
     <button>太棒了！</button></div>`;
   el.querySelector('button').onclick = () => el.remove();
   document.body.appendChild(el);
@@ -2952,13 +2985,13 @@ function vPet() {
     <div class="fullbar ${p.full < 30 ? 'low' : ''}" style="height:14px"><i style="width:${p.full}%"></i></div>
     <div class="row" style="justify-content:space-between;margin-top:8px"><span class="cmeta">飽足度 ${p.full}%・點牠會有反應喔</span><span class="coin" style="font-size:18px">${coinIco()} ${P.coins}</span></div></div>
   <div class="tabs pettabs" style="margin-top:6px">${[['food', '餵食'], ['wear', '裝扮'], ['home', '小窩'], ['adopt', '領養'], ['earn', '金幣']].map(([k, l]) => `<button class="${tab === k ? 'on' : ''}" onclick="S.petTab='${k}';render()">${l}</button>`).join('')}</div>
-  ${tab === 'food' ? `<div class="hint" style="margin-top:0;${p.full >= 100 ? 'color:var(--late);font-weight:700' : ''}">${p.full >= 100 ? `「${esc(p.name)}」已經吃飽了（飽足 100%），明天再來餵吧！` : `現在餵的是「${esc(p.name)}」・飽足 ${p.full}%・每天最多可以餵到 100%・🔒 的食物升級後解鎖`}</div><div class="shop">${foods.map(k => festHead(shop, foods, k) + (() => { const it = shop[k]; if ((it.minLv || 1) > (P.homeLevel || p.level)) return lockItem(foodIcon(k, p.kind), k === 'fish' ? PET_FOOD_NAME[p.kind] : it.name, it.minLv, P, `飽足 +${it.add}`); return `<div class="item"><div class="ic">${foodIcon(k, p.kind)}</div>${it.fest ? `<div class="festtag">${FEST_TAG[it.fest]}</div>` : ''}<div class="nm">${k === 'fish' ? PET_FOOD_NAME[p.kind] : it.name}</div><div class="sm2">飽足 +${it.add}</div><button ${P.coins < it.price || p.full >= 100 ? 'disabled' : ''} onclick="petCall('petBuy',{item:'${k}'},{eat:'${k}',say:'好吃！'})">${coinIco()} ${it.price} 餵牠</button></div>`; })()).join('')}</div>${p.full >= 100 ? '<div class="hint">吃飽飽了，晚點再餵吧</div>' : ''}` : ''}
-  ${tab === 'wear' ? `<div class="hint" style="margin-top:0">幫「${esc(p.name)}」打扮・買過的裝扮每隻都可以戴・🔒 是等級專屬</div><div class="shop">${wears.map(k => festHead(shop, wears, k) + (() => { const it = shop[k], own = owned.indexOf(k) >= 0, on = w[it.slot] === k, lock = it.minLv && (P.homeLevel || p.level) < it.minLv; if (lock) return lockItem(accIcon(k), it.name, it.minLv, P); return `<div class="item ${on ? 'wear' : ''} ${it.minLv >= 5 ? 'vip' : ''}"><div class="ic">${accIcon(k)}</div>${it.fest ? `<div class="festtag">${FEST_TAG[it.fest]}</div>` : ''}<div class="nm">${it.name}</div><div class="sm2">${{ head: '頭上', face: '臉上', neck: '脖子', back: '背上' }[it.slot]}</div>
+  ${tab === 'food' ? `<div class="hint" style="margin-top:0;${p.full >= 100 ? 'color:var(--late);font-weight:700' : ''}">${p.full >= 100 ? `「${esc(p.name)}」已經吃飽了（飽足 100%），明天再來餵吧！` : `現在餵的是「${esc(p.name)}」・飽足 ${p.full}%・每天最多可以餵到 100%・🔒 的食物升級後解鎖`}</div><div class="shop">${foods.map(k => festHead(shop, foods, k) + (() => { const it = shop[k]; if ((it.minLv || 1) > (P.homeLevel || p.level)) return lockItem(foodIcon(k, p.kind), k === 'fish' ? PET_FOOD_NAME[p.kind] : it.name, it.minLv, P, `飽足 +${it.add}`); return `<div class="item"><div class="ic">${foodIcon(k, p.kind)}</div>${unlTag(it)}${it.fest ? `<div class="festtag">${FEST_TAG[it.fest]}</div>` : ''}<div class="nm">${k === 'fish' ? PET_FOOD_NAME[p.kind] : it.name}</div><div class="sm2">飽足 +${it.add}</div><button ${P.coins < it.price || p.full >= 100 ? 'disabled' : ''} onclick="petCall('petBuy',{item:'${k}'},{eat:'${k}',say:'好吃！'})">${coinIco()} ${it.price} 餵牠</button></div>`; })()).join('')}</div>${p.full >= 100 ? '<div class="hint">吃飽飽了，晚點再餵吧</div>' : ''}` : ''}
+  ${tab === 'wear' ? `<div class="hint" style="margin-top:0">幫「${esc(p.name)}」打扮・買過的裝扮每隻都可以戴・🔒 是等級專屬</div><div class="shop">${wears.map(k => festHead(shop, wears, k) + (() => { const it = shop[k], own = owned.indexOf(k) >= 0, on = w[it.slot] === k, lock = it.minLv && (P.homeLevel || p.level) < it.minLv; if (lock) return lockItem(accIcon(k), it.name, it.minLv, P); return `<div class="item ${on ? 'wear' : ''} ${it.minLv >= 5 ? 'vip' : ''}"><div class="ic">${accIcon(k)}</div>${unlTag(it)}${it.fest ? `<div class="festtag">${FEST_TAG[it.fest]}</div>` : ''}<div class="nm">${it.name}</div><div class="sm2">${{ head: '頭上', face: '臉上', neck: '脖子', back: '背上' }[it.slot]}</div>
     ${own ? `<button class="${on ? 'ghost2' : ''}" onclick="petCall('petWear',${on ? `{slot:'${it.slot}',item:''}` : `{item:'${k}'}`},{say:'${on ? '換一下～' : '好看嗎？'}'})">${on ? '脫下' : '穿上'}</button>` : `<button ${P.coins < it.price ? 'disabled' : ''} onclick="petCall('petBuy',{item:'${k}'},{say:'謝謝你！'})">${coinIco()} ${it.price} 購買</button>`}</div>`; })()).join('')}</div>` : ''}
   ${tab === 'home' ? `<label class="f" style="margin-top:4px">房間背景（部分免費・🪙 標示的要用金幣買）</label><div class="themes">${Object.keys(ROOM_TH).map(k => { const tl = (P.themeLv || {})[k] || 1, pr = (P.themePrice || {})[k], own = !pr || (P.owned || []).indexOf('th_' + k) >= 0;
     if (tl > (P.homeLevel || 1)) return `<button disabled class="tlock"><span class="thm">${roomSVG({ theme: k })}</span><span>🔒 Lv.${tl} 解鎖</span></button>`;
     if (!own) return `<button class="tbuy" onclick="if(confirm('用 🪙 ${pr} 買「${ROOM_TH[k][0]}」背景？'))petCall('petStyle',{theme:'${k}',buy:1},{say:'哇！新背景！'})"><span class="thm">${roomSVG({ theme: k })}</span><span>${ROOM_TH[k][0]}・🪙${pr}</span></button>`;
-    return `<button class="${(hm.theme || 'bluegold') === k ? 'on' : ''}" onclick="petCall('petStyle',{theme:'${k}'},{say:'換新家！'})"><span class="thm">${roomSVG({ theme: k })}</span><span>${ROOM_TH[k][0]}</span></button>`; }).join('')}</div><label class="f">家具（大家一起住・看等級最高的那隻解鎖）</label><div class="hint" style="margin-top:0">同一類（牆上裝飾、玩具、節慶擺飾、人偶、燈、地毯、小床）最多同時擺 2 個，擺好可以用「🪑 佈置小窩」拖到喜歡的位置</div><div class="shop">${homes.map(k => festHead(shop, homes, k) + (() => { const it = shop[k], own = owned.indexOf(k) >= 0, on = Array.isArray(hm[it.slot]) ? hm[it.slot].indexOf(k) >= 0 : hm[it.slot] === k; if ((it.minLv || 1) > (P.homeLevel || 1)) return lockItem(homeIcon(k), it.name, it.minLv, P, '要有一隻升到這級'); return `<div class="item ${on ? 'wear' : ''}"><div class="ic">${homeIcon(k)}</div>${it.fest ? `<div class="festtag">${FEST_TAG[it.fest]}</div>` : ''}<div class="nm">${it.name}</div><div class="sm2">${{ wall: '牆面', window: '窗戶', lamp: '燈飾', rug: '地毯', plant: '植物', toy: '玩具', bed: '小床', deco: '牆上裝飾', fest: '節慶擺飾', figure: '節慶人偶' }[it.slot]}</div>
+    return `<button class="${(hm.theme || 'bluegold') === k ? 'on' : ''}" onclick="petCall('petStyle',{theme:'${k}'},{say:'換新家！'})"><span class="thm">${roomSVG({ theme: k })}</span><span>${ROOM_TH[k][0]}</span></button>`; }).join('')}</div><label class="f">家具（大家一起住・看等級最高的那隻解鎖）</label><div class="hint" style="margin-top:0">同一類（牆上裝飾、玩具、節慶擺飾、人偶、燈、地毯、小床）最多同時擺 2 個，擺好可以用「🪑 佈置小窩」拖到喜歡的位置</div><div class="shop">${homes.map(k => festHead(shop, homes, k) + (() => { const it = shop[k], own = owned.indexOf(k) >= 0, on = Array.isArray(hm[it.slot]) ? hm[it.slot].indexOf(k) >= 0 : hm[it.slot] === k; if ((it.minLv || 1) > (P.homeLevel || 1)) return lockItem(homeIcon(k), it.name, it.minLv, P, '要有一隻升到這級'); return `<div class="item ${on ? 'wear' : ''}"><div class="ic">${homeIcon(k)}</div>${unlTag(it)}${it.fest ? `<div class="festtag">${FEST_TAG[it.fest]}</div>` : ''}<div class="nm">${it.name}</div><div class="sm2">${{ wall: '牆面', window: '窗戶', lamp: '燈飾', rug: '地毯', plant: '植物', toy: '玩具', bed: '小床', deco: '牆上裝飾', fest: '節慶擺飾', figure: '節慶人偶' }[it.slot]}</div>
     ${own ? `<button class="${on ? 'ghost2' : ''}" onclick="petCall('petWear',${on ? `{slot:'${it.slot}',item:'',remove:'${k}'}` : `{item:'${k}'}`},{say:'${on ? '收起來～' : '好漂亮！'}'})">${on ? '收起來' : '擺上'}</button>` : `<button ${P.coins < it.price ? 'disabled' : ''} onclick="petCall('petBuy',{item:'${k}'},{say:'新家具耶！'})">${coinIco()} ${it.price} 購買</button>`}</div>`; })()).join('')}</div>` : ''}
   ${tab === 'adopt' ? adoptBox(P, false) : ''}
 
