@@ -317,6 +317,7 @@ html,body{height:100%;overflow:hidden}
 .cbrand{font:700 11px/1 -apple-system,sans-serif;letter-spacing:3px;color:rgba(58,36,0,.6)}
 .ckind{font-size:30px;font-weight:900;margin:10px 0 12px;color:#14204E}
 .score tr.mine td{background:#FFF3C4}
+.rvdone{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#E3F6EA;color:#14532D;border:1px solid #9AD8B0;border-radius:14px;padding:10px 10px 10px 14px;margin:0 0 10px;font-size:14px}.rvdone b{color:#14532D}
 .rvleft{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#FFF6D8;color:#14204E;border-radius:14px;padding:8px 10px 8px 14px;margin:0 0 12px;font-size:14px}.rvleft b{color:#B4532A}
 .certtabs{display:flex;gap:8px;justify-content:center;margin:0 0 12px}.certtabs button{border:1px solid rgba(255,246,216,.6);border-radius:99px;padding:8px 16px;background:transparent;color:#FFF6D8;font:800 14px -apple-system,sans-serif}.certtabs button.on{background:#FFF6D8;color:#14204E}
 .gpets{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-end;gap:0 2px;background:rgba(255,255,255,.55);border-radius:18px;padding:8px 8px 6px;margin:0 4px 12px}.gpets>span{flex-basis:100%;font-size:13px;color:#5B6585;margin-top:2px}
@@ -1126,7 +1127,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261127-1810';
+const APP_VER = '20261127-1820';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1165,6 +1166,7 @@ function poll() {
   if (document.hidden || !S.token || typing() || !S.me) return;
   if (S.v === 'admin') bgFresh('ad', () => api('adminCourses'), x => { const n0 = ((S.ad && S.ad.pendingList) || []).length, n1 = (x.pendingList || []).length; S.ad = x; if (n1 > n0) toast('📥 有 ' + (n1 - n0) + ' 份新作業進來了'); }, () => S.v === 'admin');
   else if (S.v === 'board' && S.p && S.p.id) { const id = S.p.id; bgFresh('bd_' + id, () => api('courseBoard', { courseId: id }), x => { const c = b => (b.subs || []).filter(s => s.status === 'pending').length, n0 = S.bd ? c(S.bd) : 0; S.bd = x; if (c(x) > n0) toast('📥 有新作業進來了'); }, () => S.v === 'board' && S.p.id === id); }
+  else if (S.v === 'review' && S.bd && S.bd.course) { const id = S.bd.course.id, sid = S.p.subId; bgFresh('bd_' + id, () => api('courseBoard', { courseId: id }), x => { const o = (S.bd.subs || []).find(z => z.id === sid), n = (x.subs || []).find(z => z.id === sid); S.bd = x; if (o && n && o.status === 'pending' && n.status !== 'pending' && n.reviewedBy !== S.me.user.id) toast('這份剛剛已經有人批改了'); }, () => S.v === 'review' && S.p.subId === sid); }
   else if (S.v === 'home') bgFresh('me', () => api('me'), x => { S.me = x; saveBootCache(); setTimeout(bonusPop, 0); }, () => S.v === 'home');
   else if (S.v === 'course' && S.p && S.p.id) { const id = S.p.id; bgFresh('cd_' + id, () => api('getCourse', { courseId: id }), x => { S.cd = x; }, () => S.v === 'course' && S.p.id === id); }
   else if (S.v === 'team') bgFresh('team', () => api('myTeam', EMBED ? {} : { direct: 1 }), x => { S.team = x; S.ts = null; }, () => S.v === 'team');
@@ -3238,15 +3240,20 @@ function openReview(id) {
   S.rv = { status: s.status === 'pending' ? '' : s.status, stars: Number(s.stars) || 0 };
   if (S.v === 'review') { S.p = { subId: id }; render(); SCR().scrollTop = 0; }
   else go('review', { subId: id });
+  setTimeout(() => { if (S.v === 'review' && S.p.subId === id) { LAST_POLL = Date.now(); poll(); } }, 300);
 }
 function fillReply(tpl, s) { const m = S.bd.members.find(x => x.id === s.userId) || {}, t = taskOf(s.taskId) || {}; return String(tpl || '').replace(/\{名字\}/g, FN(m)).replace(/\{任務\}/g, t.title || ''); }
 function pickRv(st) { if ($('rvText')) S.rv.text = val('rvText'); S.rv.status = st; render(); }
 function vReview() {
   const s = S.bd.subs.find(x => x.id === S.p.subId), t = taskOf(s.taskId), rv = S.rv;
   const m = S.bd.members.find(x => x.id === s.userId) || {};
-  const left = (S.bd.subs || []).filter(x => x.status === 'pending' && taskOf(x.taskId)).length;
+  const left = (S.bd.subs || []).filter(x => x.status === 'pending' && taskOf(x.taskId)).length, meId = S.me.user.id;
+  const oc = (s.comments || []).filter(c => c.authorId && c.authorId !== meId && c.id !== 'local' && String(c.createdAt || '') >= String(s.updatedAt || s.submittedAt || '')).slice(-1)[0];
+  const byOther = s.status !== 'pending' && s.reviewedBy && s.reviewedBy !== meId ? (s.reviewedByName || '其他管理員') : '';
+  const warn = byOther ? `✅ 這份已經由 <b>${esc(byOther)}</b> 批改（${STW[s.status]}），不用再改了` : s.status === 'pending' && oc ? `💬 <b>${esc(oc.authorName || '其他管理員')}</b> 已經回覆過了，但還沒選通過或需修改` : '';
   return `${backBar('返回列表')}
-  ${left ? `<div class="rvleft"><span>📝 這堂課還有 <b>${left}</b> 份待批改・改完自動跳下一份</span>${left > 1 || s.status !== 'pending' ? `<button class="btn sm ghost" onclick="skipReview()">跳過 ›</button>` : ''}</div>` : ''}
+  ${warn ? `<div class="rvdone"><span>${warn}</span>${left ? `<button class="btn sm gold" onclick="skipReview()">下一份 ›</button>` : ''}</div>` : ''}
+  ${left && !byOther ? `<div class="rvleft"><span>📝 這堂課還有 <b>${left}</b> 份待批改・改完自動跳下一份</span>${left > 1 || s.status !== 'pending' ? `<button class="btn sm ghost" onclick="skipReview()">跳過 ›</button>` : ''}</div>` : ''}
   <div class="chead" style="margin-bottom:10px"><span class="st ${s.status}">${STW[s.status]}</span><h1 class="title">${esc(FN(m) || '夥伴')}</h1>
   <div class="cmeta">${esc(t.title)}，${fmtT(s.updatedAt)} 送出</div></div>
   ${whoCard(m)}
