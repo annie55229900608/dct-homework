@@ -1108,7 +1108,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261127-1320';
+const APP_VER = '20261127-1340';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1244,7 +1244,38 @@ function vAuth() {
     <label class="f">密碼</label><input id="aPw" type="password" autocomplete="${reg ? 'new-password' : 'current-password'}" placeholder="至少 4 碼">
     ${reg ? `<label class="f">課程邀請碼（選填）</label><input id="aCode" value="${esc(code)}" autocapitalize="characters" autocomplete="off" placeholder="6 碼英數字" style="text-transform:uppercase;letter-spacing:.1em">` : ''}
     <button class="btn gold block" type="submit">${reg ? '註冊並開始' : '登入'}</button>
+    ${reg ? '' : '<button type="button" class="btn ghost block" style="margin-top:10px" onclick="forgotPw()">忘記密碼？</button>'}
+    <div class="cmeta" style="text-align:center;margin-top:12px;opacity:.7">版本 ${APP_VER}</div>
   </form></div>`;
+}
+function forgotPw() {
+  const el = document.createElement('div'); el.className = 'sysmodal'; let step = 1, ph = (document.getElementById('aPhone') || {}).value || '', masked = '';
+  const draw = () => {
+    el.innerHTML = `<div class="sysbox"><div class="ding">叮！【重設密碼】</div><h3>🔑 自己重設密碼</h3>
+    ${step === 1 ? `<p style="text-align:center">輸入你的手機號碼，我們會寄驗證碼到你註冊時填的 Email</p><input id="fpPhone" type="tel" inputmode="numeric" value="${esc(ph)}" placeholder="0912345678" style="margin:6px 0 10px"><button data-a="send">寄驗證碼到 Email</button>`
+      : `<p style="text-align:center">驗證碼已寄到 <b>${esc(masked)}</b><br>（找不到請看垃圾郵件）</p><input id="fpCode" inputmode="numeric" placeholder="6 位數驗證碼" style="margin:6px 0"><input id="fpPw" type="password" autocomplete="new-password" placeholder="新密碼（至少 4 碼）" style="margin:0 0 10px"><button data-a="do">確定更改並登入</button><button data-a="back" class="gask-later" style="margin-top:8px">重新寄驗證碼</button>`}
+    <button data-a="x" class="gask-later" style="margin-top:8px">取消</button>
+    <div class="cmeta" style="margin-top:10px;color:#E9DBF7;text-align:center">沒有設定 Email 的話，請找上家或最高管理員幫你重設</div></div>`;
+  };
+  draw(); document.body.appendChild(el);
+  el.onclick = async e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.a === 'x') return el.remove();
+    if (b.dataset.a === 'back') { step = 1; return draw(); }
+    if (b.dataset.a === 'send') {
+      ph = el.querySelector('#fpPhone').value.trim(); if (!ph) return toast('請輸入手機號碼');
+      const r = await run(() => api('pwResetStart', { phone: ph }), '寄送中…'); if (!r) return;
+      masked = r.masked; step = 2; draw(); return;
+    }
+    if (b.dataset.a === 'do') {
+      const code = el.querySelector('#fpCode').value.trim(), pw = el.querySelector('#fpPw').value;
+      if (!code) return toast('請輸入驗證碼'); if (pw.trim().length < 4) return toast('新密碼至少 4 碼');
+      const r = await run(() => api('pwResetDo', { phone: ph, code, password: pw }), '更改中…'); if (!r) return;
+      el.remove(); S.token = r.token; store.set('dct_token', r.token);
+      if (r.me) { try { store.set('dct_cache_me', JSON.stringify(Object.assign({}, r.me, { __t: r.token }))); if (r.pet) store.set('dct_cache_pet', JSON.stringify(r.pet)); } catch (e2) {} }
+      toast('密碼已更改，已幫你登入 ✓'); boot();
+    }
+  };
 }
 function regAva(d) { S.regAva = d; const el = $('regAvaImg'); if (el) { el.innerHTML = `<img src="${d}" alt="">`; el.nextElementSibling.textContent = '換一張'; } }
 async function doAuth(e) {
@@ -1260,7 +1291,7 @@ async function doAuth(e) {
       else if (r.joined) toast(r.joined.status === 'pending' ? '已申請加入課程，等待審核' : `已加入「${r.joined.title}」🪙 金幣 +10`);
       if (r.joined && r.joined.status === 'active' && !r.joined.admin) S.joinCid = r.joined.courseId;
     } else {
-      r = await api('login', { phone: val('aPhone'), password: val('aPw') });
+      r = await api('login', { phone: val('aPhone').replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)), password: val('aPw') });
     }
     S.token = r.token; store.set('dct_token', r.token);
     if (reg && S.regAva) { const ava = S.regAva; S.regAva = null; if (r.me && r.me.user) r.me.user.avatar = ava; api('setAvatar', { data: ava.split(',')[1] }).then(u => { if (S.me) { S.me.user = Object.assign(S.me.user, u); saveBootCache(); render(); } }).catch(() => toast('大頭貼上傳失敗，可以到「我的」再換一次')); }
@@ -3213,7 +3244,7 @@ function usersListHTML() {
   const list = S.users.filter(u => (!q || [u.realName, u.name, u.lineName, u.phone].some(v => String(v || '').toLowerCase().indexOf(q) >= 0)) && (!S.lvF || u.level === S.lvF)).sort(lvSort);
   return list.slice(0, S.userLimit || 60).map((u, i, A) => (u.level && (i === 0 || lvRank(A[i - 1].level) !== lvRank(u.level)) ? `<h3 class="lvhead">${esc(u.level)}（${list.filter(y => lvRank(y.level) === lvRank(u.level)).length}）</h3>` : (!u.level && i > 0 && A[i - 1].level ? '<h3 class="lvhead" style="opacity:.6">其他</h3>' : '')) + `<div class="urow"><div class="grow" style="cursor:pointer" onclick="openPinfo('${u.id}')"><b>${esc(u.realName || u.name)}</b>${u.realName && u.realName !== u.name ? ` <span class="cmeta">（${esc(u.name)}）</span>` : ''}<div class="cmeta">${esc(u.phone)}${u.ig ? '，IG ' + esc(u.ig) : ''}</div><div class="cmeta">上家：${u.uplineName ? esc(u.uplineName) + (u.uplineSt === 'pending' ? '（待確認）' : '') : '未設定'}　<button class="upbtn" onclick="event.stopPropagation();adminMoveUp('${u.id}')">🔄 改上家</button></div></div>
     ${u.role === 'owner' ? '<span class="chip">最高管理員</span>' : `<select onchange="setRole('${u.id}',this.value)"><option value="member" ${u.role === 'member' ? 'selected' : ''}>夥伴</option><option value="admin" ${u.role === 'admin' ? 'selected' : ''}>管理員</option></select>
-    <button class="btn sm ${u.exited === '1' ? 'red' : 'ghost'}" onclick="toggleExit('${u.id}')">${u.exited === '1' ? '已退出' : '退出'}</button>`}</div>`).join('') + (list.length > (S.userLimit || 60) ? `<button class="btn block" onclick="S.userLimit=(S.userLimit||60)+60;$('usersList').innerHTML=usersListHTML()">顯示更多（還有 ${list.length - (S.userLimit || 60)} 人）</button>` : '');
+    <button class="btn sm ghost" onclick="resetPw('${u.id}')">🔑 重設密碼</button><button class="btn sm ${u.exited === '1' ? 'red' : 'ghost'}" onclick="toggleExit('${u.id}')">${u.exited === '1' ? '已退出' : '退出'}</button>`}</div>`).join('') + (list.length > (S.userLimit || 60) ? `<button class="btn block" onclick="S.userLimit=(S.userLimit||60)+60;$('usersList').innerHTML=usersListHTML()">顯示更多（還有 ${list.length - (S.userLimit || 60)} 人）</button>` : '');
 }
 async function adminMoveUp(id) {
   const x = S.users.find(u => u.id === id); if (!x) return;
