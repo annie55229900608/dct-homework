@@ -101,6 +101,7 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;margin:0;line-height:1.35}
 .tlist{margin-top:18px;border-top:1px solid var(--line)}
 .trow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:14px 2px}
 .trow .tt{flex:1;min-width:0}
+.lvstat{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px}.lvstat>div{flex:1 1 72px;background:rgba(255,255,255,.9);border-radius:14px;padding:8px 6px;text-align:center;color:#14204E}.lvstat b{display:block;font-size:20px;font-family:var(--serif)}.lvstat span{font-size:11px;color:#5A6180}.lvstat .lvtot{background:#E8C46A}
 .tact{display:flex;flex-direction:column;gap:6px;flex:none}.tact b{font-size:12px;font-weight:700;padding:5px 10px;border-radius:99px;background:#EEF1F8;color:#22315E;text-align:center}.tact b.del{background:#FCE8EC;color:#C2334D}
 .trow .tt div:first-child{font-weight:600}
 .st{font-size:13px;padding:2px 10px;border-radius:99px;white-space:nowrap;border:1px solid}
@@ -999,6 +1000,7 @@ function nl(s) { return esc(s).replace(/\n/g, '<br>'); }
 function pad(n) { return String(n).padStart(2, '0'); }
 function today() { const d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
 function localDate(iso) { if (!iso) return ''; const d = new Date(iso); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function fmtDue(o) { return fmtD(o.dueDate) + (o.dueTime ? ' ' + o.dueTime : ''); }
 function fmtD(s) { if (!s) return ''; const p = s.split('-'); return Number(p[1]) + '/' + Number(p[2]); }
 function fmtT(iso) { if (!iso) return ''; const d = new Date(iso); return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); }
 function daysSince(iso) { return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000); }
@@ -1099,7 +1101,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261127-1025';
+const APP_VER = '20261127-1145';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1280,7 +1282,7 @@ function todoHTML() {
   const T = (S.me && S.me.todo) || [];
   if (!T.length) return S.me.courses.length ? '<div class="todo-ok">✨ 作業都完成了，太棒了！</div>' : '';
   const groups = ['revise', 'overdue', 'today', 'open', 'reply'].map(k => [k, T.filter(x => x.type === k)]).filter(g => g[1].length);
-  return `<div class="panel todop"><h3 style="margin-top:0">📌 待辦事項（${T.length}）</h3>${groups.map(([k, L]) => `<div class="tdh" style="color:${TODO_T[k][2]}">${TODO_T[k][0]} ${TODO_T[k][1]}（${L.length}）</div>${L.slice(0, S.todoAll ? 99 : 4).map(x => `<button class="tdrow" style="border-left-color:${TODO_T[k][2]}" onclick="openTodo('${x.courseId}','${x.taskId}')"><div class="grow"><b>${x.kind === 'choice' ? '🎮 ' : ''}${esc(x.title)}${x.isNew && k !== 'revise' && k !== 'reply' ? ' <span class="newtag">NEW</span>' : ''}</b><div class="cmeta">${esc(x.courseTitle)}${x.dueDate ? '・' + fmtD(x.dueDate) + ' 截止' : ''}</div></div><span class="cmeta">${k === 'revise' ? '去修改' : k === 'reply' ? '去看' : '去交'} ›</span></button>`).join('')}${L.length > 4 && !S.todoAll ? `<button class="btn sm block" style="margin:4px 0 8px" onclick="S.todoAll=1;render()">還有 ${L.length - 4} 個，全部顯示</button>` : ''}`).join('')}</div>`;
+  return `<div class="panel todop"><h3 style="margin-top:0">📌 待辦事項（${T.length}）</h3>${groups.map(([k, L]) => `<div class="tdh" style="color:${TODO_T[k][2]}">${TODO_T[k][0]} ${TODO_T[k][1]}（${L.length}）</div>${L.slice(0, S.todoAll ? 99 : 4).map(x => `<button class="tdrow" style="border-left-color:${TODO_T[k][2]}" onclick="openTodo('${x.courseId}','${x.taskId}')"><div class="grow"><b>${x.kind === 'choice' ? '🎮 ' : ''}${esc(x.title)}${x.isNew && k !== 'revise' && k !== 'reply' ? ' <span class="newtag">NEW</span>' : ''}</b><div class="cmeta">${esc(x.courseTitle)}${x.dueDate ? '・' + fmtDue(x) + ' 截止' : ''}</div></div><span class="cmeta">${k === 'revise' ? '去修改' : k === 'reply' ? '去看' : '去交'} ›</span></button>`).join('')}${L.length > 4 && !S.todoAll ? `<button class="btn sm block" style="margin:4px 0 8px" onclick="S.todoAll=1;render()">還有 ${L.length - 4} 個，全部顯示</button>` : ''}`).join('')}</div>`;
 }
 function openTodo(cid, tid) { if (MEM['cd_' + cid]) { S.cd = MEM['cd_' + cid]; go('course', { id: cid }); openTask(tid); bgFresh('cd_' + cid, () => api('getCourse', { courseId: cid }), x => { if (S.cd && S.cd.course && S.cd.course.id === cid) S.cd = x; }, () => S.v === 'course' && S.p.id === cid); return; } run(async () => { await loadCourse(cid); go('course', { id: cid }); openTask(tid); }, '載入中…'); }
 function bonusPop() {
@@ -1354,11 +1356,11 @@ function vCourse() {
   <div class="legend"><span class="l1">已通過</span><span class="l2">待批改</span><span class="l3">需修改</span><span class="l4">未交</span></div>
   ${d.tasks.length ? `<div class="stamps">${d.tasks.map((t, i) => {
     const s = subOf(t.id), st = stampState(t, s);
-    return `<button class="stamp ${st} ${t.kind === 'choice' ? 'quest-s' : ''} ${S.lastTask === t.id ? 'sel' : ''}" onclick="openTask('${t.id}')"><b>${esc(stampLabel(t, i))}</b><small>${st === 'todo' ? (t.dueDate ? fmtD(t.dueDate) : '待交') : STW[st]}</small>${s && s.isNew ? '<em></em>' : ''}</button>`;
+    return `<button class="stamp ${st} ${t.kind === 'choice' ? 'quest-s' : ''} ${S.lastTask === t.id ? 'sel' : ''}" onclick="openTask('${t.id}')"><b>${esc(stampLabel(t, i))}</b><small>${st === 'todo' ? (t.dueDate ? fmtDue(t) : '待交') : STW[st]}</small>${s && s.isNew ? '<em></em>' : ''}</button>`;
   }).join('')}</div>
   <div class="tlist">${d.tasks.map(t => {
     const s = subOf(t.id), st = stampState(t, s);
-    return `<button class="trow" onclick="openTask('${t.id}')"><div class="tt"><div>${t.kind === 'choice' ? '🎮 ' : ''}${esc(t.title)}</div><div class="cmeta">${t.dueDate ? fmtD(t.dueDate) + ' 截止' : '不限時間'}${s && s.isNew ? '，有新批改' : ''}</div></div><span class="st ${st}">${STW[st]}</span></button>`;
+    return `<button class="trow" onclick="openTask('${t.id}')"><div class="tt"><div>${t.kind === 'choice' ? '🎮 ' : ''}${esc(t.title)}</div><div class="cmeta">${t.dueDate ? fmtDue(t) + ' 截止' : '不限時間'}${s && s.isNew ? '，有新批改' : ''}</div></div><span class="st ${st}">${STW[st]}</span></button>`;
   }).join('')}</div>` : `<div class="empty">管理員還沒放上任務</div>`}
   ${c.feedbackOn === '1' ? vFeedbackForm() : ''}`;
 }
@@ -1457,6 +1459,24 @@ async function delTaskQuick(id) {
   const ok = await run(async () => { await api('deleteTask', { taskId: id }); await loadBoard(S.bd.course.id); return true; }, '刪除中…');
   if (ok) { toast('已刪除'); render(); }
 }
+function groupBonusPop(gid) {
+  const bd = S.bd, n = (bd.members || []).filter(m => m.status === 'active' && m.groupId === gid).length;
+  const el = document.createElement('div'); el.className = 'sysmodal';
+  el.innerHTML = `<div class="sysbox"><div class="ding">叮！【組別加分】</div><h3>🎁 ${esc(gName(gid))}</h3><p style="text-align:center">輸入總分，系統平分給 ${n} 位組員<br>（每人拿到的分數 = 金幣）</p>
+  <input id="gbPts" type="number" inputmode="numeric" placeholder="總分，例如 100" style="margin:6px 0"><div id="gbEach" class="cmeta" style="color:#F6E7B8;text-align:center;min-height:20px"></div>
+  <input id="gbWhy" placeholder="原因（選填），例如 小組全員交齊" style="margin:6px 0 10px"><button data-a="ok">確定加分</button><button data-a="x" class="gask-later" style="margin-top:8px">取消</button></div>`;
+  document.body.appendChild(el);
+  const P = el.querySelector('#gbPts'), E = el.querySelector('#gbEach');
+  P.oninput = () => { const v = Math.round(Number(P.value) || 0), e = n ? (v > 0 ? 1 : -1) * Math.floor(Math.abs(v) / n) : 0; E.textContent = v ? (e ? `每人 ${e > 0 ? '+' : ''}${e} 分` : '分數太少，每人分不到 1 分') : ''; };
+  el.onclick = async e => {
+    const b = e.target.closest('button'); if (!b) { if (e.target === el) el.remove(); return; }
+    if (b.dataset.a === 'x') return el.remove();
+    const pts = Math.round(Number(P.value) || 0); if (!pts) return toast('請輸入分數');
+    const why = el.querySelector('#gbWhy').value.trim(); el.remove();
+    const r = await run(() => api('addGroupBonus', { courseId: bd.course.id, groupId: gid, points: pts, reason: why }), '加分中…');
+    if (r) { bd.bonus = (bd.bonus || []).concat(r.rows || []); render(); toast(`已幫 ${r.n} 位組員各 ${r.each > 0 ? '+' : ''}${r.each} 分 🎁`); }
+  };
+}
 function vTask() {
   const h = vTask0(); if (!S.cd || S.cd.canManage !== '1') return h;
   const t = curTask(), bb = backBar(S.cd.course.title);
@@ -1478,13 +1498,13 @@ function vTask0() {
   const t0 = curTask();
   if (t0.kind === 'choice') {
     const s0 = S.cd.subs.find(x => x.taskId === t0.id);
-    return `${backBar(S.cd.course.title)}<div class="chead"><span class="st ${stampState(t0, s0)}">${s0 && s0.status === 'pass' ? '已過關' : '抉擇關卡'}</span><h1 class="title">🎮 ${esc(t0.title)}</h1><div class="cmeta">${t0.dueDate ? fmtD(t0.dueDate) + ' 截止' : '不限時間'}</div>
+    return `${backBar(S.cd.course.title)}<div class="chead"><span class="st ${stampState(t0, s0)}">${s0 && s0.status === 'pass' ? '已過關' : '抉擇關卡'}</span><h1 class="title">🎮 ${esc(t0.title)}</h1><div class="cmeta">${t0.dueDate ? fmtDue(t0) + ' 截止' : '不限時間'}</div>
     ${t0.desc ? `<p class="desc">${nl(t0.desc)}</p>` : ''}${taskMediaHtml(t0)}</div>${questHtml(t0, s0)}`;
   }
   const t = curTask(), s = S.cd.subs.find(x => x.taskId === t.id), dr = S.draft, st = stampState(t, s);
   const canEdit = !s || s.status !== 'pass';
   return `${backBar(S.cd.course.title)}
-  <div class="chead"><span class="st ${st}">${STW[st]}</span><h1 class="title">${esc(t.title)}</h1><div class="cmeta">${t.dueDate ? fmtD(t.dueDate) + ' 截止' : '不限時間'}　🪙 交作業 +${Number(t.coin) || 5}・通過再 +10</div>
+  <div class="chead"><span class="st ${st}">${STW[st]}</span><h1 class="title">${esc(t.title)}</h1><div class="cmeta">${t.dueDate ? fmtDue(t) + ' 截止' : '不限時間'}　🪙 交作業 +${Number(t.coin) || 5}・通過再 +10</div>
   ${t.desc ? `<p class="desc">${nl(t.desc)}</p>` : ''}${taskMediaHtml(t)}</div>
   ${t.template ? `<div class="row" style="justify-content:space-between;margin-top:6px"><b class="tplh" style="font-family:var(--serif)">參考模板</b><button class="btn sm" onclick="copyText(curTask().template)">複製模板</button></div><div class="tpl">${esc(t.template)}</div>` : ''}
   ${s ? `<div class="sub"><div class="row" style="justify-content:space-between"><b>我交的作業</b><span class="cmeta">${fmtT(s.updatedAt)}</span></div>
@@ -1753,6 +1773,7 @@ function vAdmin() {
   const L0 = a.courses.filter(c => !S.adBy || c.createdBy === S.adBy), PT = perTabs(L0, c => c.endDate || c.startDate || c.createdAt, 'adPer');
   const L = PT.list.slice().sort((x, y) => (x.archived === '1') - (y.archived === '1') || (y.toReview || 0) - (x.toReview || 0) || (y.waiting || 0) - (x.waiting || 0));
   return `<header class="top"><div><div class="hi">${S.me.user.role === 'owner' ? '👑 最高管理員' : '管理員'}</div><h1 class="title">課程管理</h1></div>${isAdmin() ? `<button class="btn gold" onclick="go('courseEdit',{})">＋ 新增課程</button>` : ''}</header>
+  ${own && a.overview.levelCounts ? lvCountHTML(a.overview.levelCounts, Object.values(a.overview.levelCounts).reduce((x, y) => x + y, 0)) : ''}
   <div class="panel pendp"><h3 style="margin-top:0">📝 需要回覆的作業${P.length ? `（${P.length}）` : ''}</h3>
   ${P.length ? P.slice(0, S.pendAll ? 999 : 6).map(x => `<button class="prow" onclick="openPend('${x.courseId}','${x.id}')">${avatarHtml(x, 40)}<div class="grow"><b>${esc(x.realName || x.name)}・${esc(x.taskTitle)}</b><div class="cmeta">${esc(x.courseTitle)}・${ago(x.at)}交</div></div><span class="cmeta">回覆 ›</span></button>`).join('')
     + (P.length > 6 && !S.pendAll ? `<button class="btn sm block" style="margin-top:8px" onclick="S.pendAll=1;render()">看全部 ${P.length} 份</button>` : '')
@@ -1778,7 +1799,7 @@ function ownerTasksHTML() {
   const L0 = o.taskList.filter(t => (!S.adBy || t.createdBy === S.adBy) && (!q || [t.title, t.courseTitle, t.creatorName].some(v => String(v || '').toLowerCase().indexOf(q) >= 0)));
   if (!L0.length) return '<div class="empty" style="padding:14px">找不到符合的任務</div>';
   const PT = perTabs(L0, t => t.createdAt || t.dueDate, 'otPer'), L = PT.list;
-  return PT.html + `<div class="cmeta" style="margin:6px 0">${perLabel(PT.cur)} ${L.length} 個任務（全部 ${L0.length} 個）</div>` + L.slice(0, S.otLimit || 40).map(t => `<button class="trow" onclick="openTaskAdmin('${t.courseId}','${t.id}')"><div class="tt"><div>${t.kind === 'choice' ? '🎮 ' : ''}${esc(t.title)}</div><div class="cmeta">${esc(t.courseTitle)}${t.archived === '1' ? '（已封存）' : ''}・${esc(t.creatorName || '—')} 建立${t.dueDate ? '・' + fmtD(t.dueDate) + ' 截止' : ''}<br>已交 ${t.subs} 份${t.pending ? `・<b style="color:#C0392B">待批改 ${t.pending}</b>` : ''}</div></div><span class="cmeta">看 ›</span></button>`).join('') + (L.length > (S.otLimit || 40) ? `<button class="btn block" onclick="S.otLimit=(S.otLimit||40)+40;$('oTasks').innerHTML=ownerTasksHTML()">顯示更多</button>` : '');
+  return PT.html + `<div class="cmeta" style="margin:6px 0">${perLabel(PT.cur)} ${L.length} 個任務（全部 ${L0.length} 個）</div>` + L.slice(0, S.otLimit || 40).map(t => `<button class="trow" onclick="openTaskAdmin('${t.courseId}','${t.id}')"><div class="tt"><div>${t.kind === 'choice' ? '🎮 ' : ''}${esc(t.title)}</div><div class="cmeta">${esc(t.courseTitle)}${t.archived === '1' ? '（已封存）' : ''}・${esc(t.creatorName || '—')} 建立${t.dueDate ? '・' + fmtDue(t) + ' 截止' : ''}<br>已交 ${t.subs} 份${t.pending ? `・<b style="color:#C0392B">待批改 ${t.pending}</b>` : ''}</div></div><span class="cmeta">看 ›</span></button>`).join('') + (L.length > (S.otLimit || 40) ? `<button class="btn block" onclick="S.otLimit=(S.otLimit||40)+40;$('oTasks').innerHTML=ownerTasksHTML()">顯示更多</button>` : '');
 }
 function openTaskAdmin(cid, tid) { run(async () => { await loadBoard(cid); go('board', { id: cid, tab: 'tasks' }); go('taskEdit', { taskId: tid }); }, '載入中…'); }
 function backupPanel() {
@@ -2030,7 +2051,7 @@ function bClass() {
   <tr class="tot"><td>全班合計</td>${bd.tasks.map(t => `<td>${bd.subs.filter(s => s.taskId === t.id).length}</td>`).join('')}<td>${avg}%</td><td>${sum('bonus')}</td><td class="tt"><b>${sum('total')}</b></td></tr>
   <tr class="tot"><td>平均</td>${bd.tasks.map(() => '<td></td>').join('')}<td></td><td>${Math.round(sum('bonus') / R0.length)}</td><td class="tt"><b>${Math.round(sum('total') / R0.length)}</b></td></tr>
   </table></div>
-  ${S.p.g ? `<h2 class="sec">📋 ${S.p.g === '__none' ? '未分組' : esc(gName(S.p.g))} 組員作業</h2><div class="hint">點名字展開，看她交的每一份作業</div>
+  ${S.p.g ? `<h2 class="sec">📋 ${S.p.g === '__none' ? '未分組' : esc(gName(S.p.g))} 組員作業</h2>${S.p.g !== '__none' ? `<button class="btn gold block" style="margin:4px 0 8px" onclick="groupBonusPop('${S.p.g}')">🎁 幫「${esc(gName(S.p.g))}」組別加分（平分給組員）</button>` : ''}<div class="hint">點名字展開，看她交的每一份作業</div>
   ${R0.map(r => { const x = r.x, mt = bd.tasks.filter(t => tFor(t, x.m.groupId)), subs = mt.map(t => ({ t, s: x.by[t.id] })), pct = Math.round(x.rate * 100);
     return `<details class="gmem"><summary><div class="row" style="justify-content:space-between;flex-wrap:nowrap;gap:10px">${avatarHtml(x.m, 36)}<div class="grow"><b>${esc(FN(x.m))}</b><div class="cmeta">交 ${x.submitted}／${mt.length}・通過 ${x.pass}・需修改 ${x.revise}${x.missing.length ? `・<span style="color:#B0405A">漏交 ${x.missing.length}</span>` : ''}・總分 ${r.total}</div></div><b class="gpct">${pct}%</b></div><div class="gbar"><i style="width:${pct}%"></i></div></summary>
       ${subs.map(({ t, s }) => `<div class="gsub"><div class="row" style="justify-content:space-between;flex-wrap:nowrap;gap:8px"><b>${t.kind === 'choice' ? '🎮 ' : ''}${esc(t.title)}</b>${s ? `<span class="st ${s.status}">${STW[s.status] || ''}</span>` : `<span class="cmeta">${t.dueDate && t.dueDate < today() ? '漏交' : '還沒交'}</span>`}</div>${s ? `<div class="cmeta">${fmtT(s.submittedAt)}</div>${subBody(s)}<button class="btn sm gold" style="margin-top:8px" onclick="openReview('${s.id}')">批改這份</button>` : ''}</div>`).join('')}
@@ -2068,7 +2089,7 @@ function bTasks() {
   return `<button class="btn gold block" style="margin:0 0 14px" onclick="go('taskEdit',{})">＋ 新增任務</button>
   ${ts.length ? ts.map(t => {
     const n = S.bd.subs.filter(s => s.taskId === t.id).length;
-    return `<button class="trow" onclick="go('taskEdit',{taskId:'${t.id}'})"><div class="tt"><div>${t.kind === 'choice' ? '🎮 ' : ''}${esc(t.title)}${t.groupIds ? ` <span class="chip">${esc(String(t.groupIds).split(',').map(id => gName(id)).filter(Boolean).join('、'))}</span>` : ''}</div><div class="cmeta">${t.dueDate ? fmtD(t.dueDate) + ' 截止' : '不限時間'}，已交 ${n} 份${t.template ? '，有模板' : ''}${(t.media || []).length ? '，📎 ' + t.media.length + ' 個檔案' : ''}</div></div><span class="tact"><b onclick="event.stopPropagation();go('taskEdit',{taskId:'${t.id}'})">✏️ 編輯</b><b class="del" onclick="event.stopPropagation();delTaskQuick('${t.id}')">🗑 刪除</b></span></button>`;
+    return `<button class="trow" onclick="go('taskEdit',{taskId:'${t.id}'})"><div class="tt"><div>${t.kind === 'choice' ? '🎮 ' : ''}${esc(t.title)}${t.groupIds ? ` <span class="chip">${esc(String(t.groupIds).split(',').map(id => gName(id)).filter(Boolean).join('、'))}</span>` : ''}</div><div class="cmeta">${t.dueDate ? fmtDue(t) + ' 截止' : '不限時間'}，已交 ${n} 份${t.template ? '，有模板' : ''}${(t.media || []).length ? '，📎 ' + t.media.length + ' 個檔案' : ''}</div></div><span class="tact"><b onclick="event.stopPropagation();go('taskEdit',{taskId:'${t.id}'})">✏️ 編輯</b><b class="del" onclick="event.stopPropagation();delTaskQuick('${t.id}')">🗑 刪除</b></span></button>`;
   }).join('') : `<div class="empty">還沒有任務</div>`}`;
 }
 function groupPanel() {
@@ -2155,7 +2176,7 @@ function vTaskEdit() {
   <label class="f">任務類型</label>
   <div class="kindpick"><button class="${isQ ? '' : 'on'}" onclick="tKind('')">📝 一般作業</button><button class="${isQ ? 'on' : ''}" onclick="tKind('choice')">🎮 二選一抉擇關卡</button></div>
   <label class="f">任務名稱</label><input id="tTitle" value="${esc(t.title)}" placeholder="例如 Day 1 或 第 1 堂">
-  <label class="f">截止日期</label><input id="tDue" type="date" value="${esc(t.dueDate)}">
+  <div class="row"><div class="grow"><label class="f">截止日期</label><input id="tDue" type="date" value="${esc(t.dueDate)}"></div><div style="flex:0 0 auto"><label class="f">截止時間（24 小時制）</label><div class="row" style="gap:4px;flex-wrap:nowrap"><select id="tDueH" style="width:76px"><option value="">--</option>${Array.from({ length: 24 }, (_, h) => String(h).padStart(2, '0')).map(h => `<option ${String(t.dueTime || '').slice(0, 2) === h ? 'selected' : ''}>${h}</option>`).join('')}</select><b>:</b><select id="tDueM" style="width:76px">${['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'].map(m => `<option ${String(t.dueTime || '').slice(3, 5) === m ? 'selected' : ''}>${m}</option>`).join('')}</select></div></div></div><div class="hint" style="margin-top:2px">時間不選 = 當天結束前都可以交</div>
   <label class="f">任務說明</label><textarea id="tDesc" placeholder="今天要做什麼、怎麼交">${esc(t.desc)}</textarea>
   ${isQ ? `<div class="panel"><h3>🎮 二選一關卡設定</h3>
     ${S.qd.map((q, i) => `<div class="qedit"><div class="row" style="justify-content:space-between"><b>第 ${i + 1} 題</b>${S.qd.length > 1 ? `<button class="btn sm red" onclick="qdDel(${i})">刪除這題</button>` : ''}</div>
@@ -2931,8 +2952,8 @@ function vPet() {
     <div class="fullbar ${p.full < 30 ? 'low' : ''}" style="height:14px"><i style="width:${p.full}%"></i></div>
     <div class="row" style="justify-content:space-between;margin-top:8px"><span class="cmeta">飽足度 ${p.full}%・點牠會有反應喔</span><span class="coin" style="font-size:18px">${coinIco()} ${P.coins}</span></div></div>
   <div class="tabs pettabs" style="margin-top:6px">${[['food', '餵食'], ['wear', '裝扮'], ['home', '小窩'], ['adopt', '領養'], ['earn', '金幣']].map(([k, l]) => `<button class="${tab === k ? 'on' : ''}" onclick="S.petTab='${k}';render()">${l}</button>`).join('')}</div>
-  ${tab === 'food' ? `<div class="hint" style="margin-top:0;${p.full >= 100 ? 'color:var(--late);font-weight:700' : ''}">${p.full >= 100 ? `「${esc(p.name)}」已經吃飽了（飽足 100%），明天再來餵吧！` : `現在餵的是「${esc(p.name)}」・飽足 ${p.full}%・每天最多可以餵到 100%・🔒 的食物升級後解鎖`}</div><div class="shop">${foods.map(k => festHead(shop, foods, k) + (() => { const it = shop[k]; if ((it.minLv || 1) > p.level) return lockItem(foodIcon(k, p.kind), k === 'fish' ? PET_FOOD_NAME[p.kind] : it.name, it.minLv, P, `飽足 +${it.add}`); return `<div class="item"><div class="ic">${foodIcon(k, p.kind)}</div>${it.fest ? `<div class="festtag">${FEST_TAG[it.fest]}</div>` : ''}<div class="nm">${k === 'fish' ? PET_FOOD_NAME[p.kind] : it.name}</div><div class="sm2">飽足 +${it.add}</div><button ${P.coins < it.price || p.full >= 100 ? 'disabled' : ''} onclick="petCall('petBuy',{item:'${k}'},{eat:'${k}',say:'好吃！'})">${coinIco()} ${it.price} 餵牠</button></div>`; })()).join('')}</div>${p.full >= 100 ? '<div class="hint">吃飽飽了，晚點再餵吧</div>' : ''}` : ''}
-  ${tab === 'wear' ? `<div class="hint" style="margin-top:0">幫「${esc(p.name)}」打扮・買過的裝扮每隻都可以戴・🔒 是等級專屬</div><div class="shop">${wears.map(k => festHead(shop, wears, k) + (() => { const it = shop[k], own = owned.indexOf(k) >= 0, on = w[it.slot] === k, lock = it.minLv && p.level < it.minLv; if (lock) return lockItem(accIcon(k), it.name, it.minLv, P); return `<div class="item ${on ? 'wear' : ''} ${it.minLv >= 5 ? 'vip' : ''}"><div class="ic">${accIcon(k)}</div>${it.fest ? `<div class="festtag">${FEST_TAG[it.fest]}</div>` : ''}<div class="nm">${it.name}</div><div class="sm2">${{ head: '頭上', face: '臉上', neck: '脖子', back: '背上' }[it.slot]}</div>
+  ${tab === 'food' ? `<div class="hint" style="margin-top:0;${p.full >= 100 ? 'color:var(--late);font-weight:700' : ''}">${p.full >= 100 ? `「${esc(p.name)}」已經吃飽了（飽足 100%），明天再來餵吧！` : `現在餵的是「${esc(p.name)}」・飽足 ${p.full}%・每天最多可以餵到 100%・🔒 的食物升級後解鎖`}</div><div class="shop">${foods.map(k => festHead(shop, foods, k) + (() => { const it = shop[k]; if ((it.minLv || 1) > (P.homeLevel || p.level)) return lockItem(foodIcon(k, p.kind), k === 'fish' ? PET_FOOD_NAME[p.kind] : it.name, it.minLv, P, `飽足 +${it.add}`); return `<div class="item"><div class="ic">${foodIcon(k, p.kind)}</div>${it.fest ? `<div class="festtag">${FEST_TAG[it.fest]}</div>` : ''}<div class="nm">${k === 'fish' ? PET_FOOD_NAME[p.kind] : it.name}</div><div class="sm2">飽足 +${it.add}</div><button ${P.coins < it.price || p.full >= 100 ? 'disabled' : ''} onclick="petCall('petBuy',{item:'${k}'},{eat:'${k}',say:'好吃！'})">${coinIco()} ${it.price} 餵牠</button></div>`; })()).join('')}</div>${p.full >= 100 ? '<div class="hint">吃飽飽了，晚點再餵吧</div>' : ''}` : ''}
+  ${tab === 'wear' ? `<div class="hint" style="margin-top:0">幫「${esc(p.name)}」打扮・買過的裝扮每隻都可以戴・🔒 是等級專屬</div><div class="shop">${wears.map(k => festHead(shop, wears, k) + (() => { const it = shop[k], own = owned.indexOf(k) >= 0, on = w[it.slot] === k, lock = it.minLv && (P.homeLevel || p.level) < it.minLv; if (lock) return lockItem(accIcon(k), it.name, it.minLv, P); return `<div class="item ${on ? 'wear' : ''} ${it.minLv >= 5 ? 'vip' : ''}"><div class="ic">${accIcon(k)}</div>${it.fest ? `<div class="festtag">${FEST_TAG[it.fest]}</div>` : ''}<div class="nm">${it.name}</div><div class="sm2">${{ head: '頭上', face: '臉上', neck: '脖子', back: '背上' }[it.slot]}</div>
     ${own ? `<button class="${on ? 'ghost2' : ''}" onclick="petCall('petWear',${on ? `{slot:'${it.slot}',item:''}` : `{item:'${k}'}`},{say:'${on ? '換一下～' : '好看嗎？'}'})">${on ? '脫下' : '穿上'}</button>` : `<button ${P.coins < it.price ? 'disabled' : ''} onclick="petCall('petBuy',{item:'${k}'},{say:'謝謝你！'})">${coinIco()} ${it.price} 購買</button>`}</div>`; })()).join('')}</div>` : ''}
   ${tab === 'home' ? `<label class="f" style="margin-top:4px">房間背景（部分免費・🪙 標示的要用金幣買）</label><div class="themes">${Object.keys(ROOM_TH).map(k => { const tl = (P.themeLv || {})[k] || 1, pr = (P.themePrice || {})[k], own = !pr || (P.owned || []).indexOf('th_' + k) >= 0;
     if (tl > (P.homeLevel || 1)) return `<button disabled class="tlock"><span class="thm">${roomSVG({ theme: k })}</span><span>🔒 Lv.${tl} 解鎖</span></button>`;
@@ -2987,7 +3008,7 @@ function tKind(k) {
 async function saveTask() {
   const isQ = S.tdraft && S.tdraft.kind === 'choice';
   const prevT = S.p.taskId ? taskOf(S.p.taskId) : null;
-  const data = { groupIds: (S.tdraft && S.tdraft.g) || [], kind: isQ ? 'choice' : '', coin: isQ ? '' : val('tCoin'), choice: isQ ? (qdSync(), { qs: S.qd, coin: 5 }) : null, id: S.p.taskId || '', courseId: S.bd.course.id, title: val('tTitle'), dueDate: val('tDue'), desc: val('tDesc'), template: isQ ? '' : val('tTpl'), allowText: isQ || chk('tText'), allowPhoto: !isQ && chk('tPhoto'), allowVideo: !isQ && chk('tVideo'), allowLink: !isQ && chk('tLink'), extraFields: isQ ? '' : val('tExtra'),
+  const data = { dueTime: val('tDueH') ? val('tDueH') + ':' + (val('tDueM') || '00') : '', groupIds: (S.tdraft && S.tdraft.g) || [], kind: isQ ? 'choice' : '', coin: isQ ? '' : val('tCoin'), choice: isQ ? (qdSync(), { qs: S.qd, coin: 5 }) : null, id: S.p.taskId || '', courseId: S.bd.course.id, title: val('tTitle'), dueDate: val('tDue'), desc: val('tDesc'), template: isQ ? '' : val('tTpl'), allowText: isQ || chk('tText'), allowPhoto: !isQ && chk('tPhoto'), allowVideo: !isQ && chk('tVideo'), allowLink: !isQ && chk('tLink'), extraFields: isQ ? '' : val('tExtra'),
     links: val('tLinks').split(/\s+/).map(x => x.trim()).filter(Boolean) };
   if (!data.title.trim()) return toast('請輸入任務名稱');
   const ok = await run(async () => {
@@ -3037,11 +3058,12 @@ async function sendReview() {
   if (next && S.p && S.hist.length && S.hist[S.hist.length - 1].p.tab === 'review') openReview(next.id); else back();
   if (S.ad && S.ad.pendingList) S.ad.pendingList = S.ad.pendingList.filter(x => x.id !== id);
   try {
-    const sub = await api('review', { subId: id, status: rv.status || undefined, stars: rv.stars, comment: text });
+    const sub = await api('review', { subId: id, status: rv.status || undefined, stars: rv.stars, comment: text, wasPending: old.status === 'pending' ? 1 : 0 });
     const k = bd.subs.findIndex(x => x.id === id); if (k >= 0) bd.subs[k] = sub;
     if (sub.graderCoin) { toast('✅ 已批改・🪙 批改獎勵 +' + sub.graderCoin); if (S.pet) S.pet.coins = (Number(S.pet.coins) || 0) + sub.graderCoin; delete MEM.notifs; api('petGet').then(x => { S.pet = x; saveBootCache(); }).catch(() => {}); }
   } catch (e) {
     const k = bd.subs.findIndex(x => x.id === id); if (k >= 0) bd.subs[k] = old;
+    if (/已經由/.test(e.message || '')) { toast(e.message); delete MEM.ad; delete MEM['bd_' + bd.course.id]; api('courseBoard', { courseId: bd.course.id }).then(x => { if (S.bd && S.bd.course && S.bd.course.id === x.course.id) { S.bd = MEM['bd_' + x.course.id] = x; render(); } }).catch(() => {}); if (S.ad) api('adminCourses').then(x => { S.ad = MEM.ad = x; if (S.v === 'admin') render(); }).catch(() => {}); return; }
     sysPop({ warn: true, title: '批改沒有送出成功', body: (e.message || '網路不穩') + '\n請再批改一次', btn: '知道了' });
     if (S.v === 'board' || S.v === 'admin') render();
   }
@@ -3112,14 +3134,23 @@ function vUsers() {
   <label class="f">REST API Key</label><input id="psKey" type="password" autocapitalize="off" autocorrect="off" placeholder="${S.push && S.push.hasKey ? '已儲存（要更換才需要重填）' : '貼上 REST API Key'}">
   <div class="row wrap" style="margin-top:12px"><button class="btn sm gold" onclick="savePush()">儲存</button><button class="btn sm" onclick="testPush()">傳一則測試推播給我</button></div></div>
   <input placeholder="🔍 搜尋本名、LINE 名字、手機" style="margin:6px 0 4px" value="${esc(S.userQ || '')}" oninput="qIn(this,v=>{S.userQ=v;$('usersList').innerHTML=usersListHTML()})">
+  ${lvCountHTML(lvCountOf(S.users.filter(x => x.exited !== '1')), S.users.filter(x => x.exited !== '1').length)}
   <div id="usersList">${usersListHTML()}</div>`;
 }
 function usersListHTML() {
   const q = String(S.userQ || '').trim().toLowerCase();
-  const list = S.users.filter(u => !q || [u.realName, u.name, u.lineName, u.phone].some(v => String(v || '').toLowerCase().indexOf(q) >= 0));
-  return list.slice(0, S.userLimit || 60).map(u => `<div class="urow"><div class="grow" style="cursor:pointer" onclick="openPinfo('${u.id}')"><b>${esc(u.realName || u.name)}</b>${u.realName && u.realName !== u.name ? ` <span class="cmeta">（${esc(u.name)}）</span>` : ''}<div class="cmeta">${esc(u.phone)}${u.ig ? '，IG ' + esc(u.ig) : ''}</div></div>
+  const list = S.users.filter(u => !q || [u.realName, u.name, u.lineName, u.phone].some(v => String(v || '').toLowerCase().indexOf(q) >= 0)).sort(lvSort);
+  return list.slice(0, S.userLimit || 60).map((u, i, A) => (i === 0 || lvRank(A[i - 1].level) !== lvRank(u.level) ? `<h3 class="lvhead">${esc(u.level || '未填等級')}（${list.filter(y => lvRank(y.level) === lvRank(u.level)).length}）</h3>` : '') + `<div class="urow"><div class="grow" style="cursor:pointer" onclick="openPinfo('${u.id}')"><b>${esc(u.realName || u.name)}</b>${u.realName && u.realName !== u.name ? ` <span class="cmeta">（${esc(u.name)}）</span>` : ''}<div class="cmeta">${esc(u.phone)}${u.ig ? '，IG ' + esc(u.ig) : ''}</div><div class="cmeta">上家：${u.uplineName ? esc(u.uplineName) + (u.uplineSt === 'pending' ? '（待確認）' : '') : '未設定'}　<a href="javascript:void 0" onclick="event.stopPropagation();adminMoveUp('${u.id}')" style="color:#B58A2E;font-weight:700">🔄 改上家</a></div></div>
     ${u.role === 'owner' ? '<span class="chip">最高管理員</span>' : `<select onchange="setRole('${u.id}',this.value)"><option value="member" ${u.role === 'member' ? 'selected' : ''}>夥伴</option><option value="admin" ${u.role === 'admin' ? 'selected' : ''}>管理員</option></select>
     <button class="btn sm ${u.exited === '1' ? 'red' : 'ghost'}" onclick="toggleExit('${u.id}')">${u.exited === '1' ? '已退出' : '退出'}</button>`}</div>`).join('') + (list.length > (S.userLimit || 60) ? `<button class="btn block" onclick="S.userLimit=(S.userLimit||60)+60;$('usersList').innerHTML=usersListHTML()">顯示更多（還有 ${list.length - (S.userLimit || 60)} 人）</button>` : '');
+}
+async function adminMoveUp(id) {
+  const x = S.users.find(u => u.id === id); if (!x) return;
+  const ph = prompt('輸入「' + (x.realName || x.name) + '」新上家的手機號碼' + (x.uplineName ? '\n目前上家：' + x.uplineName : ''), '');
+  if (ph === null || !ph.trim()) return;
+  if (!confirm('是否確認把「' + (x.realName || x.name) + '」的上家改成 ' + ph.trim() + '？\n原上家和新上家都會收到通知')) return;
+  const r = await run(() => api('setUplineAdmin', { userId: id, phone: ph.trim() }), '轉移中…');
+  if (r) { x.uplineName = r.name; x.uplineTel = r.phone; x.uplineSt = 'ok'; delete MEM.team; $('usersList').innerHTML = usersListHTML(); toast('已轉移到 ' + r.name + ' 的團隊'); }
 }
 async function savePush() {
   const r = await run(() => api('setPushKeys', { appId: val('psId'), key: val('psKey') }));
@@ -3231,14 +3262,21 @@ function openNoticeEdit() { run(async () => { await ensureAdmin(); go('noticeEdi
 async function sendUpline() {
   const ph = val('pUp').trim();
   if (!ph) return toast('請輸入上家的手機號碼');
-  if (S.me.upline && S.me.upline.phone !== ph.replace(/\D/g, '') && !confirm('確定要更改上家嗎？\n更改後，原本的上家「' + (S.me.upline.name || S.me.upline.phone) + '」就看不到你的資料；新上家確認後，可以看到你所有過去的紀錄')) return;
+  if (S.me.upline && S.me.upline.phone !== ph.replace(/\D/g, '') && !confirm('是否確認更改上家？\n原本的上家「' + (S.me.upline.name || S.me.upline.phone) + '」會收到通知，你會移到新上家的團隊組織圖')) return;
   const r = await run(() => api('setUpline', { phone: ph }), '送出中…');
+  if (r && r.changed) { S.me.upline = r; writeMoneyProfile({ upline: r.name }); delete MEM.team; delete MEM.me; toast('已更改上家為 ' + r.name + '，已同步到團隊組織圖'); S.teamView = 'org'; S.upJust = 1; setTimeout(() => { S.upJust = 0; }, 20000); tab('team'); return; }
   if (r) { S.me.upline = r; writeMoneyProfile({ upline: r.name }); try { const md = window.parent.dctMeData; if (md) md.upline = r; } catch (e) {} toast(r.status === 'waiting' ? '已記下！她用這支手機註冊後，會自動收到你的申請' : '已送出，等待 ' + r.name + ' 確認'); render(); }
 }
 function crmResync() { try { if (EMBED && window.parent.dctSyncCrm) window.parent.dctSyncCrm().catch(function () {}); } catch (e) {} }
 function money(n) { return '$' + Math.round(Number(n) || 0).toLocaleString(); }
 function lvRank(l) { l = String(l || ''); return /皇家/.test(l) ? 6 : /一級/.test(l) ? 5 : /二級/.test(l) ? 4 : /三級輔導/.test(l) ? 3 : /三級/.test(l) ? 2 : /實習/.test(l) ? 1 : 0; }
 function lvSort(a, b) { return lvRank(b.level) - lvRank(a.level) || String(FN(a)).localeCompare(String(FN(b)), 'zh-Hant'); }
+const LV_ORDER = ['皇家輔導', '一級輔導', '二級輔導', '三級輔導', '三級零售', '實習', '未填等級'];
+function lvCountHTML(cnt, total) {
+  const keys = Object.keys(cnt).sort((a, b) => (LV_ORDER.indexOf(a) < 0 ? 99 : LV_ORDER.indexOf(a)) - (LV_ORDER.indexOf(b) < 0 ? 99 : LV_ORDER.indexOf(b)));
+  return `<div class="lvstat"><div class="lvtot"><b>${total}</b><span>總人數</span></div>${keys.map(k => `<div><b>${cnt[k]}</b><span>${esc(k)}</span></div>`).join('')}</div>`;
+}
+function lvCountOf(list) { const m = {}; list.forEach(x => { const k = x.level || '未填等級'; m[k] = (m[k] || 0) + 1; }); return m; }
 function lvTag(l) { return l ? `<span class="chip">${esc(l)}</span>` : ''; }
 function vTeam() {
   if (!EMBED) return vTeamLite();
@@ -3354,6 +3392,7 @@ function vTsubs() {
     ${S.piOpen[x.id] ? `<div class="sub" style="margin-top:10px">${subBody(x)}</div>` : (x.text ? `<div class="q2">${esc(x.text)}</div>` : '')}</div>`; }).join('') + (list.length > (S.tsLimit || 80) ? `<button class="btn block" onclick="S.tsLimit=(S.tsLimit||80)+80;render()">顯示更多</button>` : '') : '<div class="empty">沒有符合的作業</div>'}`;
 }
 function tlRefresh() { const box = $('tlList'); if (!box) return render(); const tmp = document.createElement('div'); tmp.innerHTML = vTeamLite(); const n = tmp.querySelector('#tlList'); if (n) box.innerHTML = n.innerHTML; }
+function answerDownAll() { S.selReq = {}; (S.team.requests || []).forEach(r => { S.selReq[r.id] = 1; }); answerDownMany(true); }
 function vTeamLite() {
   const t = S.team; t.requests = (t.requests || []).filter(r => !(S.ansDone || {})[r.id]);
   const uniq = t.team.filter(x => !x.dup && x.depth === 1), q = String(S.teamQ || '').trim().toLowerCase();
@@ -3363,11 +3402,13 @@ function vTeamLite() {
     <div class="row" style="gap:8px;flex-wrap:wrap"><b style="font-size:18px">${esc(x.realName || x.name)}</b>${x.realName && x.realName !== x.name ? `<span class="cmeta">${esc(x.name)}</span>` : ''}${lvTag(x.level)}${x.exited ? '<span class="chip">已退出</span>' : ''}${x.second ? '<span class="chip">共同上家</span>' : ''}</div>
     <div class="cmeta" style="margin-top:6px">📖 ${x.courses} 堂課・交 ${x.submitted} 份・通過 ${x.passed} 份</div></div><span class="cmeta">›</span></div></button>`;
   return `<header class="top"><div><div class="hi">上家看下家</div><h1 class="title">我的團隊</h1></div></header>
-  ${(t.delReqs || []).length ? `<h2 class="sec" style="margin-top:0">申請刪除帳號（${t.delReqs.length}）</h2>${t.delReqs.map(r => `<div class="urow"><div class="grow"><b>${esc(r.realName || r.name)}</b>${r.realName && r.realName !== r.name ? ` <span class="cmeta">（${esc(r.name)}）</span>` : ''}<div class="cmeta">${esc(r.phone)}，${fmtT(r.deleteReq)} 申請</div></div><button class="btn sm red" onclick="answerDelete('${r.id}',true)">同意刪除</button><button class="btn sm" onclick="answerDelete('${r.id}',false)">不同意</button></div>`).join('')}` : ''}
   ${t.requests.length ? (() => { const SEL = S.selReq = S.selReq || {}, n = t.requests.filter(r => SEL[r.id]).length, allOn = n === t.requests.length;
-    return `<h2 class="sec" style="margin-top:0">想加入你團隊的夥伴（${t.requests.length}）</h2>
+    return `<div class="panel" style="margin-top:0;outline:3px solid #E8C46A"><h2 class="sec" style="margin-top:0">🔔 想加入你團隊的夥伴（${t.requests.length}）</h2><button class="btn gold block" style="margin-bottom:10px" onclick="answerDownAll()">✅ 一鍵全部確認（${t.requests.length} 位）</button>
     ${t.requests.length > 1 ? `<div class="selbar"><label><input type="checkbox" ${allOn ? 'checked' : ''} onchange="S.selReq={};if(this.checked)S.team.requests.forEach(r=>S.selReq[r.id]=1);render()"> 全選</label><span class="cmeta">已選 ${n} 位</span><button class="btn sm gold" ${n ? '' : 'disabled'} onclick="answerDownMany(true)">✅ 全部確認</button><button class="btn sm ghost" ${n ? '' : 'disabled'} onclick="answerDownMany(false)">不是</button></div>` : ''}
-    ${t.requests.map(r => `<div class="urow">${t.requests.length > 1 ? `<input type="checkbox" class="selck" ${SEL[r.id] ? 'checked' : ''} onchange="S.selReq['${r.id}']=this.checked?1:0;render()">` : ''}${avatarHtml(r, 40)}<div class="grow"><b>${esc(r.name)}</b><div class="cmeta">${esc(r.phone)}${r.ig ? '，IG ' + esc(r.ig) : ''}</div></div><button class="btn sm gold" onclick="answerDown('${r.id}',true)">確認</button><button class="btn sm ghost" onclick="answerDown('${r.id}',false)">不是</button></div>`).join('')}`; })() : ''}
+    ${t.requests.map(r => `<div class="urow">${t.requests.length > 1 ? `<input type="checkbox" class="selck" ${SEL[r.id] ? 'checked' : ''} onchange="S.selReq['${r.id}']=this.checked?1:0;render()">` : ''}${avatarHtml(r, 40)}<div class="grow"><b>${esc(r.name)}</b><div class="cmeta">${esc(r.phone)}${r.ig ? '，IG ' + esc(r.ig) : ''}</div></div><button class="btn sm gold" onclick="answerDown('${r.id}',true)">確認</button><button class="btn sm ghost" onclick="answerDown('${r.id}',false)">不是</button></div>`).join('')}</div>`; })() : ''}
+  ${S.me && S.me.upline && S.me.upline.name ? `<div class="panel" style="${S.upJust ? 'outline:3px solid #F2A7C3;' : ''}margin-top:0"><div class="row" style="gap:10px;align-items:center">👑<div class="grow"><div class="cmeta">我的上家${S.me.upline.status === 'pending' ? '（等她確認中）' : ''}</div><b style="font-size:18px">${esc(S.me.upline.name)}</b></div></div>${S.upJust ? '<div class="cmeta" style="margin-top:6px">✅ 已更改上家，你已經在她的團隊組織圖裡了</div>' : ''}</div>` : ''}
+  ${(t.delReqs || []).length ? `<h2 class="sec" style="margin-top:0">申請刪除帳號（${t.delReqs.length}）</h2>${t.delReqs.map(r => `<div class="urow"><div class="grow"><b>${esc(r.realName || r.name)}</b>${r.realName && r.realName !== r.name ? ` <span class="cmeta">（${esc(r.name)}）</span>` : ''}<div class="cmeta">${esc(r.phone)}，${fmtT(r.deleteReq)} 申請</div></div><button class="btn sm red" onclick="answerDelete('${r.id}',true)">同意刪除</button><button class="btn sm" onclick="answerDelete('${r.id}',false)">不同意</button></div>`).join('')}` : ''}
+  ${uniq.length ? lvCountHTML(lvCountOf(uniq), uniq.length) : ''}
   ${uniq.length ? `<div class="nums" style="grid-template-columns:repeat(3,1fr)"><div class="num"><b>${uniq.length}</b><span>直屬下家</span></div><button class="num numbtn" onclick="openTsubs('')"><b>${sub}</b><span>交過的作業 ›</span></button><button class="num numbtn" onclick="openTsubs('pass')"><b>${pas}</b><span>通過的作業 ›</span></button></div>
     ${teamActHTML()}
     <div class="row" style="margin-bottom:12px"><input id="teamQ" placeholder="🔍 搜尋本名、LINE 名字、手機" value="${esc(S.teamQ || '')}" oninput="qIn(this,v=>{S.teamQ=v;S.teamLimit=60;tlRefresh()})"></div>
