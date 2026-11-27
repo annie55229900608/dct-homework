@@ -1108,7 +1108,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261127-1340';
+const APP_VER = '20261127-1350';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -2018,6 +2018,21 @@ function boardRoster() {
   const mk = m => ({ id: m.id, name: FN(m), avatar: m.avatar || '' });
   return { groups: G.map(g => ({ id: g.id, name: g.name, leaderId: g.leaderId || '', leaderName: nm(g.leaderId), members: act.filter(m => m.groupId === g.id).map(mk) })), none: act.filter(m => !m.groupId || !G.some(g => g.id === m.groupId)).map(mk) };
 }
+async function setCAdmin(uid, on) {
+  const bd = S.bd, m = (bd.allMembers || bd.members || []).find(x => x.id === uid) || (S.users || []).find(x => x.id === uid) || {};
+  if (!confirm(on ? `把「${FN(m)}」設為「${bd.course.title}」的管理員？\n她可以批改作業、發任務、看全班成績` : `取消「${FN(m)}」的管理員？`)) return;
+  const r = await run(async () => { await api('setCourseAdmin', { courseId: bd.course.id, userId: uid, on: on ? 1 : 0 }); delete MEM.ad; await loadBoard(bd.course.id); return true; }, '設定中…');
+  if (r) { render(); toast(on ? `已把 ${FN(m)} 設為管理員 🖋` : '已取消管理員'); }
+}
+function pickCourseAdmin() {
+  const bd = S.bd, adm = (bd.course.admins || '').split(','), L = (bd.allMembers || bd.members || []).filter(m => m.status === 'active' && adm.indexOf(m.id) < 0 && m.id !== bd.course.createdBy).sort(lvSort);
+  if (!L.length) return toast('課程裡沒有可以設定的夥伴');
+  const el = document.createElement('div'); el.className = 'sysmodal';
+  el.innerHTML = `<div class="sysbox"><div class="ding">叮！【課程管理員】</div><h3>🖋 點夥伴設為管理員</h3><input id="caQ" placeholder="🔍 搜尋名字" style="margin:6px 0"><div class="gask" id="caL" style="max-height:50vh;overflow:auto">${L.map(m => `<button data-u="${m.id}" data-n="${esc(FN(m))}">${esc(FN(m))}${m.level ? '<small>' + esc(m.level) + '</small>' : ''}</button>`).join('')}</div><button class="gask-later" data-a="x">取消</button></div>`;
+  document.body.appendChild(el);
+  el.querySelector('#caQ').oninput = e => { const q = e.target.value.trim(); el.querySelectorAll('#caL button').forEach(b => { b.style.display = !q || b.dataset.n.indexOf(q) >= 0 ? '' : 'none'; }); };
+  el.onclick = e => { const b = e.target.closest('button'); if (!b) { if (e.target === el) el.remove(); return; } el.remove(); if (b.dataset.u) setCAdmin(b.dataset.u, true); };
+}
 function rosterTap(uid) { if ((S.bd.members || []).some(x => x.id === uid)) memberPop(uid); else if (!S.bd.leaderOnly) gPick(uid); else bonusQuick(uid); }
 function gPick(uid) {
   const bd = S.bd, m = (bd.members || []).find(x => x.id === uid); if (!m) return;
@@ -2073,6 +2088,7 @@ function memberPop(uid) {
     <div class="row" style="gap:8px;margin-top:8px;flex-wrap:nowrap"><input id="bPts" type="number" inputmode="numeric" placeholder="自訂分數" style="flex:1"><input id="bWhy" placeholder="原因（選填）" style="flex:1.4"></div>
     <button class="btn gold block" data-a="ok" style="margin-top:10px">確定加分</button>
     ${hist.length ? `<h4>加分紀錄</h4>${hist.map(b => `<div class="bh"><b class="${Number(b.points) < 0 ? 'neg' : ''}">${Number(b.points) > 0 ? '+' : ''}${b.points}</b><div class="grow">${esc(b.reason || '老師加分')}<div class="cmeta">${esc(b.byName || '')}・${localDate(b.createdAt)}</div></div><button data-del="${b.id}">刪除</button></div>`).join('')}` : ''}
+    ${bd.canEditAdmins && uid !== bd.course.createdBy ? ((bd.course.admins || '').split(',').indexOf(uid) >= 0 ? '<button class="btn ghost block" data-a="unadm" style="margin-top:10px">🖋 已是課程管理員・點這裡取消</button>' : '<button class="btn ghost block" data-a="adm" style="margin-top:10px">🖋 設為這堂課的管理員</button>') : ''}
     ${bd.leaderOnly ? '' : '<button class="btn ghost block" data-a="info" style="margin-top:10px">看她的完整資料 ›</button>'}</div>`;
   document.body.appendChild(el);
   const P = el.querySelector('#bPts');
@@ -2082,6 +2098,7 @@ function memberPop(uid) {
     if (b.dataset.a === 'x') return el.remove();
     if (b.dataset.a === 'info') { el.remove(); return openPinfo(uid); }
     if (b.dataset.a === 'grp') { el.remove(); return gPick(uid); }
+    if (b.dataset.a === 'adm' || b.dataset.a === 'unadm') { el.remove(); return setCAdmin(uid, b.dataset.a === 'adm'); }
     if (b.dataset.del) { if (!confirm('刪除這筆加分？')) return; const id = b.dataset.del, old = bd.bonus; bd.bonus = bd.bonus.filter(x => x.id !== id); render(); memberPop(uid); api('delBonus', { id }).catch(err => { bd.bonus = old; render(); toast(err.message || '刪除失敗'); }); return; }
     if (b.dataset.a === 'ok') {
       const pts = Math.round(Number(P.value)); if (!pts) return toast('請選或輸入分數');
@@ -2237,6 +2254,7 @@ function bSetting() {
     <div class="hint">複製的訊息裡有邀請碼和連結：已經有 DCTx大瑩家 App 的夥伴，打開 App 輸入邀請碼就能加入，不用點連結</div></div>
   <div class="panel"><h3>這堂課的獨立管理員</h3>
     ${(bd.courseAdmins || []).length ? bd.courseAdmins.map(a => `<div class="urow"><div class="grow"><b>${esc(a.realName || a.name)}</b>${a.realName && a.realName !== a.name ? `<span class="cmeta">（${esc(a.name)}）</span>` : ''}</div>${bd.canEditAdmins ? `<button class="btn sm ghost" onclick="rmCourseAdmin('${a.id}')">移除</button>` : ''}</div>`).join('') : '<div class="cmeta">還沒有其他管理員</div>'}
+    ${bd.canEditAdmins ? '<button class="btn sm gold" style="margin-top:10px" onclick="pickCourseAdmin()">＋ 點夥伴直接設為管理員</button>' : ''}
     ${bd.canEditAdmins ? (c.adminCode ? `<div class="cmeta" style="margin-top:12px">管理員邀請碼</div><div class="code">${esc(c.adminCode)}</div>
       <div class="row wrap" style="margin-top:10px"><button class="btn sm gold" onclick="copyText('${esc(L.origin + L.pathname + '?code=' + c.adminCode)}')">複製管理員邀請連結</button><button class="btn sm" onclick="copyText('${esc(c.adminCode)}')">複製邀請碼</button><button class="btn sm ghost" onclick="adminCode(true)">停用</button></div>
       <div class="hint">對方輸入這組碼，就會成為「這堂課」的管理員，可以批改作業、看全班成績，不需要在你的團隊裡</div>`
