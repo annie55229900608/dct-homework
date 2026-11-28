@@ -317,6 +317,8 @@ html,body{height:100%;overflow:hidden}
 .cbrand{font:700 11px/1 -apple-system,sans-serif;letter-spacing:3px;color:rgba(58,36,0,.6)}
 .ckind{font-size:30px;font-weight:900;margin:10px 0 12px;color:#14204E}
 .score tr.mine td{background:#FFF3C4}
+.glog .glrow{padding:7px 4px;border-top:1px solid rgba(20,32,78,.08);font-size:14px;color:#14204E}.glog .glrow .cmeta{display:block;font-size:12px}
+.exchip{border:0;background:#EEF1F8;color:#14204E;border-radius:99px;padding:3px 10px;margin:4px 4px 0 0;font:700 13px -apple-system,sans-serif}
 .rvdone{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#E3F6EA;color:#14532D;border:1px solid #9AD8B0;border-radius:14px;padding:10px 10px 10px 14px;margin:0 0 10px;font-size:14px}.rvdone b{color:#14532D}
 .rvleft{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#FFF6D8;color:#14204E;border-radius:14px;padding:8px 10px 8px 14px;margin:0 0 12px;font-size:14px}.rvleft b{color:#B4532A}
 .certtabs{display:flex;gap:8px;justify-content:center;margin:0 0 12px}.certtabs button{border:1px solid rgba(255,246,216,.6);border-radius:99px;padding:8px 16px;background:transparent;color:#FFF6D8;font:800 14px -apple-system,sans-serif}.certtabs button.on{background:#FFF6D8;color:#14204E}
@@ -1127,7 +1129,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261127-1820';
+const APP_VER = '20261128-1525';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1406,7 +1408,7 @@ function groupAsk() {
 }
 function certAuto() {
   const d = S.cd; if (!d || S.v !== 'course' || d.canManage) return; const c = d.course;
-  if (!c.wrap || c.archived === '1' || (c.feedbackOn === '1' && !d.feedback)) return;
+  if (!c.wrap || c.archived === '1' || !d.feedback) return;
   let at = ''; try { at = JSON.parse(c.wrap).at || ''; } catch (e) {}
   const k = 'certSeen_' + c.id + '_' + at; if (store.get(k)) return;
   if (document.querySelector('.sysmodal')) return setTimeout(certAuto, 1500);
@@ -1425,11 +1427,11 @@ function vCourse() {
   const subOf = id => d.subs.find(s => s.taskId === id);
   return `${backBar('我的課程')}
   <div class="chead"><span class="chip">${TYPE[c.type] || ''}</span><h1 class="title">${esc(c.title)}</h1><div class="cmeta">${dateRange(c)}</div>${c.desc ? `<p class="desc">${nl(c.desc)}</p>` : ''}</div>
-  ${c.archived === '1' ? `<div class="wrapbar" style="border-color:#B9C2D6;background:#EEF1F8"><div style="font-size:26px">🔒</div><div class="grow"><b>這堂課已經封存</b><div class="cmeta">不能再交作業了${c.wrap ? (c.feedbackOn === '1' && !d.feedback ? '，封存前沒有填回饋，所以領不到獎狀' : '') : ''}</div>${c.videoClean ? '<div class="cmeta">🧹 作業影片已在封存 30 天後清除，照片和文字都還在</div>' : c.archivedAt ? `<div class="cmeta">🎬 ${vcDay(c.archivedAt)} 會清除這堂課的作業影片，想留念請先下載</div>` : ''}</div>${c.wrap && !(c.feedbackOn === '1' && !d.feedback) ? `<button class="btn sm gold" onclick="openCert('${c.id}')">🏅 看獎狀</button>` : ''}</div>` : ''}
+  ${c.archived === '1' ? `<div class="wrapbar" style="border-color:#B9C2D6;background:#EEF1F8"><div style="font-size:26px">🔒</div><div class="grow"><b>這堂課已經封存</b><div class="cmeta">不能再交作業了${c.wrap ? (!d.feedback ? '，封存前沒有填回饋，所以領不到獎狀' : '') : ''}</div>${c.videoClean ? '<div class="cmeta">🧹 作業影片已在封存 30 天後清除，照片和文字都還在</div>' : c.archivedAt ? `<div class="cmeta">🎬 ${vcDay(c.archivedAt)} 會清除這堂課的作業影片，想留念請先下載</div>` : ''}</div>${c.wrap && d.feedback ? `<button class="btn sm gold" onclick="openCert('${c.id}')">🏅 看獎狀</button>` : ''}</div>` : ''}
   ${c.archiveAt && c.archived !== '1' ? (() => { const left = Math.round((new Date(c.archiveAt) - new Date(today())) / 86400000); return `<div class="wrapbar" style="border-color:#F2B8C6"><div style="font-size:26px">⏰</div><div class="grow"><b>${left <= 0 ? '今天' : left + ' 天後'}封存（${c.archiveAt.slice(5).replace('-', '/')}）</b><div class="cmeta">封存後就不能交作業、領獎狀，把握時間喔！不用全部做完也能結業</div></div></div>`; })() : ''}
-  ${c.wrap && c.archived !== '1' ? (() => { const fbNeed = c.feedbackOn === '1' && !d.feedback; return `<div class="wrapbar"><div style="font-size:30px">🎓</div><div class="grow"><b>課程結業了！</b><div class="cmeta">${fbNeed ? '填完最下面的「課程回饋」，就能領取你的獎狀 👇' : '你的獎狀已經準備好了'}</div></div>${fbNeed ? `<button class="btn sm gold" onclick="const p=$('fbPanel');if(p){p.scrollIntoView({behavior:'smooth',block:'start'});p.classList.add('flash')}">去填回饋</button>` : `<button class="btn sm gold" onclick="openCert('${c.id}')">🏅 看獎狀</button>`}</div>`; })() : ''}
+  ${c.wrap && c.archived !== '1' ? (() => { const fbNeed = !d.feedback && !d.canManage; return `<div class="wrapbar"><div style="font-size:30px">🎓</div><div class="grow"><b>課程結業了！</b><div class="cmeta">${fbNeed ? '填完最下面的「課程回饋」，就能領取你的獎狀 👇' : '你的獎狀已經準備好了'}</div></div>${fbNeed ? `<button class="btn sm gold" onclick="const p=$('fbPanel');if(p){p.scrollIntoView({behavior:'smooth',block:'start'});p.classList.add('flash')}">去填回饋</button>` : `<button class="btn sm gold" onclick="openCert('${c.id}')">🏅 看獎狀</button>`}</div>`; })() : ''}
   ${(d.groups || []).length ? (() => { const my = d.groups.find(g => g.id === d.myGroup);
-    if (my) return `<div class="mygroup">👥 你的組別：<b>${esc(my.name)}</b>${my.leaderName ? `・組長 ${esc(my.leaderName)}` : ''}${(d.myLeads || []).indexOf(my.id) >= 0 ? ' 👑' : ''}${c.groupSelf === '1' ? `<div class="adchips">${d.groups.map(g => `<button class="${g.id === d.myGroup ? 'on' : ''}" onclick="setMemberGroup(S.me.user.id,'${g.id}',1)">${esc(g.name)}</button>`).join('')}</div>` : ''}</div>`;
+    if (my) return `<div class="mygroup">👥 你的組別：<b>${esc(my.name)}</b>${my.leaderName ? `・組長 ${esc(my.leaderName)}` : ''}${(d.myLeads || []).indexOf(my.id) >= 0 ? ' 👑' : ''}${c.groupSelf === '1' ? (S.gChange ? `<div class="adchips">${d.groups.map(g => `<button class="${g.id === d.myGroup ? 'on' : ''}" onclick="changeMyGroup('${g.id}')">${esc(g.name)}</button>`).join('')}<button onclick="S.gChange=0;render()">取消</button></div>` : ` <button class="btn sm ghost" style="margin-left:6px" onclick="S.gChange=1;render()">更換組別</button>`) : ''}</div>`;
     return c.groupSelf === '1' ? `<div class="mygroup">👥 <b>請選擇你的組別</b><div class="adchips">${d.groups.map(g => `<button onclick="setMemberGroup(S.me.user.id,'${g.id}',1)">${esc(g.name)}${g.leaderName ? '・' + esc(g.leaderName) : ''}</button>`).join('')}</div></div>` : `<div class="mygroup cmeta">👥 老師還沒幫你分組</div>`; })() : ''}
   ${rosterHTML(d.roster, false)}
   ${(d.bonus || []).length ? `<div class="bonusme">🌟 額外加分 <b>${(d.bonus.reduce((a, b) => a + (Number(b.points) || 0), 0) > 0 ? '+' : '') + d.bonus.reduce((a, b) => a + (Number(b.points) || 0), 0)}</b>${d.bonus.slice(0, 3).map(b => `<div class="cmeta">${Number(b.points) > 0 ? '+' : ''}${b.points}｜${esc(b.reason || '老師加分')}・${esc(b.byName || '')}</div>`).join('')}</div>` : ''}
@@ -1444,7 +1446,7 @@ function vCourse() {
     const s = subOf(t.id), st = stampState(t, s);
     return `<button class="trow" onclick="openTask('${t.id}')"><div class="tt"><div>${t.kind === 'choice' ? '🎮 ' : ''}${esc(t.title)}</div><div class="cmeta">${t.dueDate ? fmtDue(t) + ' 截止' : '不限時間'}${s && s.isNew ? '，有新批改' : ''}</div></div><span class="st ${st}">${STW[st]}</span></button>`;
   }).join('')}</div>` : `<div class="empty">管理員還沒放上任務</div>`}
-  ${c.feedbackOn === '1' ? vFeedbackForm() : ''}`;
+  ${(c.feedbackOn === '1' || c.wrap) && (c.archived !== '1' || d.feedback) ? vFeedbackForm() : ''}`;
 }
 function fbKeep() { if ($('fbBest')) S.fbDraft = { cid: S.cd.course.id, best: val('fbBest'), improve: val('fbImprove'), wish: val('fbWish') }; }
 function goFeedback(cid) {
@@ -1453,20 +1455,23 @@ function goFeedback(cid) {
 }
 function vFeedbackForm() {
   const f0 = S.cd.feedback || {}, D = S.fbDraft && S.fbDraft.cid === S.cd.course.id ? S.fbDraft : null, f = D ? Object.assign({}, f0, D) : f0, r = S.fbRating != null ? S.fbRating : Number(f0.rating || 0);
-  return `<div class="panel" id="fbPanel" style="margin-top:28px"><h3>📝「${esc(S.cd.course.title)}」課程回饋</h3><p class="cmeta">${S.cd.feedback ? '你已填過，可以再修改' : (S.cd.course.wrap ? '填完送出，就能領取這堂課的獎狀 🏅' : '幫我們把課程變得更好')}</p>
+  const done = S.cd.feedback, editing = !done || S.fbEdit === S.cd.course.id;
+  if (!editing) return `<div class="panel" id="fbPanel" style="margin-top:28px"><h3>✅ 已送出課程回饋</h3><div class="starpick" style="pointer-events:none">${[1, 2, 3, 4, 5].map(n => `<button class="${n <= Number(done.rating || 0) ? 'on' : ''}">★</button>`).join('')}</div>${done.best ? `<label class="f">最有收穫的地方</label><p class="desc">${nl(done.best)}</p>` : ''}${done.improve ? `<label class="f">覺得可以更好的地方</label><p class="desc">${nl(done.improve)}</p>` : ''}${done.wish ? `<label class="f">下次想學什麼</label><p class="desc">${nl(done.wish)}</p>` : ''}<button class="btn block" onclick="S.fbEdit='${S.cd.course.id}';S.fbRating=null;S.fbDraft=null;render();setTimeout(()=>{const p=$('fbPanel');if(p)p.scrollIntoView({block:'start'})},50)">✏️ 修改回饋</button></div>`;
+  return `<div class="panel" id="fbPanel" style="margin-top:28px"><h3>📝「${esc(S.cd.course.title)}」課程回饋</h3><p class="cmeta">${done ? '修改完按「送出修改」' : (S.cd.course.wrap ? '填完送出，就能領取這堂課的獎狀 🏅' : '幫我們把課程變得更好')}</p>
   <label class="f">整體滿意度</label><div class="starpick">${[1, 2, 3, 4, 5].map(n => `<button class="${n <= r ? 'on' : ''}" onclick="fbKeep();S.fbRating=${n};render()" aria-label="${n} 顆星">★</button>`).join('')}</div>
   <label class="f">最有收穫的地方</label><textarea id="fbBest" oninput="fbKeep()">${esc(f.best)}</textarea>
   <label class="f">覺得可以更好的地方</label><textarea id="fbImprove" oninput="fbKeep()">${esc(f.improve)}</textarea>
   <label class="f">下次想學什麼</label><textarea id="fbWish" oninput="fbKeep()">${esc(f.wish)}</textarea>
-  <button class="btn gold block" onclick="sendFeedback()">送出回饋</button></div>`;
+  <button class="btn gold block" onclick="sendFeedback()">${done ? '送出修改' : '送出回饋'}</button>${done ? `<button class="btn ghost block" style="margin-top:8px" onclick="S.fbEdit=null;S.fbRating=null;S.fbDraft=null;render()">取消</button>` : ''}</div>`;
 }
 async function sendFeedback() {
   const rating = S.fbRating != null ? S.fbRating : Number((S.cd.feedback || {}).rating || 0);
   if (!rating) return toast('請先選滿意度星星');
   await run(async () => {
+    const first = !S.cd.feedback;
     S.cd.feedback = await api('submitFeedback', { courseId: S.cd.course.id, rating, best: val('fbBest'), improve: val('fbImprove'), wish: val('fbWish') });
-    S.fbRating = null; S.fbDraft = null; toast('已送出回饋，謝謝你'); render();
-    if (S.cd.course.wrap) { try { store.set('certSeen_' + S.cd.course.id + '_' + (JSON.parse(S.cd.course.wrap).at || ''), '1'); } catch (e) {} setTimeout(() => openCert(S.cd.course.id), 500); }
+    S.fbRating = null; S.fbDraft = null; S.fbEdit = null; toast(first ? '已送出回饋，謝謝你' : '回饋已修改 ✓'); render();
+    if (first && S.cd.course.wrap) { try { store.set('certSeen_' + S.cd.course.id + '_' + (JSON.parse(S.cd.course.wrap).at || ''), '1'); } catch (e) {} setTimeout(() => openCert(S.cd.course.id), 500); }
   });
 }
 
@@ -2013,11 +2018,13 @@ function gOf(uid) { const m = (S.bd.members || []).find(x => x.id === uid); retu
 function gName(id, bd) { const g = ((bd || S.bd).groups || []).find(x => x.id === id); return g ? g.name : ''; }
 function gOK(uid) { const g = S.p && S.p.g; if (!g) return true; return g === '__none' ? !gOf(uid) : gOf(uid) === g; }
 function tFor(t, gid) { const L = String(t.groupIds || '').split(',').filter(Boolean); return !L.length || L.indexOf(gid || '') >= 0; }
+function exSet(bd) { const o = {}; String((bd && bd.course && bd.course.excluded) || '').split(',').filter(Boolean).forEach(id => o[id] = 1); return o; }
 function memberStats(bd) {
   const t0 = today(), tasks = bd.tasks, tid = {};
   tasks.forEach(t => tid[t.id] = t);
   const dueTasks = tasks.filter(t => !t.dueDate || t.dueDate <= t0);
-  return bd.members.filter(m => m.status === 'active' && gOK(m.id)).map(m => {
+  const ex = exSet(bd);
+  return bd.members.filter(m => m.status === 'active' && gOK(m.id) && !ex[m.id]).map(m => {
     const mt = tasks.filter(t => tFor(t, m.groupId)), mdue = dueTasks.filter(t => tFor(t, m.groupId));
     const subs = bd.subs.filter(s => s.userId === m.id && tid[s.taskId]);
     const by = {}; subs.forEach(s => by[s.taskId] = s);
@@ -2027,7 +2034,7 @@ function memberStats(bd) {
     const last = subs.reduce((a, s) => (s.updatedAt > a ? s.updatedAt : a), '');
     const base = mdue.length || mt.length || 1;
     return {
-      m, by, missing, last, ontime, submitted: subs.length,
+      m, by, missing, last, ontime, submitted: subs.length, nTask: mt.length,
       pass: subs.filter(s => s.status === 'pass').length, revise: subs.filter(s => s.status === 'revise').length,
       rate: Math.min(1, subs.length / base), avgStar: stars.length ? stars.reduce((a, b) => a + b, 0) / stars.length : 0
     };
@@ -2048,7 +2055,7 @@ function vBoard() {
   ${(({ review: bReview, class: bClass, care: bCare, fb: bFb, tasks: bTasks, setting: bSetting })[S.p.tab] || bReview)()}`;
 }
 function whoCard(m) {
-  return `<div class="row" style="gap:10px;align-items:center;margin:6px 0 8px">${avatarHtml(m, 52)}<b style="font-size:17px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.35)">${esc(m.realName || m.name)}</b></div><div class="whocard"><div><span>級別</span><b>${esc(m.level || '未填')}</b></div><div><span>上家</span><b>${esc(m.uplineName || m.upName || '未填')}</b></div><div><span>皇家</span><b>${esc(m.royal || '未填')}</b></div><div><span>IG</span>${m.ig ? `<a href="https://instagram.com/${encodeURIComponent(m.ig)}" target="_blank" rel="noopener">@${esc(m.ig)} ↗</a>` : '<b>未填</b>'}</div>
+  return `<div class="row" style="gap:10px;align-items:center;margin:6px 0 8px">${avatarHtml(m, 52)}<b style="font-size:17px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.35)">${esc(m.realName || m.name)}</b></div><div class="whocard"><div><span>級別</span><b>${esc(m.level || '未填')}</b></div><div><span>上家</span><b>${esc(upTxt(m) || '未填')}</b></div><div><span>皇家</span><b>${esc(m.royal || '未填')}</b></div><div><span>IG</span>${m.ig ? `<a href="https://instagram.com/${encodeURIComponent(m.ig)}" target="_blank" rel="noopener">@${esc(m.ig)} ↗</a>` : '<b>未填</b>'}</div>
   ${(S.bd && (S.bd.groups || []).length) ? `<div class="wline"><span>組別</span><div class="row" style="gap:8px;align-items:center"><b style="flex:1">${esc(gName(m.groupId) || '未分組')}</b>${S.bd.leaderOnly ? '' : `<button class="btn sm gold" onclick="gPick('${m.id}')">更改組別</button>`}</div></div>` : ''}</div>
   <button class="btn block pinfo-go" onclick="openPinfo('${m.id}')">👤 看她的完整資料、參加的群組、所有作業 ›</button>`;
 }
@@ -2059,7 +2066,7 @@ async function saveMemberLine(id) {
 function openPinfo(id) { run(async () => { S.pi = await api('memberInfo', { userId: id }); S.piOpen = {}; S.piCourse = ''; go('pinfo', { id }); }, '載入中…'); }
 function vPinfo() {
   const P = S.pi, u = P.user, CT = TYPE;
-  const kv = [['本名', u.realName], ['LINE 名字', u.name], ['等級', u.level], ['上家', u.uplineName || u.upName], ['皇家', u.royal], ['IG', u.ig ? `<a href="https://instagram.com/${encodeURIComponent(u.ig)}" target="_blank" rel="noopener">@${esc(u.ig)} ↗</a>` : ''], ['手機', u.phone ? `<a href="tel:${esc(u.phone)}">${esc(u.phone)}</a>` : ''], ['生日', u.birthday], ['居住地', u.city], ['職業', u.job], ['註冊', u.createdAt ? localDate(u.createdAt) : '']];
+  const kv = [['本名', u.realName], ['LINE 名字', u.name], ['等級', u.level], ['上家', upTxt(u)], ['皇家', u.royal], ['IG', u.ig ? `<a href="https://instagram.com/${encodeURIComponent(u.ig)}" target="_blank" rel="noopener">@${esc(u.ig)} ↗</a>` : ''], ['手機', u.phone ? `<a href="tel:${esc(u.phone)}">${esc(u.phone)}</a>` : ''], ['生日', u.birthday], ['居住地', u.city], ['職業', u.job], ['註冊', u.createdAt ? localDate(u.createdAt) : '']];
   const st = { active: '參加中', pending: '等待審核', left: '已移出' };
   return `${backBar()}<div class="row" style="gap:14px;align-items:center;flex-wrap:nowrap">${avatarHtml(u, 72)}<div><h1 class="title" style="margin:0">${esc(u.realName || u.name)}</h1>${u.realName && u.realName !== u.name ? `<div class="cmeta">（${esc(u.name)}）</div>` : ''}</div></div>
   <div class="pigrid">${kv.map(([k, v]) => `<div><span>${k}</span><b>${v ? (/^</.test(v) ? v : esc(v)) : '未填'}</b></div>`).join('')}</div>
@@ -2140,7 +2147,7 @@ function bReview() {
   ${list.length && f !== 'pass' ? (selOn ? `<div class="selbar"><label><input type="checkbox" ${nSel === list.length ? 'checked' : ''} onchange="S.selSub={};if(this.checked)(${JSON.stringify(list.map(s => s.id)).replace(/"/g, "'")}).forEach(i=>S.selSub[i]=1);render()"> 全選</label><span class="cmeta">已選 ${nSel} 份</span><button class="btn sm gold" ${nSel ? '' : 'disabled'} onclick="reviewMany()">✅ 一鍵通過</button><button class="btn sm ghost" onclick="S.selMode=0;S.selSub={};render()">取消</button></div>` : `<button class="btn sm" style="margin-bottom:10px" onclick="S.selMode=1;S.selSub={};render()">☑️ 多選批改（一次通過多份）</button>`) : ''}
   ${list.length ? list.map(s => selOn ? `<label class="qcard selcard ${SEL[s.id] ? 'on' : ''}"><input type="checkbox" class="selck" ${SEL[s.id] ? 'checked' : ''} onchange="S.selSub['${s.id}']=this.checked?1:0;render()"><div class="grow"><div class="q1"><b>${esc(nameOf(s.userId))}</b><span class="st ${s.status}">${STW[s.status]}</span></div><div class="cmeta">${esc(taskOf(s.taskId).title)}，${fmtT(s.updatedAt)}${s.files.length ? `，${s.files.length} 個檔案` : ''}</div>${s.text ? `<div class="q2">${esc(s.text)}</div>` : ''}</div></label>` : `<button class="qcard" onclick="openReview('${s.id}')">
     <div class="q1"><b>${esc(nameOf(s.userId))}</b><span class="st ${s.status}">${STW[s.status]}</span></div>
-    ${(() => { const m = S.bd.members.find(x => x.id === s.userId) || {}; return `<div class="cmeta">${[m.level, (m.uplineName || m.upName) ? '上家 ' + (m.uplineName || m.upName) : '', m.royal ? '皇家 ' + m.royal : '', m.lineName ? 'LINE ' + m.lineName : '', m.ig ? '@' + m.ig : ''].filter(Boolean).map(esc).join('・')}</div>`; })()}
+    ${(() => { const m = S.bd.members.find(x => x.id === s.userId) || {}; return `<div class="cmeta">${[m.level, upTxt(m) ? '上家 ' + upTxt(m) : '', m.royal ? '皇家 ' + m.royal : '', m.lineName ? 'LINE ' + m.lineName : '', m.ig ? '@' + m.ig : ''].filter(Boolean).map(esc).join('・')}</div>`; })()}
     <div class="cmeta">${esc(taskOf(s.taskId).title)}，${fmtT(s.updatedAt)}${s.files.length ? `，${s.files.length} 個檔案` : ''}</div>
     ${s.text ? `<div class="q2">${esc(s.text)}</div>` : ''}
   </button>`).join('') : `<div class="empty">${f === 'pending' ? '都批改完了 ✓' : '目前沒有作業'}</div>`}`;
@@ -2152,7 +2159,7 @@ function missingBox() {
   if (!rows.length) return `<div class="missbox ok">🎉 目前沒有人漏交作業</div>`;
   const open = S.missOpen;
   return `<div class="missbox"><div class="mh"><b>⚠️ 未提交作業 ${rows.length} 人</b><span>漏交 ${rows.reduce((a, r) => a + r.late.length, 0)} 份${todayTasks.length ? `・今天截止還沒交 ${rows.filter(r => r.today.length).length} 人` : ''}</span></div>
-  ${rows.slice(0, open ? 999 : 5).map(r => `<div class="mr"><div class="mn"><b>${esc(FN(r.x.m))}</b><span>${esc([r.x.m.level, (r.x.m.uplineName || r.x.m.upName) ? '上家 ' + (r.x.m.uplineName || r.x.m.upName) : ''].filter(Boolean).join('・'))}</span></div>
+  ${rows.slice(0, open ? 999 : 5).map(r => `<div class="mr"><div class="mn"><b>${esc(FN(r.x.m))}</b><span>${esc([r.x.m.level, upTxt(r.x.m) ? '上家 ' + upTxt(r.x.m) : ''].filter(Boolean).join('・'))}</span></div>
     <div class="mt">${r.late.map(t => `<i class="late">${esc(stampLabel(t, S.bd.tasks.indexOf(t)))}</i>`).join('')}${r.today.map(t => `<i class="today">今天 ${esc(stampLabel(t, S.bd.tasks.indexOf(t)))}</i>`).join('')}</div>
     ${r.x.m.ig ? `<a class="ig" href="https://instagram.com/${encodeURIComponent(r.x.m.ig)}" target="_blank" rel="noopener">IG</a>` : ''}</div>`).join('')}
   ${rows.length > 5 ? `<button class="more" onclick="S.missOpen=!S.missOpen;render()">${open ? '收起' : `看全部 ${rows.length} 人`}</button>` : ''}</div>`;
@@ -2172,6 +2179,7 @@ function memberPop(uid) {
     <button class="btn gold block" data-a="ok" style="margin-top:10px">確定加分</button>
     ${hist.length ? `<h4>加分紀錄</h4>${hist.map(b => `<div class="bh"><b class="${Number(b.points) < 0 ? 'neg' : ''}">${Number(b.points) > 0 ? '+' : ''}${b.points}</b><div class="grow">${esc(b.reason || '老師加分')}<div class="cmeta">${esc(b.byName || '')}・${localDate(b.createdAt)}</div></div><button data-del="${b.id}">刪除</button></div>`).join('')}` : ''}
     ${bd.canEditAdmins && uid !== bd.course.createdBy ? ((bd.course.admins || '').split(',').indexOf(uid) >= 0 ? '<button class="btn ghost block" data-a="unadm" style="margin-top:10px">🖋 已是課程管理員・點這裡取消</button>' : '<button class="btn ghost block" data-a="adm" style="margin-top:10px">🖋 設為這堂課的管理員</button>') : ''}
+    ${bd.leaderOnly ? '' : (exSet(bd)[uid] ? '<button class="btn ghost block" data-a="exoff" style="margin-top:10px">🚫 目前不計算・點這裡恢復計算</button>' : '<button class="btn ghost block" data-a="exon" style="margin-top:10px">🚫 不計算這位（沒參加課程）</button>')}
     ${bd.leaderOnly ? '' : '<button class="btn ghost block" data-a="info" style="margin-top:10px">看她的完整資料 ›</button>'}</div>`;
   document.body.appendChild(el);
   const P = el.querySelector('#bPts');
@@ -2181,6 +2189,11 @@ function memberPop(uid) {
     if (b.dataset.a === 'x') return el.remove();
     if (b.dataset.a === 'info') { el.remove(); return openPinfo(uid); }
     if (b.dataset.a === 'grp') { el.remove(); return gPick(uid); }
+    if (b.dataset.a === 'exon' || b.dataset.a === 'exoff') {
+      const on = b.dataset.a === 'exon'; if (on && !confirm(`「${FN(m)}」不計入完成率、排名和小組分數？\n之後可以再點她恢復`)) return;
+      el.remove(); const old = bd.course.excluded || ''; const L = old.split(',').filter(x => x && x !== uid); if (on) L.push(uid); bd.course.excluded = L.join(','); render(); toast(on ? '已設為不計算' : '已恢復計算');
+      api('setExcluded', { courseId: bd.course.id, userId: uid, on }).catch(err => { bd.course.excluded = old; render(); toast(err.message || '設定失敗'); }); return;
+    }
     if (b.dataset.a === 'adm' || b.dataset.a === 'unadm') { el.remove(); return setCAdmin(uid, b.dataset.a === 'adm'); }
     if (b.dataset.del) { if (!confirm('刪除這筆加分？')) return; const id = b.dataset.del, old = bd.bonus; bd.bonus = bd.bonus.filter(x => x.id !== id); render(); memberPop(uid); api('delBonus', { id }).catch(err => { bd.bonus = old; render(); toast(err.message || '刪除失敗'); }); return; }
     if (b.dataset.a === 'ok') {
@@ -2196,7 +2209,12 @@ function bClass() {
   const R = boardRoster(), g = S.p.g;
   if (R && g) { if (g === '__none') R.groups = []; else { R.groups = R.groups.filter(x => x.id === g); R.none = []; } }
   const gb = g && g !== '__none' ? `<button class="btn gold" onclick="groupBonusPop('${g}')">🎁 「${esc(gName(g))}」組別加分</button>` : '';
-  return `<div class="row" style="gap:8px;margin:0 0 12px;flex-wrap:wrap"><button class="btn gold" onclick="bonusQuick()">🌟 額外加分</button>${gb}</div>` + bPendTop() + rosterHTML(R, true) + bClass0();
+  return `<div class="row" style="gap:8px;margin:0 0 12px;flex-wrap:wrap"><button class="btn gold" onclick="bonusQuick()">🌟 額外加分</button>${gb}</div>` + bPendTop() + rosterHTML(R, true) + groupLogHTML() + bClass0();
+}
+function groupLogHTML() {
+  const L = S.bd.groupLog || []; if (!L.length || S.p.g) return '';
+  const gn = id => id ? gName(id) || '已刪除的組' : '未分組';
+  return `<details class="roster glog"><summary>🕘 分組異動紀錄（最近 ${L.length} 筆）</summary>${L.map(x => `<div class="glrow"><b>${esc(x.userName || '夥伴')}</b> ${esc(gn(x.fromG))} → <b>${esc(gn(x.toG))}</b><span class="cmeta">${esc(x.byName || '')}・${fmtT(x.at)}</span></div>`).join('')}</details>`;
 }
 function bonusQuick(pre) {
   const bd = S.bd, act = (bd.allMembers || bd.members || []).filter(m => m.status === 'active').sort((a, b) => (gOK(b.id) ? 1 : 0) - (gOK(a.id) ? 1 : 0) || lvSort(a, b)), G = bd.groups || [];
@@ -2234,9 +2252,10 @@ function bClass0() {
   return `<div class="nums">
     <div class="num"><b>${ms.length}</b><span>參加人數</span></div>
     <div class="num"><b>${R0.reduce((a, r) => a + r.x.submitted, 0)}</b><span>完成數</span></div>
-    <div class="num"><b>${sum('total')}</b><span>全班總分</span></div>
+    <div class="num"><b>${(() => { const n = R0.reduce((a, r) => a + r.x.nTask, 0), d = R0.reduce((a, r) => a + Math.min(r.x.submitted, r.x.nTask), 0); return n ? Math.round(d / n * 100) + '<small style="font-size:.55em">%</small>' : '—'; })()}</b><span>完成率</span></div>
     <div class="num"><b>${(() => { const ids = {}; R0.forEach(r => { ids[r.x.m.id] = 1; }); return bd.subs.filter(x => ids[x.userId] && taskOf(x.taskId) && x.status === 'pass').length; })()}</b><span>通過數</span></div></div>
-  ${(bd.groups || []).length && !S.p.g ? (() => { const GR = bd.groups.filter(g => !bd.leaderOnly || (bd.myLeads || []).indexOf(g.id) >= 0).map(g => { const rs = R0.filter(r => (r.x.m.groupId || '') === g.id); const tot = rs.reduce((a, r) => a + r.total, 0); return { g, n: rs.length, tot, done: rs.reduce((a, r) => a + r.x.submitted, 0) }; }).sort((a, b) => b.tot - a.tot || b.done - a.done);
+  ${(() => { const ex = exSet(bd), L = bd.members.filter(m => ex[m.id] && m.status === 'active'); return bd.leaderOnly ? `<div class="hint" style="margin:-4px 0 10px">完成率＝全班交的作業 ÷ 全班應交的任務數</div>` : L.length ? `<div class="hint" style="margin:-4px 0 10px">完成率＝全班交的作業 ÷ 全班應交的任務數<br>🚫 不計算（${L.length}）：${L.map(m => `<button class="exchip" onclick="memberPop('${m.id}')">${esc(FN(m))}</button>`).join('')}</div>` : `<div class="hint" style="margin:-4px 0 10px">完成率＝全班交的作業 ÷ 全班應交的任務數・沒參加的人點頭像可設定「不計算」</div>`; })()}
+  ${(bd.groups || []).length && !S.p.g ? (() => { const BR = boardRoster(); const GR = bd.groups.filter(g => !bd.leaderOnly || (bd.myLeads || []).indexOf(g.id) >= 0).map(g => { const rs = R0.filter(r => (r.x.m.groupId || '') === g.id), rg = BR && BR.groups.find(y => y.id === g.id); const tot = rs.reduce((a, r) => a + r.total, 0); return { g, n: rg ? rg.members.length : rs.length, tot, done: rs.reduce((a, r) => a + r.x.submitted, 0) }; }).sort((a, b) => b.tot - a.tot || b.done - a.done);
     return GR.length ? `<h2 class="sec">👥 小組排行</h2><div class="hint">依總分排名・點組別看該組成績</div><div class="mx"><table class="score"><tr><th>#</th><th>組別</th><th>人數</th><th>完成數</th><th>總分</th></tr>${GR.map((x, i) => `<tr onclick="S.p.g='${x.g.id}';render()"><td>${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td><td class="nm">${esc(x.g.name)}${x.g.leaderName ? `<div class="cmeta" style="font-weight:400">組長 ${esc(x.g.leaderName)}</div>` : ''}</td><td>${x.n}</td><td>${x.done}</td><td><b>${x.tot}</b></td></tr>`).join('')}</table></div>` : ''; })() : ''}
   ${bd.leaderOnly ? '' : `<button class="btn gold block" style="margin-top:14px" onclick="go('wrap',{})">🏆 ${bd.course.wrap ? '課程總結・獎狀（已發布）' : '課程結束總結・頒獎'}</button>`}
   <div class="row" style="gap:8px;margin:14px 0 0"><button class="btn sm" onclick="exportScores()">📥 匯出成績表</button><button class="btn sm" onclick="exportSubs()">📥 匯出作業內容</button></div>
@@ -2282,7 +2301,7 @@ function bFb() {
   const dist = [5, 4, 3, 2, 1].map(n => [n, fb.filter(f => Number(f.rating) === n).length]);
   return `<div class="nums"><div class="num"><b>${avg}</b><span>平均滿意度</span></div><div class="num"><b>${fb.length}</b><span>填寫人數</span></div></div>
   <div class="panel">${dist.map(([n, k]) => `<div class="row" style="font-size:14px"><span style="width:32px;color:var(--gold)">${n}★</span><div class="bar grow" style="margin:6px 0"><i style="width:${Math.round(k / fb.length * 100)}%"></i></div><span style="width:24px;text-align:right">${k}</span></div>`).join('')}</div>
-  ${fb.map(f => `<div class="sub"><div class="row" style="justify-content:space-between"><b>${esc(f.name)}</b><span class="stars">${starStr(f.rating)}</span></div>
+  ${fb.slice().sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || ''))).map(f => `<div class="sub"><div class="row" style="justify-content:space-between"><b>${esc(f.name)}</b><span class="stars">${starStr(f.rating)}</span></div>${f.createdAt ? `<div class="cmeta">${fmtT(f.createdAt)}</div>` : ''}
     ${f.best ? `<div class="extra"><b>收穫：</b>${esc(f.best)}</div>` : ''}${f.improve ? `<div class="extra"><b>可以更好：</b>${esc(f.improve)}</div>` : ''}${f.wish ? `<div class="extra"><b>想學：</b>${esc(f.wish)}</div>` : ''}</div>`).join('')}`;
 }
 function bTasks() {
@@ -2313,6 +2332,12 @@ function groupPanel() {
 function saveGroups() {
   const D = S.gd; if (D.G.some(g => !String(g.name || '').trim())) return toast('每一組都要有組名');
   run(async () => { const r = await api('saveGroups', { courseId: S.bd.course.id, groups: D.G, groupSelf: D.self }); S.bd.course.groupSelf = r.groupSelf; await loadBoard(S.bd.course.id); S.gd = null; render(); toast('分組已儲存'); }, '儲存中…');
+}
+function changeMyGroup(gid) {
+  const d = S.cd; if (gid === d.myGroup) { S.gChange = 0; return render(); }
+  const from = (d.groups.find(g => g.id === d.myGroup) || {}).name, to = (d.groups.find(g => g.id === gid) || {}).name;
+  if (!confirm(`確定要從「${from}」換到「${to}」嗎？`)) return;
+  S.gChange = 0; setMemberGroup(S.me.user.id, gid, 1);
 }
 function setMemberGroup(uid, gid, self) {
   const cid = self ? S.cd.course.id : S.bd.course.id;
@@ -3418,6 +3443,7 @@ function nfGo(g) {
   if (g === 'me') return tab('me');
   if (g === 'notice') return openNotices();
   if (p[0] === 'cert') return openCert(p[1]);
+  if (p[0] === 'fb') return run(async () => { await loadBoard(p[1]); go('board', { id: p[1], tab: 'fb' }); }, '載入中…');
 }
 function vNotifs() {
   const L = (S.nf && S.nf.list) || [], seen = S.nfSeenBefore || '';
@@ -3523,7 +3549,7 @@ function vTeam() {
     ${S.teamView === 'list' ? rows.filter(x => !x.dup && pass(x)).slice(0, S.teamLimit || 50).map(row).join('') + (uniq.length > (S.teamLimit || 50) ? `<button class="btn block" onclick="S.teamLimit=(S.teamLimit||50)+50;render()">顯示更多（還有 ${uniq.length - (S.teamLimit || 50)} 人）</button>` : '') : orgChart(t)}`
     : `<div class="empty">還沒有下家<br>請夥伴到「我的」輸入你的手機號碼 <b>${esc(S.me.user.phone)}</b>，你確認後就會出現在這裡</div>`}
   ${unregHTML()}
-  ${t.orphans && t.orphans.length ? `<h2 class="sec">還沒連結上家的夥伴（${t.orphans.length}）</h2><div class="hint" style="margin-bottom:8px">最高管理員可以直接幫她設定上家</div>${t.orphans.map(x => `<div class="urow"><div class="grow"><b>${esc(x.name)}</b> ${lvTag(x.level)}<div class="cmeta">${esc(x.phone)}</div></div><button class="btn sm ghost" onclick="openMember('${x.id}')">查看</button><button class="btn sm" onclick="adminUpline('${x.id}')">設定上家</button></div>`).join('')}` : ''}`;
+  ${t.orphans && t.orphans.length ? `<h2 class="sec">還沒連結上家的夥伴（${t.orphans.length}）</h2><div class="hint" style="margin-bottom:8px">最高管理員可以直接幫她設定上家</div>${t.orphans.map(x => `<div class="urow"><div class="grow"><b>${esc(x.name)}</b> ${lvTag(x.level)}<div class="cmeta">${esc(x.phone)}</div>${orphanInfo(x)}</div><button class="btn sm ghost" onclick="openMember('${x.id}')">查看</button>${orphanBtns(x)}</div>`).join('')}` : ''}`;
 }
 function FN(u) { return (u && (u.realName || u.name)) || ''; }
 function avatarHtml(u, sz) {
@@ -3632,7 +3658,7 @@ function vTeamLite() {
     <div id="tlList">${list.length ? list.slice(0, S.teamLimit || 60).map((x, i, A) => (i === 0 || lvRank(A[i - 1].level) !== lvRank(x.level) ? `<h3 class="lvhead">${esc(x.level || '未填等級')}（${list.filter(y => lvRank(y.level) === lvRank(x.level)).length}）</h3>` : '') + row(x)).join('') + (list.length > (S.teamLimit || 60) ? `<button class="btn block" onclick="S.teamLimit=(S.teamLimit||60)+60;render()">顯示更多（還有 ${list.length - (S.teamLimit || 60)} 人）</button>` : '') : '<div class="empty">找不到符合的夥伴</div>'}</div>`
     : `<div class="empty">還沒有下家<br>請夥伴到「我的」輸入你的手機號碼 <b>${esc(S.me.user.phone)}</b>，你確認後就會出現在這裡</div>`}
   <div class="hint" style="text-align:center;margin-top:10px">只會顯示你的直屬下家</div>
-  ${t.orphans && t.orphans.length ? `<h2 class="sec">還沒連結上家的夥伴（${t.orphans.length}）</h2><div class="hint" style="margin-bottom:8px">最高管理員可以直接幫她設定上家</div>${t.orphans.map(x => `<div class="urow"><div class="grow" style="cursor:pointer" onclick="openPinfo('${x.id}')"><b>${esc(x.realName || x.name)}</b> ${lvTag(x.level)}<div class="cmeta">${esc(x.phone)}</div></div></div><div class="row" style="margin:-4px 0 12px;gap:8px"><input id="au_${x.id}" type="tel" inputmode="numeric" placeholder="上家手機（空白＝設成你）"><button class="btn sm gold" onclick="adminUpline('${x.id}')">設定上家</button></div>`).join('')}` : ''}`;
+  ${t.orphans && t.orphans.length ? `<h2 class="sec">還沒連結上家的夥伴（${t.orphans.length}）</h2><div class="hint" style="margin-bottom:8px">最高管理員可以直接幫她設定上家</div>${t.orphans.map(x => `<div class="urow"><div class="grow" style="cursor:pointer" onclick="openPinfo('${x.id}')"><b>${esc(x.realName || x.name)}</b> ${lvTag(x.level)}<div class="cmeta">${esc(x.phone)}</div>${orphanInfo(x)}</div></div><div class="row" style="margin:-4px 0 12px;gap:8px;flex-wrap:wrap">${x.pendUpName ? '' : `<input id="au_${x.id}" type="tel" inputmode="numeric" placeholder="上家手機號碼" style="flex:1;min-width:140px">`}${orphanBtns(x)}</div>`).join('')}` : ''}`;
 }
 function teamEff(x) { const c = careOf(x.id); return pfEff(pfBase(x, c || {}, x.level), c); }
 function teamHitsHTML() {
@@ -3671,10 +3697,28 @@ async function answerDown(id, ok) {
   try { await api('answerDownline', { userId: id, ok }); S.ts = null; S.team = MEM.team = await api('myTeam', EMBED ? {} : { direct: 1 }); if (S.me) S.me.downReq = (S.team.requests || []).length; saveBootCache(); if (S.v === 'team') render(); crmResync(); }
   catch (e) { delete S.ansDone[id]; toast('處理失敗：' + (e.message || '請再試一次')); delete MEM.team; }
 }
-async function adminUpline(id) {
-  const el = $('au_' + id), ph = el ? el.value.trim() : prompt('輸入她上家的手機號碼（直接按確定 = 設成你）', '');
-  if (ph === null) return;
-  await run(async () => { const r = await api('setUplineAdmin', { userId: id, phone: ph }); S.team = MEM.team = await api('myTeam', EMBED ? {} : { direct: 1 }); render(); toast('上家已設為 ' + r.name); crmResync(); });
+function upTxt(m) { return m.uplineName || (m.upPend ? m.upPend + '（等確認）' : '') || (m.upName ? m.upName + '（自填）' : ''); }
+function orphanInfo(x) {
+  if (x.pendUpName) return `<div class="cmeta" style="color:#B4532A">⏳ 申請加入「${esc(x.pendUpName)}」的團隊，等她確認中</div>`;
+  if (x.waitPhone) return `<div class="cmeta" style="color:#B4532A">⏳ 填了上家手機 ${esc(x.waitPhone)}（這支還沒註冊）</div>`;
+  return '';
+}
+function orphanBtns(x) {
+  return x.pendUpName ? `<button class="btn sm gold" onclick="adminUpline('${x.id}','pend')">幫${esc(x.pendUpName)}確認</button><button class="btn sm ghost" onclick="adminUpline('${x.id}')">改填別人</button>` : `<button class="btn sm gold" onclick="adminUpline('${x.id}')">設定上家</button><button class="btn sm ghost" onclick="adminUpline('${x.id}','me')">設成我</button>`;
+}
+async function adminUpline(id, mode) {
+  const x = (S.team && (S.team.orphans || []).find(o => o.id === id)) || {}, nm = x.realName || x.name || '她';
+  let body;
+  if (mode === 'pend') { if (!confirm(`確定幫「${x.pendUpName}」確認，讓「${nm}」加入她的團隊嗎？`)) return; body = { userId: id, confirmPending: true }; }
+  else if (mode === 'me') { if (!confirm(`確定把「${nm}」的上家設成「你自己」嗎？`)) return; body = { userId: id, toMe: true }; }
+  else {
+    const el = $('au_' + id); let ph = el ? el.value.trim() : '';
+    if (!ph) ph = (prompt(`輸入「${nm}」上家的手機號碼`, '') || '').trim();
+    if (!ph) return toast('沒有輸入手機號碼，沒有變更');
+    if (!confirm(`確定把「${nm}」的上家設成 ${ph} 嗎？`)) return;
+    body = { userId: id, phone: ph };
+  }
+  await run(async () => { const r = await api('setUplineAdmin', body); S.team = MEM.team = await api('myTeam', EMBED ? {} : { direct: 1 }); render(); toast('上家已設為 ' + r.name); crmResync(); });
 }
 function openGrowth(name, ig, id) {
   if (id) { run(async () => { S.md = await api('memberDetail', { userId: id }); go('member', { id }, true); }, '載入資料…'); return; }
