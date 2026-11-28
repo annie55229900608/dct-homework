@@ -1129,7 +1129,7 @@ function render() {
 /* ---------- 載入 ---------- */
 const MEM = {};
 function SCR() { return document.getElementById('scr') || document.scrollingElement; }
-const APP_VER = '20261128-1525';
+const APP_VER = '20261128-1530';
 function checkUpdate() {
   if (EMBED || !/^https?:/.test(location.protocol)) return;
   fetch(location.pathname + '?vc=' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(t => {
@@ -1836,7 +1836,7 @@ function vWrap() {
 }
 function publishWrap() {
   const D = S.wd, c = S.bd.course;
-  if (!confirm(`確定發布「${c.title}」的課程總結？\n前 ${D.ranks.length} 名${(S.bd.groups || []).length && D.groupRanks.length ? `、小組前 ${D.groupRanks.length} 名` : ''}會拿到加分和獎品，所有夥伴都會收到通知和獎狀。`)) return;
+  if (!confirm(`確定發布「${c.title}」的課程總結？\n前 ${D.ranks.length} 名${(S.bd.groups || []).length && D.groupRanks.length ? `、小組前 ${D.groupRanks.length} 名` : ''}會拿到加分和獎品，所有夥伴都會收到通知和獎狀。\n\n發布後名次和分數會固定，之後再交作業或加分都不會改變獎狀。${c.wrap ? '\n⚠️ 重新發布會用「現在」的成績重新排名。' : ''}`)) return;
   run(async () => { const r = await api('finishCourse', { courseId: c.id, ranks: D.ranks, others: D.others, note: D.note, groupRanks: (S.bd.groups || []).length ? D.groupRanks : [] }); delete MEM['bd_' + c.id]; await loadBoard(c.id); S.wd = null; try { S.certAll = await api('wrapCerts', { courseId: c.id }); S.certTab = ''; go('certAll', {}); } catch (e) { render(); } toast(r.adminBonus ? '🎉 已發布！你獲得 🪙 +200 管理員獎勵' : '🎉 已發布！大家都收到通知了'); }, '發布中…');
 }
 function openCert(cid, uid) { S.certTab = ''; run(async () => { S.cert = await api('certData', { courseId: cid, userId: uid || '' }); go('cert', {}); }, '準備獎狀…'); }
